@@ -20,6 +20,7 @@
 ## Phase 3
 
 - [ ] `vehicles/vx-vehicle-01.yaml` — full OEM-representative composition (six zones, QNX +
-      AAOS guests, Kuksa signal plane, CARLA world)
+      AAOS guests, CAN edges, Kuksa signal plane, CARLA world)
+- [ ] `exp-012` — HTB vs TSN (taprio/gPTP) slice isolation comparison on identical topology
 - [ ] End-to-end vehicle demo experiment referencing vx-vehicle-01
 - [ ] Paper dataset freeze: tag manifests + digests used in submitted figures
