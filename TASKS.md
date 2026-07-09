@@ -15,6 +15,10 @@
 
 - [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
+- [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
+      slices → AD stack → actuation → world), with/without infotainment load
+- [ ] `exp-014` — harness topology as variable: star vs daisy-chained zones under identical
+      load (per-link `impairments`, BASE-T1 emulation)
 - [ ] Determinism-controls ablation: PREEMPT_RT / pinning / VPP on-off matrix
 
 ## Phase 3
