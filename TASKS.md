@@ -22,5 +22,6 @@
 - [ ] `vehicles/vx-vehicle-01.yaml` — full OEM-representative composition (six zones, QNX +
       AAOS guests, CAN edges, Kuksa signal plane, CARLA world)
 - [ ] `exp-012` — HTB vs TSN (taprio/gPTP) slice isolation comparison on identical topology
+- [ ] `exp-020` — V2X: two vehicle instances + RSU node, V2V/V2I flows over a dedicated slice
 - [ ] End-to-end vehicle demo experiment referencing vx-vehicle-01
 - [ ] Paper dataset freeze: tag manifests + digests used in submitted figures
