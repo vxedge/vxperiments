@@ -10,6 +10,10 @@
 - [ ] `exp-003` — OTA co-location (H4): OTA burst during ADAS load, SLA delta *(needs vxota v1)*
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
 - [ ] Reproducibility check: rerun exp-001 twice, diff result distributions
+- [ ] CI: manifest-validation on every PR (`vxedge manifest validate` over experiments/ and
+      vehicles/) — phase 2, once the CLI subcommand exists
+- [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
+      (§13 on-demand reproduction; needs KVM-capable runner) — phase 2
 
 ## Phase 2
 
