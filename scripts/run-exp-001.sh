@@ -38,6 +38,24 @@ for bin in "$VXEDGED" "$VXEDGE" "$VXPROBE" "$VXTRAFFIC" "$VXTELEMETRY"; do
   [[ -x "$bin" ]] || { echo "error: missing $bin — cargo build each repo first" >&2; exit 1; }
 done
 
+# Staleness gate: a binary older than its repo's latest commit means someone
+# forgot to rebuild — refuse rather than measure with stale code.
+check_fresh() { # $1=repo dir, $2=binary
+  local head_ts bin_ts
+  head_ts=$(git -C "$1" log -1 --format=%ct 2>/dev/null || echo 0)
+  bin_ts=$(stat -c %Y "$2")
+  if (( bin_ts < head_ts )); then
+    echo "error: $2 is older than the latest commit in $1 — rebuild (as your user, not root):" >&2
+    echo "       cd $1 && cargo build --workspace" >&2
+    exit 1
+  fi
+}
+check_fresh "$WS/vxedge" "$VXEDGED"
+check_fresh "$WS/vxedge" "$VXEDGE"
+check_fresh "$WS/vxagents" "$VXPROBE"
+check_fresh "$WS/vxagents" "$VXTRAFFIC"
+check_fresh "$WS/vxtelemetry" "$VXTELEMETRY"
+
 MANIFEST="$REPO_DIR/experiments/exp-001.yaml"
 RESULTS="$REPO_DIR/results/exp-001"
 RUNTIME=$(mktemp -d /tmp/exp-001.XXXXXX)
