@@ -45,8 +45,10 @@ check_fresh() { # $1=repo dir, $2=binary
   head_ts=$(git -C "$1" log -1 --format=%ct 2>/dev/null || echo 0)
   bin_ts=$(stat -c %Y "$2")
   if (( bin_ts < head_ts )); then
-    echo "error: $2 is older than the latest commit in $1 — rebuild (as your user, not root):" >&2
-    echo "       cd $1 && cargo build --workspace" >&2
+    echo "error: $2 predates the latest commit in $1 — rebuild + stamp (as your user, not root):" >&2
+    echo "       cd $1 && cargo build --workspace && touch $2" >&2
+    echo "       (touch after a successful build attests cargo's freshness check — cargo" >&2
+    echo "        does not relink unchanged binaries, so their mtime alone can look stale)" >&2
     exit 1
   fi
 }
