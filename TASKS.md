@@ -2,9 +2,12 @@
 
 ## Phase 1 (gate-defining: exp-001 produces the H1/H3/H4 numbers)
 
-- [ ] Repo layout: `experiments/`, `vehicles/`, `notebooks/`, `results/README.md`
-- [ ] `exp-001` — ADAS slice isolation (H1): adas vs infotainment slices, synthetic load
-      sweep, per-slice p50/p95/p99 targets (§16 worked example as starting point)
+- [x] Repo layout: `experiments/`, `notebooks/`, `results/README.md` (`vehicles/` with the
+      phase-3 vehicle manifest)
+- [ ] `exp-001` — ADAS slice isolation (H1) *(kit done 2026-07-10: manifest validated via
+      vxedged, campaign runner with methodology discipline, archive-only analyzer verified
+      on synthetic archives; REMAINING: privileged campaign run on the dev host + frozen
+      summary + reproducibility check)*
 - [ ] `exp-002` — virtualization packaging (H3): same flow measured across libvirt VM vs
       container vs qemu-microvm node backends
 - [ ] `exp-003` — OTA co-location (H4): OTA burst during ADAS load, SLA delta *(needs vxota v1)*
