@@ -38,17 +38,19 @@ for bin in "$VXEDGED" "$VXEDGE" "$VXPROBE" "$VXTRAFFIC" "$VXTELEMETRY"; do
   [[ -x "$bin" ]] || { echo "error: missing $bin — cargo build each repo first" >&2; exit 1; }
 done
 
-# Staleness gate: a binary older than its repo's latest commit means someone
-# forgot to rebuild — refuse rather than measure with stale code.
+# Staleness gate: any source file newer than the binary means someone edited
+# code without rebuilding — refuse rather than measure with stale code.
+# (Compares file mtimes, not commit times: committing doesn't change mtimes,
+# so freshly-built binaries never false-positive after a commit.)
 check_fresh() { # $1=repo dir, $2=binary
-  local head_ts bin_ts
-  head_ts=$(git -C "$1" log -1 --format=%ct 2>/dev/null || echo 0)
-  bin_ts=$(stat -c %Y "$2")
-  if (( bin_ts < head_ts )); then
-    echo "error: $2 predates the latest commit in $1 — rebuild + stamp (as your user, not root):" >&2
+  local newer
+  newer=$(find "$1" \( -name '*.rs' -o -name 'Cargo.toml' -o -name 'Cargo.lock' -o -name '*.proto' \) \
+            -not -path '*/target/*' -newer "$2" -print -quit 2>/dev/null)
+  if [[ -n "$newer" ]]; then
+    echo "error: $2 is older than source file $newer — rebuild (as your user, not root):" >&2
     echo "       cd $1 && cargo build --workspace && touch $2" >&2
-    echo "       (touch after a successful build attests cargo's freshness check — cargo" >&2
-    echo "        does not relink unchanged binaries, so their mtime alone can look stale)" >&2
+    echo "       (touch after a successful build attests cargo's freshness — cargo does" >&2
+    echo "        not relink unchanged binaries, so mtime alone can look stale)" >&2
     exit 1
   fi
 }
