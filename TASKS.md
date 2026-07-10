@@ -4,15 +4,17 @@
 
 - [x] Repo layout: `experiments/`, `notebooks/`, `results/README.md` (`vehicles/` with the
       phase-3 vehicle manifest)
-- [ ] `exp-001` — ADAS slice isolation (H1) *(kit done 2026-07-10: manifest validated via
-      vxedged, campaign runner with methodology discipline, archive-only analyzer verified
-      on synthetic archives; REMAINING: privileged campaign run on the dev host + frozen
-      summary + reproducibility check)*
+- [x] `exp-001` — ADAS slice isolation (H1). Full campaign run 2026-07-10 (5 reps x 5 loads,
+      60k samples/point, governor=performance): **H1 HOLDS — adas p99 0.93x baseline under
+      600 mbit offered overload, zero loss**; load delivery verified (600.0 mbit, 0 errors);
+      frozen summary committed (results/exp-001/exp-001-summary.md)
 - [ ] `exp-002` — virtualization packaging (H3): same flow measured across libvirt VM vs
       container vs qemu-microvm node backends
 - [ ] `exp-003` — OTA co-location (H4): OTA burst during ADAS load, SLA delta *(needs vxota v1)*
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
-- [ ] Reproducibility check: rerun exp-001 twice, diff result distributions
+- [ ] Reproducibility check: full second campaign of exp-001, medians within first
+      campaign's IQRs *(within-campaign consistency already strong: p99 IQRs 3.9–6.5 µs
+      across 5 fresh up/down cycles per load)*
 - [ ] CI: manifest-validation on every PR (`vxedge manifest validate` over experiments/ and
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
