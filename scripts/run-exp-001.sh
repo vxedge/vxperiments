@@ -163,5 +163,10 @@ for rep in $(seq 1 "$REPS"); do
   done
 done
 
+# Hand the results back to the invoking user (analysis runs unprivileged).
+if [[ -n "${SUDO_UID:-}" ]]; then
+  chown -R "$SUDO_UID:${SUDO_GID:-$SUDO_UID}" "$RESULTS"
+fi
+
 echo "== campaign complete: $(ls "$RESULTS"/*.zip | wc -l) archives in $RESULTS"
 echo "== analyze: python3 notebooks/analyze_exp001.py $RESULTS"

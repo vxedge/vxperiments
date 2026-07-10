@@ -20,6 +20,19 @@ from pathlib import Path
 
 ARCHIVE_RE = re.compile(r"rep(\d+)-load(\d+)\.zip$")
 
+
+def json_lenient(raw: bytes):
+    """Parse JSON, tolerating leading log noise (parse from the first '{').
+
+    Older tool builds wrote tracing INFO lines to stdout; archives captured
+    before that fix carry a prefixed line. Trailing garbage is still an error.
+    """
+    text = raw.decode("utf-8", errors="replace")
+    start = text.find("{")
+    if start < 0:
+        raise ValueError("no JSON object found")
+    return json.loads(text[start:])
+
 # H1 acceptance: adas p99 under max load stays within this factor of baseline.
 H1_P99_FACTOR = 2.0
 
@@ -31,9 +44,9 @@ def load_runs(results_dir: Path):
         if not m:
             continue
         with zipfile.ZipFile(path) as z:
-            probe = json.loads(z.read("ingest/probe-summary.json"))
-            env = json.loads(z.read("ingest/run-env.json"))
-            meta = json.loads(z.read("metadata.json"))
+            probe = json_lenient(z.read("ingest/probe-summary.json"))
+            env = json_lenient(z.read("ingest/run-env.json"))
+            meta = json_lenient(z.read("metadata.json"))
         runs.append(
             {
                 "rep": int(m.group(1)),
