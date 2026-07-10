@@ -1,0 +1,68 @@
+# exp-001 — ADAS slice isolation under infotainment load (hypothesis H1).
+# One hypothesis, one variable: infotainment offered load sweeps 0 -> overload;
+# everything else is fixed. Schema: docs/ARCHITECTURE.md §6.1.
+experiment:
+  id: exp-001
+  name: ADAS slice isolation test
+  description: >
+    H1: per-slice VLAN mapping with hierarchical HTB queue-tree reservations in
+    vxgateway keeps ADAS (URLLC-like) p95/p99 RTT near baseline while the
+    infotainment slice is driven from idle to overload. Probe: 1000 pps UDP
+    round-trips on the adas slice across the shaped trunk uplink. Load:
+    vxtraffic on the infotainment slice, swept per campaign profile
+    (0/100/250/400/600 mbit offered; root rate 500 mbit).
+  duration_s: 60
+  results_prefix: results/exp-001
+
+network:
+  defaults:
+    bandwidth: 500000000        # 500 mbit root rate at the shared uplink bottleneck
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 100, max_rate_mbps: 200, priority: 1 }
+    - id: infotainment
+      mode: vlan
+      vlan: 103
+      qos: { min_rate_mbps: 0, max_rate_mbps: 400, priority: 5 }
+
+zones:
+  - id: vxzone-front-left-01
+    name: front-left ADAS zone
+    role: front-left
+    nodes:
+      - id: node-adas-probe-01
+        type: ecu
+        function: ADAS-representative probe endpoint (vxprobe sender)
+        image: { url: local/vxprobe:host-process, kind: container }
+        backend: container
+        network:
+          - { iface: eth0, vlan: 101, slice: adas }
+  - id: vxzone-rear-left-01
+    name: rear-left infotainment zone
+    role: rear-left
+    nodes:
+      - id: node-infot-load-01
+        type: infotainment
+        function: infotainment load source (vxtraffic)
+        image: { url: local/vxtraffic:host-process, kind: container }
+        backend: container
+        network:
+          - { iface: eth0, vlan: 103, slice: infotainment }
+
+traffic_profiles:
+  infotainment-load:
+    source: vxzone-rear-left-01:node-infot-load-01
+    target: internet                # uplink-side sink (fire-and-forget)
+    bandwidth_mbps: 400             # nominal; the campaign sweeps 0..600
+    payload_bytes: 1200
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"            # vxprobe live exporter
+
+results:
+  artifact_dir: results/exp-001
+  upload: false
