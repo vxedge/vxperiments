@@ -20,3 +20,9 @@ validation source), §12 (methodology/metrics), §13 (reproducibility).
 - One experiment = one hypothesis focus. Name/describe accordingly (e.g. exp-001 → H1).
 - Python for notebooks (§15); charts/CSVs must regenerate headlessly (CI-runnable) so paper
   figures are reproducible.
+
+## Project skills
+
+AI/contributor skills in `.claude/skills/`: **testbed-quality** (OEM-adoption bar) and
+**experiment-methodology** (statistical rigor: repetitions, warmup, tail-percentile support,
+archive-only analysis). Every experiment and notebook follows both.
