@@ -8,9 +8,11 @@
       60k samples/point, governor=performance): **H1 HOLDS — adas p99 0.93x baseline under
       600 mbit offered overload, zero loss**; load delivery verified (600.0 mbit, 0 errors);
       frozen summary committed (results/exp-001/exp-001-summary.md)
-- [ ] `exp-002` — virtualization packaging (H3) *(kit done 2026-07-11: manifest validated,
-      3-arm runner + analyzer pushed; REMAINING: privileged campaign — --quick first, it is
-      also the first live exercise of the microvm/libvirt backends)*
+- [x] `exp-002` — virtualization packaging (H3). Full campaign 2026-07-11 (5 reps x 3 arms,
+      60k samples/arm): **H3 HOLDS — packaging measurably affects RTT**: p50 container
+      56.0 µs, libvirt +18.5, qemu-microvm +57.9 (p99: 95.0 / +27.8 / +69.2), zero loss;
+      microvm (MMIO virtio) consistently slower than libvirt q35 (virtio-pci) — confirmed
+      across all reps; frozen summary committed
 - [ ] `exp-003` — OTA co-location (H4): OTA burst during ADAS load, SLA delta *(needs vxota v1)*
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
 - [ ] Reproducibility check: full second campaign of exp-001, medians within first
