@@ -1,0 +1,60 @@
+# exp-002 — virtual-ECU packaging vs latency (hypothesis H3).
+# One variable: the packaging backend. Three nodes carry the IDENTICAL probe
+# payload (vxprobe reflector) on the same slice/subnet — container (netns),
+# qemu-microvm, libvirt VM. No competing load: this measures packaging
+# overhead in isolation. Schema: docs/ARCHITECTURE.md §6.1.
+experiment:
+  id: exp-002
+  name: packaging backend latency comparison
+  description: >
+    H3: virtual-ECU packaging (full VM via libvirt vs microVM via raw QEMU vs
+    container/netns) measurably affects zone-to-gateway RTT. Probe: 1000 pps
+    UDP round-trips from the uplink side to each node's reflector, arms
+    measured sequentially on an otherwise idle topology.
+  duration_s: 60
+  results_prefix: results/exp-002
+
+network:
+  defaults:
+    bandwidth: 500000000
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 100, max_rate_mbps: 500, priority: 1 }
+
+zones:
+  - id: vxzone-front-left-01
+    name: packaging comparison zone
+    role: front-left
+    nodes:
+      - id: node-cont-01
+        type: ecu
+        function: reflector under container/netns packaging
+        image: { url: local/vxprobe:host-process, kind: container }
+        backend: container
+        network:
+          - { iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.11/24 }
+      - id: node-microvm-01
+        type: ecu
+        function: reflector under qemu-microvm packaging
+        image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
+        backend: qemu-microvm
+        network:
+          - { iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.12/24 }
+      - id: node-libvirt-01
+        type: ecu
+        function: reflector under libvirt full-VM packaging
+        image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
+        backend: libvirt
+        network:
+          - { iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.13/24 }
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"
+
+results:
+  artifact_dir: results/exp-002
+  upload: false
