@@ -34,6 +34,9 @@
 
 - [ ] `vehicles/vx-vehicle-01.yaml` — full OEM-representative composition (six zones, QNX +
       AAOS guests, CAN edges, Kuksa signal plane, CARLA world)
+- [ ] `exp-004` — freedom from interference (compute counterpart of exp-001): RTOS timing
+      cell vs noisy neighbor under KVM static partitioning (rung 0); rerun per hypervisor
+      ladder rung (Xen dom0less, QNX Hypervisor — phase 4)
 - [ ] `exp-012` — HTB vs TSN (taprio/gPTP) slice isolation comparison on identical topology
 - [ ] `exp-020` — V2X: two vehicle instances + RSU node, V2V/V2I flows over a dedicated slice
 - [ ] End-to-end vehicle demo experiment referencing vx-vehicle-01
