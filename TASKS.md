@@ -25,6 +25,10 @@
 
 ## Phase 2
 
+- [ ] `exp-002b` — H3 decomposition (fair-comparison hardening): separate machine type from
+      virtio transport (microvm+virtio-pci arm), vhost-net on/off, pinned-CPU variants;
+      capture per-arm CPU/memory utilization alongside latency (needs vxtelemetry resource
+      sampling) — turns the "microvm slower than q35" finding into a causal claim
 - [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
