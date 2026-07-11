@@ -8,8 +8,9 @@
       60k samples/point, governor=performance): **H1 HOLDS — adas p99 0.93x baseline under
       600 mbit offered overload, zero loss**; load delivery verified (600.0 mbit, 0 errors);
       frozen summary committed (results/exp-001/exp-001-summary.md)
-- [ ] `exp-002` — virtualization packaging (H3): same flow measured across libvirt VM vs
-      container vs qemu-microvm node backends
+- [ ] `exp-002` — virtualization packaging (H3) *(kit done 2026-07-11: manifest validated,
+      3-arm runner + analyzer pushed; REMAINING: privileged campaign — --quick first, it is
+      also the first live exercise of the microvm/libvirt backends)*
 - [ ] `exp-003` — OTA co-location (H4): OTA burst during ADAS load, SLA delta *(needs vxota v1)*
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
 - [ ] Reproducibility check: full second campaign of exp-001, medians within first
