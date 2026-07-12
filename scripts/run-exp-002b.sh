@@ -78,7 +78,12 @@ launch_qemu() { # $1=arm  — runner-managed QEMU with the arm's exact flags
   local pidfile="$RUNTIME/qemu-$arm.pid" serial="$RUNTIME/qemu-$arm.serial.log"
   local machine="q35" netdev="tap,id=n0,ifname=$tap,script=no,downscript=no"
   local device="virtio-net-pci,netdev=n0"
-  [[ "$arm" == "microvm-pci" ]] && machine="microvm,acpi=off,pcie=on"
+  # microvm's PCIe root complex is only instantiated when ACPI is enabled
+  # (verified on QEMU 8.2.2: acpi=off + pcie=on -> "No 'PCI' bus found for
+  # device 'virtio-net-pci'"; default ACPI + pcie=on attaches cleanly) — so
+  # this arm keeps ACPI on, unlike the other microvm arm (microvm-mmio,
+  # platform-managed, needs no PCI bus and stays ACPI-off for fast boot).
+  [[ "$arm" == "microvm-pci" ]] && machine="microvm,pcie=on"
   [[ "$arm" == "q35-vhost"   ]] && netdev="$netdev,vhost=on"
   qemu-system-x86_64 -M "$machine" -enable-kvm -cpu host -m 128m -smp 1 \
     -nodefaults -no-user-config -nographic -monitor none -serial "file:$serial" \
