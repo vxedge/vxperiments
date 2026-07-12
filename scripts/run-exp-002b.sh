@@ -22,7 +22,10 @@ BUNDLE="$WS/vxzones/images/linux-probe/bundle"
 for bin in "$VXEDGED" "$VXEDGE" "$VXPROBE" "$VXTELEMETRY"; do
   [[ -x "$bin" ]] || { echo "error: missing $bin" >&2; exit 1; }
 done
-[[ -f "$BUNDLE/vmlinuz" ]] || { echo "error: bundle missing — vxzones/scripts/build-guest-bundle.sh" >&2; exit 1; }
+[[ -f "$BUNDLE/vmlinuz" && -f "$BUNDLE/initrd.img" && -f "$BUNDLE/meta.json" ]] || {
+  echo "error: bundle incomplete (need vmlinuz, initrd.img, meta.json) — vxzones/scripts/build-guest-bundle.sh" >&2
+  exit 1
+}
 
 check_fresh() {
   local newer
@@ -56,15 +59,20 @@ declare -A MATCH=(
   [microvm-pci]="node=qemu-system.*ifname=vz5"
 )
 
-if [[ $QUICK -eq 1 ]]; then REPS=1; WARM_S=2; PROBE_S=10; PROBE_PPS=500
-else REPS=5; WARM_S=5; PROBE_S=60; PROBE_PPS=1000; fi
+# WARM_S=10 meets the experiment-methodology skill's minimum
+# (max(10% of PROBE_S, 10s) = 10s at PROBE_S=60); the quick profile is
+# explicitly "not reportable" (pipeline validation only) so it stays short.
+if [[ $QUICK -eq 1 ]]; then REPS=1; WARM_S=2; PROBE_S=10; PROBE_PPS=500; PROBE_TIMEOUT_MS=1000
+else REPS=5; WARM_S=10; PROBE_S=60; PROBE_PPS=1000; PROBE_TIMEOUT_MS=1000; fi
 
 PIDS=()
 cleanup() {
   set +e
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
+  [[ -n "${TEL_PID:-}" ]] && kill "$TEL_PID" 2>/dev/null
+  [[ -n "${SAMP_PID:-}" ]] && kill "$SAMP_PID" 2>/dev/null
   for f in "$RUNTIME"/qemu-*.pid; do [[ -f "$f" ]] && kill "$(cat "$f")" 2>/dev/null; done
-  for z in z-cont z-mvm-mmio z-libvirt; do
+  for z in "${ZONE_OF[@]:-}"; do
     "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "$z" >/dev/null 2>&1
   done
   "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$MANIFEST" >/dev/null 2>&1
@@ -97,10 +105,17 @@ env_metadata() { # $1=arm $2=rep
 { "experiment": "exp-002b", "hypothesis": "H3-decomposition",
   "arm": "$1", "repetition": $2,
   "warmup_s": $WARM_S, "probe_window_s": $PROBE_S, "probe_pps": $PROBE_PPS,
+  "probe_timeout_ms": $PROBE_TIMEOUT_MS,
   "quick_profile": $QUICK, "kernel": "$(uname -r)",
   "preempt_rt": $(uname -v | grep -qi preempt_rt && echo true || echo false),
   "kvm": $([[ -e /dev/kvm ]] && echo true || echo false),
   "cpu_governor": "$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo unknown)",
+  "cpu_pinning": "none",
+  "tool_versions": {
+    "vxedge": "$(git -C "$WS/vxedge" rev-parse --short HEAD 2>/dev/null || echo unknown)",
+    "vxagents": "$(git -C "$WS/vxagents" rev-parse --short HEAD 2>/dev/null || echo unknown)",
+    "vxtelemetry": "$(git -C "$WS/vxtelemetry" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  },
   "loadavg_at_start": "$(cut -d' ' -f1-3 /proc/loadavg)",
   "timestamping": "userspace-monotonic",
   "isolation": "single-arm",
@@ -147,8 +162,17 @@ stop_arm() {
     "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "${ZONE_OF[$arm]}" >/dev/null
   else
     local f="$RUNTIME/qemu-$arm.pid"
-    [[ -f "$f" ]] && kill "$(cat "$f")" 2>/dev/null
-    rm -f "$f"
+    if [[ -f "$f" ]]; then
+      local qpid; qpid="$(cat "$f")"
+      kill "$qpid" 2>/dev/null || true
+      # Wait for the process to actually exit before the next repetition
+      # relaunches on the same tap interface and pidfile path.
+      for _ in $(seq 1 50); do
+        kill -0 "$qpid" 2>/dev/null || break
+        sleep 0.1
+      done
+      rm -f "$f"
+    fi
   fi
   sleep 1  # let the port fully release before the next arm claims it
 }
@@ -180,11 +204,17 @@ for rep in $(seq 1 "$REPS"); do
     "$VXTELEMETRY" sample --match "${MATCH[$arm]}" --out-dir "$INGEST" \
       --interval-ms 500 --duration-s "$PROBE_S" &>/dev/null & SAMP_PID=$!
     echo "   $tag: probing ${PROBE_S}s @ ${PROBE_PPS}pps (+resource sampling)"
-    "$VXPROBE" send --target "$addr:9800" --pps "$PROBE_PPS" \
-      --duration-s "$PROBE_S" --metrics 127.0.0.1:9801 \
-      2>/dev/null > "$INGEST/probe-summary.json"
-    wait "$TEL_PID" 2>/dev/null || true
-    wait "$SAMP_PID" 2>/dev/null || true
+    # A zero-received measurement makes vxprobe exit 1 by design (it's a
+    # failed measurement, not a script error) — guard so one bad rep doesn't
+    # abort the whole campaign under set -e; the analyzer's loss-anomaly
+    # check already flags/refuses on exactly this condition downstream.
+    if ! "$VXPROBE" send --target "$addr:9800" --pps "$PROBE_PPS" \
+      --duration-s "$PROBE_S" --timeout-ms "$PROBE_TIMEOUT_MS" --metrics 127.0.0.1:9801 \
+      2>/dev/null > "$INGEST/probe-summary.json"; then
+      echo "   $tag: WARNING vxprobe reported zero received probes — measurement failed" >&2
+    fi
+    wait "$TEL_PID" || echo "   $tag: WARNING vxtelemetry ingest exited non-zero — archive may be incomplete" >&2
+    wait "$SAMP_PID" || echo "   $tag: WARNING vxtelemetry sample exited non-zero — archive may be incomplete" >&2
 
     "$VXTELEMETRY" collect --manifest "$MANIFEST" --ingest-dir "$INGEST" \
       --out "$RESULTS/$tag.zip" >/dev/null

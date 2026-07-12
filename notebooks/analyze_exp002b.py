@@ -53,11 +53,30 @@ def quantile_stats(values):
     return med, iqr
 
 
+def parse_out_dir(args, default):
+    """Accept both `--out-dir DIR` and `--out-dir=DIR`."""
+    out_dir = default
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--out-dir":
+            if i + 1 >= len(args):
+                sys.exit("error: --out-dir needs a value")
+            out_dir = Path(args[i + 1])
+            i += 2
+        elif arg.startswith("--out-dir="):
+            out_dir = Path(arg.split("=", 1)[1])
+            i += 1
+        else:
+            sys.exit(f"error: unrecognized argument: {arg}\n\n{__doc__}")
+    return out_dir
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     results_dir = Path(sys.argv[1])
-    out_dir = Path(sys.argv[3]) if len(sys.argv) > 3 else results_dir
+    out_dir = parse_out_dir(sys.argv[2:], results_dir)
 
     runs = []
     for path in sorted(results_dir.glob("rep*-*.zip")):
@@ -130,7 +149,10 @@ def main():
             med, iqr = quantile_stats([r["probe"]["rtt_us"][metric] for r in reps])
             row[f"{metric}_us"] = round(med, 1)
             row[f"{metric}_iqr_us"] = round(iqr, 1)
-        row["loss_pct_max"] = round(max(r["probe"]["loss_pct"] for r in reps), 4)
+        worst = max(reps, key=lambda r: r["probe"]["loss_pct"])
+        row["loss_pct_max"] = round(worst["probe"]["loss_pct"], 4)
+        row["loss_lost"] = worst["probe"]["lost"]
+        row["loss_sent"] = worst["probe"]["sent"]
 
         cpu_vals, rss_vals = [], []
         for r in reps:
@@ -159,12 +181,13 @@ def main():
         "# exp-002b — H3 decomposition + resource cost",
         "",
         f"- runs: {len(runs)} archives, manifest sha256 `{next(iter(shas))[:12]}…`",
-        f"- probe: {env['probe_pps']} pps x {env['probe_window_s']} s per arm, idle topology",
+        f"- probe: {env['probe_pps']} pps x {env['probe_window_s']} s per arm, "
+        f"timeout {env.get('probe_timeout_ms', 'unknown (script default ~1000)')} ms, idle topology",
         f"- host: kernel {env['kernel']}, KVM={env.get('kvm')}, governor={env['cpu_governor']}",
         f"- caveats: shared-host gateway; {profile_note}; resource sampling requires the arm's "
         "process to be matched by cmdline regex — 'cpu/rss: n/a' means no sample matched",
         "",
-        "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | max loss % | cpu % (mean) | rss MB (mean) |",
+        "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | max loss % (lost/sent) | cpu % (mean) | rss MB (mean) |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in rows:
@@ -174,7 +197,8 @@ def main():
         lines.append(
             f"| {r['arm']}{flag} | {r['reps']} | {r['min_samples']} "
             f"| {r['p50_us']} ({r['p50_iqr_us']}) | {r['p95_us']} ({r['p95_iqr_us']}) "
-            f"| {r['p99_us']} ({r['p99_iqr_us']}) | {r['loss_pct_max']} | {cpu} | {rss} |"
+            f"| {r['p99_us']} ({r['p99_iqr_us']}) | {r['loss_pct_max']} ({r['loss_lost']}/{r['loss_sent']}) "
+            f"| {cpu} | {rss} |"
         )
 
     if anomalies:

@@ -26,18 +26,25 @@
 ## Phase 2
 
 - [x] `exp-002b` — H3 decomposition. Full isolated campaign 2026-07-12 (5 reps x 6 arms,
-      60k samples/arm, independently audited: 1.8M probes, zero loss): the "microvm
-      slower than full VM" finding from exp-002 is **not a machine-type effect** —
-      machine (q35 vs microvm, transport/vhost fixed) shows NO measurable difference
-      (Δp50 +1.9µs, within IQR). The real drivers: **virtio transport** (MMIO vs PCI,
-      Δp50 -25.0µs — dominant), **vhost-net** (Δp50 -12.1µs), and **management layer**
-      (libvirt is FASTER than raw QEMU by default, Δp50 -18.6µs, likely libvirt enabling
+      60k samples/arm), **reconfirmed by a second independent campaign the same day**
+      after an 8-angle code review fixed 10 issues in the runner/analyzer/vxtelemetry
+      sampler (unguarded `set -e` aborts, an ingest/sample scrape-window mismatch, a
+      warmup below the methodology skill's minimum, missing metadata, orphaned/silently-
+      swallowed sidecar failures, blocking calls on the async runtime, a cleanup-trap
+      zone-list drift risk, a `--out-dir=DIR` parsing gap — see docs/STATUS.md "Code-review
+      hardening + reproducibility confirmation"). Both campaigns independently audited:
+      1.8M probes, zero loss, zero warnings, same verdicts each time. The "microvm slower
+      than full VM" finding from exp-002 is **not a machine-type effect** — machine
+      (q35 vs microvm, transport/vhost fixed) shows NO measurable difference (Δp50
+      -0.3µs, within IQR). The real drivers: **virtio transport** (MMIO vs PCI, Δp50
+      -26.0µs — dominant), **vhost-net** (Δp50 -9.5µs), and **management layer**
+      (libvirt is FASTER than raw QEMU by default, Δp50 -17.3µs, likely libvirt enabling
       vhost/optimized virtio by default). Resource cost: container cheapest (4.3% CPU,
-      7.4MB); microvm-mmio most CPU-hungry of all VM arms (15.0%) despite being the
-      "lightweight" option. Frozen summary committed. *(First campaign attempt was
-      invalidated by a concurrent-VM CPU-contention bug, root-caused and fixed — runner
-      now isolates one arm at a time with `isolation: single-arm` provenance the
-      analyzer enforces.)*
+      7.3MB); microvm-mmio most CPU-hungry of all VM arms (~15.0%) despite being the
+      "lightweight" option. Frozen summary committed (updated in place by the second
+      campaign). *(First campaign attempt was invalidated by a concurrent-VM
+      CPU-contention bug, root-caused and fixed — runner now isolates one arm at a time
+      with `isolation: single-arm` provenance the analyzer enforces.)*
 - [ ] `exp-002` hardening: retrofit the same single-arm isolation the exp-002b incident
       forced (currently 3 arms run concurrently per rep; the frozen H3 result was clean
       but that was not guaranteed by the runner's design — verify or re-run isolated)
