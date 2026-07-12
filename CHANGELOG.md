@@ -23,12 +23,14 @@ than a repo tag.
   vhost-net, and management-layer defaults.
 - Analysis notebooks (`analyze_exp001.py`/`analyze_exp002.py`/`analyze_exp002b.py`):
   archive-only, percentile tables + IQR, decomposition verdicts, headless/CI-runnable.
-- `exp-003` (H4, OTA co-location): manifest, runner, and analyzer written 2026-07-12,
-  built with every exp-002b-review lesson applied from the start (guarded `vxprobe send`,
-  loss with its denominator, `tool_versions`, 10s warmup). Two arms — baseline vs a
-  sustained OTA delivery burst — over the same adas slice/QoS/probe parameters as
-  exp-001. Manifest validated against the real parser; analyzer validated against
-  synthetic archives. Campaign not yet run.
+- `exp-003` (H4, OTA co-location): full campaign 2026-07-13, 5 reps x 2 arms, zero loss
+  both arms. **H4 HOLDS** — adas p50 45.8µs under a sustained OTA delivery burst
+  (~355 successful deliveries/rep, zero failures) vs 47.2µs baseline, well within IQR.
+  Same adas slice/QoS/probe parameters as exp-001. **This is the phase-1 gate's third and
+  final arm — H1, H3, and H4 are all delivered.**
+- Analysis notebooks (`analyze_exp001.py`/`analyze_exp002.py`/`analyze_exp002b.py`/
+  `analyze_exp003.py`): archive-only, percentile tables + IQR, decomposition/comparison
+  verdicts, headless/CI-runnable.
 
 ### Fixed
 - exp-002b's first campaign attempt ran all 6 arms concurrently, causing CPU-contention-
@@ -42,8 +44,16 @@ than a repo tag.
   silently-swallowed sidecar processes, a cleanup-trap zone-list drift risk, an
   `--out-dir=DIR` parsing gap); the campaign was re-run end-to-end on the hardened script
   and reproduced every conclusion (2026-07-12).
+- exp-003's `baseline` archives showed ~50% aggregate telemetry-scrape completeness,
+  traced to a manifest scrape target (the OTA burst driver's exporter) with nothing
+  listening during that arm by design — not real data loss (the adas-relevant target was
+  100% complete every repetition). Explained directly in the analyzer output; no re-run
+  needed (2026-07-13).
 
 ### Known gaps
 - `exp-002` still runs its 3 arms concurrently (retrofit to `exp-002b`'s single-arm
   isolation tracked, low priority — its own audit showed zero loss).
-- `exp-003` (H4) blocked on `vxedge`-side ota service wiring.
+- `exp-001`/`exp-003` don't yet have a formal second-campaign reproducibility check
+  (`exp-002b` does).
+- Manifest schema has no arm-conditional telemetry scrape targets (see exp-003's Fixed
+  entry above — currently a documented, explained gap, not a blocker).

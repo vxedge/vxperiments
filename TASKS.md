@@ -1,6 +1,6 @@
 # TASKS.md — vxedge/vxperiments
 
-## Phase 1 (gate-defining: exp-001 produces the H1/H3/H4 numbers)
+## Phase 1 (gate-defining — **PASSED 2026-07-13**: exp-001/exp-002-exp-002b/exp-003 deliver the H1/H3/H4 numbers)
 
 - [x] Repo layout: `experiments/`, `notebooks/`, `results/README.md` (`vehicles/` with the
       phase-3 vehicle manifest)
@@ -13,20 +13,28 @@
       56.0 µs, libvirt +18.5, qemu-microvm +57.9 (p99: 95.0 / +27.8 / +69.2), zero loss;
       microvm (MMIO virtio) consistently slower than libvirt q35 (virtio-pci) — confirmed
       across all reps; frozen summary committed
-- [ ] `exp-003` — OTA co-location (H4): OTA burst during ADAS load, SLA delta. Manifest,
-      runner (`scripts/run-exp-003.sh`), and analyzer (`notebooks/analyze_exp003.py`)
-      written and smoke-tested 2026-07-12 (manifest validated against vxedge-core's real
-      parser; analyzer validated against synthetic archives incl. `--out-dir` forms);
-      hardened from day one with every lesson from the exp-002b review (guarded
-      `vxprobe send`, loss w/ denominator, `tool_versions`, 10s warmup). Two arms:
-      baseline (ota service up, idle) vs ota-burst (vxota-probe fetching a 5MB artifact
-      back-to-back for the whole window) — same adas slice/QoS/probe params as exp-001,
-      so directly comparable to exp-001's load=0 and heaviest-load points. **Campaign not
-      yet run** (needs sudo, handed to the user — see docs/STATUS.md)
+- [x] `exp-003` — OTA co-location (H4). Full campaign 2026-07-13 (5 reps x 2 arms, 1000 pps
+      x 60s, zero loss both arms): **H4 HOLDS — adas p50 45.8µs under a sustained OTA
+      delivery burst vs 47.2µs baseline** (Δ -1.4µs, within IQR; p95/p99 likewise
+      near-identical: 67.5 vs 69.6, 80.1 vs 82.0). Burst confirmed real: ~355 successful
+      deliveries/rep, zero failures, ~206ms median per-delivery latency for the 5MB
+      artifact (~1.7GB transferred per rep's burst arm). Same adas slice/QoS/probe params
+      as exp-001, directly comparable to its load=0 and heaviest-load points. Frozen
+      summary committed (results/exp-003/exp-003-summary.md). Built from day one with
+      every lesson from the exp-002b review (guarded `vxprobe send`, loss w/ denominator,
+      `tool_versions`, 10s warmup) — also caught and fixed a real bug in vxota-probe's
+      `--repeat` driver mode before the campaign ran (silently skipped re-download after
+      the first fetch). Post-campaign audit found `baseline` archives showing ~50%
+      aggregate telemetry completeness — root-caused to the OTA burst driver's exporter
+      having nothing listening during that arm (a manifest scrape-target gap, not real
+      data loss; the adas-relevant target was 100% complete every rep) — explained in the
+      analyzer output, no re-run needed. **This closes the phase-1 gate** (H1+H3+H4 all
+      delivered).
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
-- [ ] Reproducibility check: full second campaign of exp-001, medians within first
-      campaign's IQRs *(within-campaign consistency already strong: p99 IQRs 3.9–6.5 µs
-      across 5 fresh up/down cycles per load)*
+- [ ] Reproducibility check: full second campaign of exp-001 and exp-003, medians within
+      first campaign's IQRs *(exp-001's within-campaign consistency already strong: p99
+      IQRs 3.9–6.5 µs across 5 fresh up/down cycles per load; exp-002b already has its
+      second-campaign check done)*
 - [ ] CI: manifest-validation on every PR (`vxedge manifest validate` over experiments/ and
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
@@ -66,6 +74,12 @@
       priority — the gate errs safe (blocks on stale-looking code, never measures with
       genuinely stale code), the workaround is a documented `touch`; a real fix needs
       per-binary dependency-graph awareness, not just a repo-wide file scan.
+- [ ] Manifest schema has no arm-conditional `telemetry.prometheus.scrape_targets` — hit
+      by exp-003, whose `baseline` arm has nothing listening on the OTA burst driver's
+      exporter port by design, dragging aggregate vxtelemetry completeness to ~50% (fully
+      explained, not real data loss; the adas-relevant target was 100% complete). Low
+      priority (the analyzer already explains it), but worth fixing before the pattern is
+      copied into a future experiment where it could mask a real completeness problem.
 - [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →

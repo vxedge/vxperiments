@@ -212,6 +212,12 @@ def main():
         "address (no manifest slice/WireGuard yet) — this measures host-level CPU/scheduling "
         "contention between the OTA workload and the adas probe, not gateway-QoS-enforced "
         "network contention",
+        "- telemetry note: baseline archives show ~50% vxtelemetry scrape completeness by "
+        "design, not data loss — `telemetry.prometheus.scrape_targets` includes the "
+        "vxota-probe exporter (127.0.0.1:9902) for both arms, but nothing listens there "
+        "during baseline (the burst driver only runs in ota-burst). The adas-relevant "
+        "target (127.0.0.1:9801) is 100% complete in every archive; only the irrelevant, "
+        "known-absent target's scrapes fail.",
         "",
         "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | max loss % (lost/sent) | ota deliveries ok/fail (median) | ota delivery p50 ms |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
