@@ -23,6 +23,12 @@ than a repo tag.
   vhost-net, and management-layer defaults.
 - Analysis notebooks (`analyze_exp001.py`/`analyze_exp002.py`/`analyze_exp002b.py`):
   archive-only, percentile tables + IQR, decomposition verdicts, headless/CI-runnable.
+- `exp-003` (H4, OTA co-location): manifest, runner, and analyzer written 2026-07-12,
+  built with every exp-002b-review lesson applied from the start (guarded `vxprobe send`,
+  loss with its denominator, `tool_versions`, 10s warmup). Two arms — baseline vs a
+  sustained OTA delivery burst — over the same adas slice/QoS/probe parameters as
+  exp-001. Manifest validated against the real parser; analyzer validated against
+  synthetic archives. Campaign not yet run.
 
 ### Fixed
 - exp-002b's first campaign attempt ran all 6 arms concurrently, causing CPU-contention-

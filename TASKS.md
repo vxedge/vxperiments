@@ -13,7 +13,16 @@
       56.0 µs, libvirt +18.5, qemu-microvm +57.9 (p99: 95.0 / +27.8 / +69.2), zero loss;
       microvm (MMIO virtio) consistently slower than libvirt q35 (virtio-pci) — confirmed
       across all reps; frozen summary committed
-- [ ] `exp-003` — OTA co-location (H4): OTA burst during ADAS load, SLA delta *(needs vxota v1)*
+- [ ] `exp-003` — OTA co-location (H4): OTA burst during ADAS load, SLA delta. Manifest,
+      runner (`scripts/run-exp-003.sh`), and analyzer (`notebooks/analyze_exp003.py`)
+      written and smoke-tested 2026-07-12 (manifest validated against vxedge-core's real
+      parser; analyzer validated against synthetic archives incl. `--out-dir` forms);
+      hardened from day one with every lesson from the exp-002b review (guarded
+      `vxprobe send`, loss w/ denominator, `tool_versions`, 10s warmup). Two arms:
+      baseline (ota service up, idle) vs ota-burst (vxota-probe fetching a 5MB artifact
+      back-to-back for the whole window) — same adas slice/QoS/probe params as exp-001,
+      so directly comparable to exp-001's load=0 and heaviest-load points. **Campaign not
+      yet run** (needs sudo, handed to the user — see docs/STATUS.md)
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
 - [ ] Reproducibility check: full second campaign of exp-001, medians within first
       campaign's IQRs *(within-campaign consistency already strong: p99 IQRs 3.9–6.5 µs
