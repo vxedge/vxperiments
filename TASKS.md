@@ -57,6 +57,15 @@
 - [ ] `exp-002` hardening: retrofit the same single-arm isolation the exp-002b incident
       forced (currently 3 arms run concurrently per rep; the frozen H3 result was clean
       but that was not guaranteed by the runner's design — verify or re-run isolated)
+- [ ] `check_fresh()` (shared across run-exp-*.sh) does a whole-repo staleness check
+      against each individual binary, which false-positives on multi-binary repos when
+      only one binary's source changed (hit twice running exp-003: vxedge-core edits
+      flagged the unrelated `vxedge` CLI binary; vxota-probe edits flagged the unrelated
+      `vxota` server binary — neither actually depends on the changed file, confirmed by
+      `cargo build --workspace` correctly relinking only the binary that did). Low
+      priority — the gate errs safe (blocks on stale-looking code, never measures with
+      genuinely stale code), the workaround is a documented `touch`; a real fix needs
+      per-binary dependency-graph awareness, not just a repo-wide file scan.
 - [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
