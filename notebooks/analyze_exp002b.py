@@ -88,7 +88,30 @@ def main():
     shas = {r["sha"] for r in runs}
     if len(shas) != 1:
         sys.exit(f"REFUSING: archives span {len(shas)} manifest checksums")
+
+    # Isolation provenance (2026-07-12 methodology fix): a pre-fix runner ran
+    # all six arms concurrently, which produced CPU-contention-driven packet
+    # loss varying 0-37% rep-to-rep on the same arm — a measurement artifact,
+    # not a packaging effect. Archives without isolation=="single-arm" predate
+    # the fix and are refused outright rather than silently analyzed.
+    not_isolated = sorted({r["arm"] for r in runs if r["env"].get("isolation") != "single-arm"})
+    if not_isolated:
+        sys.exit(
+            "REFUSING: archives for arm(s) "
+            f"{not_isolated} lack isolation=='single-arm' — these predate the "
+            "concurrent-VM contention fix (2026-07-12) and are not comparable. "
+            "Re-run the campaign with the current scripts/run-exp-002b.sh."
+        )
     quick = any(r["env"].get("quick_profile") for r in runs)
+
+    # Loud, per-rep loss-anomaly detection — never let a median hide this.
+    LOSS_WARN_PCT = 1.0
+    anomalies = [
+        (r["arm"], r["rep"], r["probe"]["loss_pct"])
+        for r in runs
+        if r["probe"]["loss_pct"] > LOSS_WARN_PCT
+    ]
+    unreliable_arms = {a for a, _, _ in anomalies}
 
     by_arm = defaultdict(list)
     for r in runs:
@@ -101,12 +124,13 @@ def main():
             "arm": arm,
             "reps": len(reps),
             "min_samples": min(r["probe"]["received"] for r in reps),
+            "unreliable": arm in unreliable_arms,
         }
         for metric in ("p50", "p95", "p99"):
             med, iqr = quantile_stats([r["probe"]["rtt_us"][metric] for r in reps])
             row[f"{metric}_us"] = round(med, 1)
             row[f"{metric}_iqr_us"] = round(iqr, 1)
-        row["loss_pct"] = round(statistics.median([r["probe"]["loss_pct"] for r in reps]), 4)
+        row["loss_pct_max"] = round(max(r["probe"]["loss_pct"] for r in reps), 4)
 
         cpu_vals, rss_vals = [], []
         for r in reps:
@@ -140,16 +164,30 @@ def main():
         f"- caveats: shared-host gateway; {profile_note}; resource sampling requires the arm's "
         "process to be matched by cmdline regex — 'cpu/rss: n/a' means no sample matched",
         "",
-        "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | loss % | cpu % (mean) | rss MB (mean) |",
+        "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | max loss % | cpu % (mean) | rss MB (mean) |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in rows:
         cpu = r["cpu_pct_mean"] if r["cpu_pct_mean"] is not None else "n/a"
         rss = r["rss_mb_mean"] if r["rss_mb_mean"] is not None else "n/a"
+        flag = " ⚠️" if r["unreliable"] else ""
         lines.append(
-            f"| {r['arm']} | {r['reps']} | {r['min_samples']} "
+            f"| {r['arm']}{flag} | {r['reps']} | {r['min_samples']} "
             f"| {r['p50_us']} ({r['p50_iqr_us']}) | {r['p95_us']} ({r['p95_iqr_us']}) "
-            f"| {r['p99_us']} ({r['p99_iqr_us']}) | {r['loss_pct']} | {cpu} | {rss} |"
+            f"| {r['p99_us']} ({r['p99_iqr_us']}) | {r['loss_pct_max']} | {cpu} | {rss} |"
+        )
+
+    if anomalies:
+        lines += ["", "## ⚠️ Loss anomalies (per-repetition, exceeds "
+                  f"{LOSS_WARN_PCT}%) — latency stats for these arms are unreliable", ""]
+        for arm, rep, pct in sorted(anomalies):
+            lines.append(f"- {arm} rep{rep}: {pct:.2f}% loss")
+        lines.append(
+            "\nA reproducible arm shows ~0% loss in every repetition (see exp-001/exp-002 "
+            "baselines). Anomalous loss means packets were dropped before reaching the "
+            "probe, not measured as slow — RTT stats for the survivors are not a fair "
+            "comparison against loss-free arms. Investigate host contention / re-run "
+            "before trusting any verdict touching these arms."
         )
 
     lines += ["", "## Decomposition verdicts", ""]
@@ -157,6 +195,13 @@ def main():
         a, b = by_arm_row.get(arm_a), by_arm_row.get(arm_b)
         if not a or not b:
             lines.append(f"- **{label}**: missing arm(s), skipped ({question})")
+            continue
+        if a["unreliable"] or b["unreliable"]:
+            lines.append(
+                f"- **{label}** ({arm_a} vs {arm_b}): UNRELIABLE — loss anomaly in "
+                f"{'both arms' if a['unreliable'] and b['unreliable'] else (arm_a if a['unreliable'] else arm_b)}, "
+                "see anomalies section; re-run before drawing a conclusion"
+            )
             continue
         delta = round(a["p50_us"] - b["p50_us"], 1)
         threshold = max(a["p50_iqr_us"], b["p50_iqr_us"], 1.0)

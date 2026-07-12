@@ -103,6 +103,7 @@ env_metadata() { # $1=arm $2=rep
   "cpu_governor": "$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo unknown)",
   "loadavg_at_start": "$(cut -d' ' -f1-3 /proc/loadavg)",
   "timestamping": "userspace-monotonic",
+  "isolation": "single-arm",
   "bundle_meta": $(cat "$BUNDLE/meta.json") }
 EOF
 }
@@ -116,26 +117,58 @@ wait_reflector() {
   echo "error: reflector at $1 never answered (serial logs in $RUNTIME)" >&2; return 1
 }
 
-echo "== exp-002b: reps=$REPS arms=(${ARMS[*]}) window=${PROBE_S}s pps=$PROBE_PPS"
+# Isolation contract (methodology fix, 2026-07-12): exactly ONE guest/container
+# node runs at a time. An earlier version brought all six arms up for the
+# whole repetition; unpinned concurrent QEMU guests contended for host CPU
+# and produced 0-37% packet loss that varied wildly rep-to-rep on the same
+# arm — a measurement artifact, not a packaging effect (see run-env "isolation"
+# field, added below, for provenance on any archive predating this fix).
+declare -A ZONE_OF=( [container]=z-cont [microvm-mmio]=z-mvm-mmio [libvirt-q35]=z-libvirt )
+
+start_arm() {
+  local arm="$1"
+  if [[ -n "${ZONE_OF[$arm]:-}" ]]; then
+    "$VXEDGE" --endpoint "unix://$SOCK" zone up --vxid "${ZONE_OF[$arm]}" >/dev/null
+    if [[ "$arm" == "container" ]]; then
+      ip netns exec vx-node-cont-01 "$VXPROBE" reflect --listen 0.0.0.0:9800 &>/dev/null &
+      PIDS+=($!)
+    fi
+  else
+    launch_qemu "$arm"
+  fi
+}
+
+stop_arm() {
+  local arm="$1"
+  if [[ -n "${ZONE_OF[$arm]:-}" ]]; then
+    if [[ "$arm" == "container" ]]; then
+      for p in "${PIDS[@]}"; do kill "$p" 2>/dev/null || true; done; PIDS=()
+    fi
+    "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "${ZONE_OF[$arm]}" >/dev/null
+  else
+    local f="$RUNTIME/qemu-$arm.pid"
+    [[ -f "$f" ]] && kill "$(cat "$f")" 2>/dev/null
+    rm -f "$f"
+  fi
+  sleep 1  # let the port fully release before the next arm claims it
+}
+
+echo "== exp-002b: reps=$REPS arms=(${ARMS[*]}) window=${PROBE_S}s pps=$PROBE_PPS [isolated: one arm at a time]"
 mkdir -p "$RESULTS"
 "$VXEDGED" --listen "unix://$SOCK" --runtime-dir "$RUNTIME" &> "$RUNTIME/vxedged.log" &
 DAEMON_PID=$!; sleep 1
 
 for rep in $(seq 1 "$REPS"); do
-  echo "-- rep $rep: gateway + zones up"
+  echo "-- rep $rep: gateway up"
   "$VXEDGE" --endpoint "unix://$SOCK" up --manifest "$MANIFEST" >/dev/null
   ip link add link vxup0p name vxup0p.101 type vlan id 101
   ip addr add 10.101.0.1/24 dev vxup0p.101
   ip link set vxup0p up && ip link set vxup0p.101 up
 
-  for z in z-cont z-mvm-mmio z-libvirt; do
-    "$VXEDGE" --endpoint "unix://$SOCK" zone up --vxid "$z" >/dev/null
-  done
-  ip netns exec vx-node-cont-01 "$VXPROBE" reflect --listen 0.0.0.0:9800 &>/dev/null & PIDS+=($!)
-  for arm in q35-pci q35-vhost microvm-pci; do launch_qemu "$arm"; done
-
   for arm in "${ARMS[@]}"; do
     addr="${ADDR[$arm]}"; tag="rep${rep}-${arm}"
+    echo "   $tag: starting (isolated)"
+    start_arm "$arm"
     echo "   $tag: waiting for reflector at $addr"
     wait_reflector "$addr"
     INGEST="$RUNTIME/ingest-$tag"; mkdir -p "$INGEST"
@@ -156,13 +189,9 @@ for rep in $(seq 1 "$REPS"); do
     "$VXTELEMETRY" collect --manifest "$MANIFEST" --ingest-dir "$INGEST" \
       --out "$RESULTS/$tag.zip" >/dev/null
     echo "   $tag: archived ($(jq -r '.rtt_us.p50' "$INGEST/probe-summary.json" 2>/dev/null || echo '?') us p50)"
+    stop_arm "$arm"
   done
 
-  for f in "$RUNTIME"/qemu-*.pid; do [[ -f "$f" ]] && kill "$(cat "$f")" 2>/dev/null && rm -f "$f"; done
-  for p in "${PIDS[@]}"; do kill "$p" 2>/dev/null || true; done; PIDS=()
-  for z in z-cont z-mvm-mmio z-libvirt; do
-    "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "$z" >/dev/null
-  done
   ip link del vxup0p.101 2>/dev/null || true
   "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$MANIFEST" >/dev/null
 done

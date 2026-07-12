@@ -25,10 +25,16 @@
 
 ## Phase 2
 
-- [ ] `exp-002b` — H3 decomposition *(kit done 2026-07-12: 6-arm manifest validated,
-      runner + analyzer pushed, vxtelemetry resource sampler built and live-smoke-tested;
-      REMAINING: privileged campaign — --quick first, since 3 arms launch runner-managed
-      QEMU with non-default flags never exercised live before)*
+- [ ] `exp-002b` — H3 decomposition *(2026-07-12: first full campaign INVALIDATED — all
+      6 arms ran concurrently for the whole repetition, unpinned, causing CPU-contention
+      packet loss (0-37%, non-reproducible rep-to-rep) on non-vhost arms; root-caused and
+      fixed: runner now isolates one arm at a time (start -> probe -> teardown), archives
+      carry `isolation: single-arm` provenance, analyzer refuses archives without it.
+      exp-002 (3-arm concurrent) audited clean by luck, not by design — same latent risk,
+      see follow-up below. REMAINING: re-run --quick then the full campaign)*
+- [ ] `exp-002` hardening: retrofit the same single-arm isolation the exp-002b incident
+      forced (currently 3 arms run concurrently per rep; the frozen H3 result was clean
+      but that was not guaranteed by the runner's design — verify or re-run isolated)
 - [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
