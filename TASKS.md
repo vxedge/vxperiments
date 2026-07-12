@@ -25,13 +25,19 @@
 
 ## Phase 2
 
-- [ ] `exp-002b` — H3 decomposition *(2026-07-12: first full campaign INVALIDATED — all
-      6 arms ran concurrently for the whole repetition, unpinned, causing CPU-contention
-      packet loss (0-37%, non-reproducible rep-to-rep) on non-vhost arms; root-caused and
-      fixed: runner now isolates one arm at a time (start -> probe -> teardown), archives
-      carry `isolation: single-arm` provenance, analyzer refuses archives without it.
-      exp-002 (3-arm concurrent) audited clean by luck, not by design — same latent risk,
-      see follow-up below. REMAINING: re-run --quick then the full campaign)*
+- [x] `exp-002b` — H3 decomposition. Full isolated campaign 2026-07-12 (5 reps x 6 arms,
+      60k samples/arm, independently audited: 1.8M probes, zero loss): the "microvm
+      slower than full VM" finding from exp-002 is **not a machine-type effect** —
+      machine (q35 vs microvm, transport/vhost fixed) shows NO measurable difference
+      (Δp50 +1.9µs, within IQR). The real drivers: **virtio transport** (MMIO vs PCI,
+      Δp50 -25.0µs — dominant), **vhost-net** (Δp50 -12.1µs), and **management layer**
+      (libvirt is FASTER than raw QEMU by default, Δp50 -18.6µs, likely libvirt enabling
+      vhost/optimized virtio by default). Resource cost: container cheapest (4.3% CPU,
+      7.4MB); microvm-mmio most CPU-hungry of all VM arms (15.0%) despite being the
+      "lightweight" option. Frozen summary committed. *(First campaign attempt was
+      invalidated by a concurrent-VM CPU-contention bug, root-caused and fixed — runner
+      now isolates one arm at a time with `isolation: single-arm` provenance the
+      analyzer enforces.)*
 - [ ] `exp-002` hardening: retrofit the same single-arm isolation the exp-002b incident
       forced (currently 3 arms run concurrently per rep; the frozen H3 result was clean
       but that was not guaranteed by the runner's design — verify or re-run isolated)
