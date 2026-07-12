@@ -1,0 +1,82 @@
+# exp-002b — H3 decomposition: separate machine type, virtio transport,
+# vhost, and management layer; capture per-arm resource cost.
+# Six arms, identical payload/kernel/resources. Zone order fixes endpoint
+# indexes (vz0..vz5) — the runner depends on it. The three "mechanism" zones
+# (q35-pci / q35-vhost / mvm-pci) are never `zone up`'d: the gateway creates
+# their taps and the runner launches QEMU on them with the arm's exact flags.
+experiment:
+  id: exp-002b
+  name: packaging decomposition + resource cost
+  description: >
+    Decompose exp-002's packaging effect: microvm-vs-q35 machine type at fixed
+    virtio-pci transport, MMIO-vs-PCI transport at fixed microvm machine,
+    vhost-net on/off at fixed q35+pci, and raw-QEMU-vs-libvirt management at
+    fixed q35+pci. Per-arm CPU/RSS sampled during each probe window.
+  duration_s: 60
+  results_prefix: results/exp-002b
+
+network:
+  defaults: { bandwidth: 500000000 }
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 100, max_rate_mbps: 500, priority: 1 }
+
+zones:
+  - id: z-cont            # endpoint vz0 (veth)
+    role: front-left
+    nodes:
+      - id: node-cont-01
+        type: ecu
+        image: { url: local/vxprobe:host-process, kind: container }
+        backend: container
+        network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.11/24 }]
+  - id: z-mvm-mmio        # endpoint vz1 (tap) — platform microvm arm
+    role: front-left
+    nodes:
+      - id: node-mvm-mmio-01
+        type: ecu
+        image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
+        backend: qemu-microvm
+        network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.12/24 }]
+  - id: z-libvirt         # endpoint vz2 (tap) — platform libvirt arm
+    role: front-left
+    nodes:
+      - id: node-libvirt-01
+        type: ecu
+        image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
+        backend: libvirt
+        network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.13/24 }]
+  - id: z-q35-pci         # endpoint vz3 (tap) — runner-launched QEMU
+    role: front-left
+    nodes:
+      - id: node-q35-pci-01
+        type: ecu
+        image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
+        backend: qemu-microvm    # tap endpoint; never zone-up'd
+        network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.14/24 }]
+  - id: z-q35-vhost       # endpoint vz4 (tap) — runner-launched QEMU
+    role: front-left
+    nodes:
+      - id: node-q35-vhost-01
+        type: ecu
+        image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
+        backend: qemu-microvm
+        network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.15/24 }]
+  - id: z-mvm-pci         # endpoint vz5 (tap) — runner-launched QEMU
+    role: front-left
+    nodes:
+      - id: node-mvm-pci-01
+        type: ecu
+        image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
+        backend: qemu-microvm
+        network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.16/24 }]
+
+telemetry:
+  prometheus:
+    scrape_targets: ["127.0.0.1:9801"]
+
+results:
+  artifact_dir: results/exp-002b
+  upload: false
