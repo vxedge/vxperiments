@@ -8,6 +8,13 @@ description: Statistical and methodological rigor for vxedge experiments — use
 A measurement that can't defend itself at review is noise. Every experiment follows this
 discipline (ARCHITECTURE §12 is the spec; this is the practice).
 
+## Validation
+
+- Before any design/execution work: `vxedge manifest validate --json <manifest>` (local-only,
+  no daemon — the same read-only check `vxedge up` runs before provisioning). Run it on every
+  experiment and vehicle manifest edit; it's the CLI's only schema validator, so a manifest
+  that fails it is not a valid input to anything downstream.
+
 ## Design
 
 - **One hypothesis per experiment** (exp-001→H1, exp-002→H3, exp-010→H2 …). If a manifest
