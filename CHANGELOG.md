@@ -2,8 +2,7 @@
 
 All notable changes to this repo are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows
-[Semantic Versioning](https://semver.org/) once the first tag is cut (see
-`docs/VERSIONING.md` in the `docs` repo — no `v0.1.0` yet, pre-phase-1-gate).
+[Semantic Versioning](https://semver.org/) — see `docs/VERSIONING.md` in the `docs` repo.
 
 Result summaries (`results/*/*.md`,`.csv`) are tracked here, not versioned as releases —
 each is reproducible from its manifest + digests per the reproducibility gate
@@ -11,6 +10,11 @@ each is reproducible from its manifest + digests per the reproducibility gate
 than a repo tag.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-07-13
+
+**Phase-1 gate passed**: H1, H3, and H4 all have reproducible numbers. Repos stay
+private for now — see `docs/STATUS.md` for the public-visibility punch list.
 
 ### Added
 - `exp-001` (H1, slice isolation): full campaign 2026-07-10, 5 reps x 5 loads, 60k
