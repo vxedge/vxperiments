@@ -40,11 +40,30 @@ def quantile_stats(values):
     return med, iqr
 
 
+def parse_out_dir(args, default):
+    """Accept both `--out-dir DIR` and `--out-dir=DIR`."""
+    out_dir = default
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--out-dir":
+            if i + 1 >= len(args):
+                sys.exit("error: --out-dir needs a value")
+            out_dir = Path(args[i + 1])
+            i += 2
+        elif arg.startswith("--out-dir="):
+            out_dir = Path(arg.split("=", 1)[1])
+            i += 1
+        else:
+            sys.exit(f"error: unrecognized argument: {arg}\n\n{__doc__}")
+    return out_dir
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     results_dir = Path(sys.argv[1])
-    out_dir = Path(sys.argv[3]) if len(sys.argv) > 3 else results_dir
+    out_dir = parse_out_dir(sys.argv[2:], results_dir)
 
     runs = []
     for path in sorted(results_dir.glob("rep*-*.zip")):
@@ -66,6 +85,24 @@ def main():
     shas = {r["sha"] for r in runs}
     if len(shas) != 1:
         sys.exit(f"REFUSING: archives span {len(shas)} manifest checksums")
+
+    # Isolation provenance (2026-07-13 methodology fix, retrofit of the same
+    # fix already applied to exp-002b — see that runner's header): a pre-fix
+    # exp-002 runner grouped all three packaging backends under one zone, so
+    # `zone up` always started all three concurrently even though only one
+    # was being measured — the same class of unpinned-concurrent-guest CPU
+    # contention that invalidated exp-002b's first campaign. Archives without
+    # isolation=="single-arm" predate the fix and are refused outright rather
+    # than silently analyzed, even though exp-002's original frozen result
+    # happened to show zero loss (luck, not a property of the design).
+    not_isolated = sorted({r["arm"] for r in runs if r["env"].get("isolation") != "single-arm"})
+    if not_isolated:
+        sys.exit(
+            "REFUSING: archives for arm(s) "
+            f"{not_isolated} lack isolation=='single-arm' — these predate the "
+            "concurrent-VM contention fix (2026-07-13) and are not comparable. "
+            "Re-run the campaign with the current scripts/run-exp-002.sh."
+        )
     quick = any(r["env"].get("quick_profile") for r in runs)
 
     by_arm = defaultdict(list)
@@ -84,7 +121,10 @@ def main():
             med, iqr = quantile_stats([r["probe"]["rtt_us"][metric] for r in reps])
             row[f"{metric}_us"] = round(med, 1)
             row[f"{metric}_iqr_us"] = round(iqr, 1)
-        row["loss_pct"] = round(statistics.median([r["probe"]["loss_pct"] for r in reps]), 4)
+        worst = max(reps, key=lambda r: r["probe"]["loss_pct"])
+        row["loss_pct_max"] = round(worst["probe"]["loss_pct"], 4)
+        row["loss_lost"] = worst["probe"]["lost"]
+        row["loss_sent"] = worst["probe"]["sent"]
         rows.append(row)
 
     baseline = next((r for r in rows if r["arm"] == "container"), rows[0])
@@ -111,7 +151,7 @@ def main():
         f"governor={env['cpu_governor']}, timestamping: {env['timestamping']}",
         f"- caveats: shared-host gateway; {profile_note}",
         "",
-        "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | Δp50 vs container | Δp99 vs container | loss % |",
+        "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | Δp50 vs container | Δp99 vs container | max loss % (lost/sent) |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in rows:
@@ -119,7 +159,7 @@ def main():
             f"| {r['arm']} | {r['reps']} | {r['min_samples']} "
             f"| {r['p50_us']} ({r['p50_iqr_us']}) | {r['p95_us']} ({r['p95_iqr_us']}) "
             f"| {r['p99_us']} ({r['p99_iqr_us']}) | {r['p50_vs_container']:+} "
-            f"| {r['p99_vs_container']:+} | {r['loss_pct']} |"
+            f"| {r['p99_vs_container']:+} | {r['loss_pct_max']} ({r['loss_lost']}/{r['loss_sent']}) |"
         )
 
     lines += ["", "## H3 verdict", ""]

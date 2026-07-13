@@ -9,10 +9,18 @@
       600 mbit offered overload, zero loss**; load delivery verified (600.0 mbit, 0 errors);
       frozen summary committed (results/exp-001/exp-001-summary.md)
 - [x] `exp-002` — virtualization packaging (H3). Full campaign 2026-07-11 (5 reps x 3 arms,
-      60k samples/arm): **H3 HOLDS — packaging measurably affects RTT**: p50 container
-      56.0 µs, libvirt +18.5, qemu-microvm +57.9 (p99: 95.0 / +27.8 / +69.2), zero loss;
-      microvm (MMIO virtio) consistently slower than libvirt q35 (virtio-pci) — confirmed
-      across all reps; frozen summary committed
+      60k samples/arm), **superseded 2026-07-13 by a re-run under the single-arm isolation
+      fix** (see "hardening" item below): current frozen numbers are p50 container 54.3 µs,
+      libvirt +12.0, qemu-microvm +59.2 (p99: 89.9 / +20.8 / +69.6), zero loss — **H3 still
+      HOLDS**, same ordering (container < libvirt < microvm). The isolation fix moved
+      libvirt down measurably (p50 74.5→66.3 µs, p99 122.8→110.7 µs — more than the
+      original run's own IQR), while container/microvm barely moved (within ~2µs, close to
+      exp-001's rerun's general host-drift noise); consistent with exp-002b's independently
+      isolated libvirt-q35 arm (p50 70.3 µs, between the two exp-002 numbers). Reading: the
+      original concurrent-arm design's background container+microvm processes measurably
+      inflated libvirt's latency specifically — H3's conclusion doesn't change, but the
+      libvirt magnitude does, and the isolated number is the one to cite going forward.
+      Frozen summary updated in place
 - [x] `exp-003` — OTA co-location (H4). Full campaign 2026-07-13 (5 reps x 2 arms, 1000 pps
       x 60s, zero loss both arms): **H4 HOLDS — adas p50 45.8µs under a sustained OTA
       delivery burst vs 47.2µs baseline** (Δ -1.4µs, within IQR; p95/p99 likewise
@@ -31,10 +39,32 @@
       analyzer output, no re-run needed. **This closes the phase-1 gate** (H1+H3+H4 all
       delivered).
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
-- [ ] Reproducibility check: full second campaign of exp-001 and exp-003, medians within
-      first campaign's IQRs *(exp-001's within-campaign consistency already strong: p99
-      IQRs 3.9–6.5 µs across 5 fresh up/down cycles per load; exp-002b already has its
-      second-campaign check done)*
+- [x] `exp-001` reproducibility check (2026-07-13): full second campaign, same manifest
+      sha256 (`e51721c1a5a0…`), 25 archives, zero loss. **Reproducible**: 14 of 15
+      median/metric pairs land within the original campaign's IQR; the one miss (p99 at the
+      `load0` baseline, -6.7µs vs a 4.3µs IQR) reflects a uniform small downward shift
+      present at every load point, not a methodology issue, and doesn't move the H1 verdict
+      (0.93x original vs 0.95x rerun, both well under the 2.0x threshold). Recorded
+      separately from the frozen original: `results/exp-001/exp-001-repro-check-2026-07-13.md`.
+- [x] `exp-003` reproducibility check (2026-07-13): full second campaign, 10 archives, zero
+      loss. **0 of 6 metric/arm pairs land within the original campaign's IQR** (a uniform
+      ~4-7µs downward shift across both arms, same-day — the weakest reproducibility check
+      of the three run this session). The substantive H4 comparison is unaffected (Δp50
+      -1.4µs original vs -0.7µs rerun, same order of magnitude/sign, both within their own
+      IQR threshold — **H4 still holds**) because it's a within-campaign relative
+      measurement and both arms drifted together. Honest reading: this host's absolute RTT
+      baseline drifts several µs across sessions hours apart even same-day — larger than
+      any single campaign's own IQR — so within-campaign IQRs bound repetition noise, not
+      cross-session drift; the comparative hypotheses (H1/H3/H4) are robust to this, but an
+      absolute-µs figure from any one campaign is a property of that session/host, not a
+      fixed constant. Not gate-blocking. Recorded separately from the frozen original:
+      `results/exp-003/exp-003-repro-check-2026-07-13.md`. Also fixed in the same pass:
+      `analyze_exp003.py`'s telemetry-completeness caveat was a hardcoded "~50%" claim
+      (true only of the original, pre-`optional_scrape_targets` archives) — now computed
+      dynamically per campaign from `ingest/ingest-stats.json`'s required/optional scrape
+      counters, confirming the schema fix works (this rerun: 100% required-target
+      completeness both arms, optional-target completeness 0%/100% baseline/ota-burst
+      exactly as designed).
 - [ ] CI: manifest-validation on every PR (`vxedge manifest validate` over experiments/ and
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
@@ -62,9 +92,22 @@
       campaign). *(First campaign attempt was invalidated by a concurrent-VM
       CPU-contention bug, root-caused and fixed — runner now isolates one arm at a time
       with `isolation: single-arm` provenance the analyzer enforces.)*
-- [ ] `exp-002` hardening: retrofit the same single-arm isolation the exp-002b incident
-      forced (currently 3 arms run concurrently per rep; the frozen H3 result was clean
-      but that was not guaranteed by the runner's design — verify or re-run isolated)
+- [x] `exp-002` hardening (2026-07-13): retrofit the same single-arm isolation the exp-002b
+      incident forced — the frozen H3 result was clean but that was luck, not a property of
+      the runner's design (all 3 arms ran under one zone, concurrently). `exp-002.yaml` now
+      declares one zone per arm (`z-cont`/`z-microvm`/`z-libvirt`, was one `vxzone-front-left-01`
+      holding all three nodes); `run-exp-002.sh` gained a `ZONE_OF` map + `start_arm()`/
+      `stop_arm()` (mirrors exp-002b's pattern) so exactly one arm's zone is up at a time,
+      plus every other exp-002b/exp-003 hardening lesson (`isolation: "single-arm"`
+      provenance, guarded `vxprobe send`, `tool_versions`/`cpu_pinning` in `env_metadata()`,
+      `WARM_S` 5→10, surfaced `wait` exit codes instead of swallowing them); `analyze_exp002.py`
+      now refuses archives missing `isolation=="single-arm"` (matching `analyze_exp002b.py`),
+      reports loss with lost/sent denominator instead of a bare median, and accepts both
+      `--out-dir DIR` and `--out-dir=DIR`. Manifest re-validated (`vxedge manifest validate`:
+      3 zones, was 1); analyzer smoke-tested against synthetic archives including the
+      isolation-refusal path. **Re-run done 2026-07-13**: 15 archives, zero loss, H3 still
+      holds; libvirt's number moved measurably (see the `exp-002` entry above for the
+      numbers and reading) — frozen summary updated in place.
 - [x] `check_fresh()` whole-repo false-positive fixed (2026-07-13): extracted
       `scripts/lib/freshness.sh`'s `check_fresh_bin()`, shared by all four run-exp-*.sh
       scripts, which walks each crate's *actual* local path dependencies (parsed from its

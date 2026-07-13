@@ -127,6 +127,8 @@ def main():
                     ota = ota_burst_stats(z.read(samples_name))
                 except (ValueError, KeyError):
                     ota = None
+            stats_name = "ingest/ingest-stats.json"
+            stats = json_lenient(z.read(stats_name)) if stats_name in names else None
             runs.append(
                 {
                     "rep": int(m.group(1)),
@@ -134,6 +136,7 @@ def main():
                     "probe": json_lenient(z.read("ingest/probe-summary.json")),
                     "env": json_lenient(z.read("ingest/run-env.json")),
                     "ota": ota,
+                    "stats": stats,
                     "sha": json_lenient(z.read("metadata.json"))["manifest_sha256"],
                 }
             )
@@ -186,6 +189,23 @@ def main():
             row["ota_deliveries_succeeded_median"] = None
             row["ota_deliveries_failed_median"] = None
             row["ota_delivery_p50_ms_median"] = None
+
+        stats_reps = [r["stats"] for r in reps if r["stats"]]
+        if stats_reps:
+            def pct(ok_key, fail_key):
+                vals = []
+                for s in stats_reps:
+                    ok, fail = s.get(ok_key, 0), s.get(fail_key, 0)
+                    total = ok + fail
+                    vals.append(100.0 * ok / total if total else None)
+                vals = [v for v in vals if v is not None]
+                return round(statistics.median(vals), 1) if vals else None
+
+            row["required_completeness_pct"] = pct("scrapes_ok", "scrapes_failed")
+            row["optional_completeness_pct"] = pct("optional_scrapes_ok", "optional_scrapes_failed")
+        else:
+            row["required_completeness_pct"] = None
+            row["optional_completeness_pct"] = None
         rows.append(row)
 
     by_arm_row = {r["arm"]: r for r in rows}
@@ -212,12 +232,27 @@ def main():
         "address (no manifest slice/WireGuard yet) — this measures host-level CPU/scheduling "
         "contention between the OTA workload and the adas probe, not gateway-QoS-enforced "
         "network contention",
-        "- telemetry note: baseline archives show ~50% vxtelemetry scrape completeness by "
-        "design, not data loss — `telemetry.prometheus.scrape_targets` includes the "
-        "vxota-probe exporter (127.0.0.1:9902) for both arms, but nothing listens there "
-        "during baseline (the burst driver only runs in ota-burst). The adas-relevant "
-        "target (127.0.0.1:9801) is 100% complete in every archive; only the irrelevant, "
-        "known-absent target's scrapes fail.",
+    ]
+    required_by_arm = {r["arm"]: r["required_completeness_pct"] for r in rows}
+    optional_by_arm = {r["arm"]: r["optional_completeness_pct"] for r in rows}
+    low_required = {a: p for a, p in required_by_arm.items() if p is not None and p < 100.0}
+    if low_required:
+        lines.append(
+            "- ⚠️ telemetry note: required scrape completeness below 100% for "
+            f"{', '.join(f'{a} ({p}%)' for a, p in sorted(low_required.items()))} — this IS "
+            "real data loss on the adas-relevant target, not the known-absent-optional-"
+            "target pattern below; investigate before trusting affected arms' RTT stats."
+        )
+    if any(p is not None for p in optional_by_arm.values()):
+        lines.append(
+            "- telemetry note: optional-target (vxota-probe exporter, 127.0.0.1:9902) "
+            "completeness by arm: "
+            + ", ".join(f"{a} {p}%" for a, p in sorted(optional_by_arm.items()) if p is not None)
+            + " — expected to be low/zero in `baseline` (nothing listens there outside "
+            "`ota-burst` by design; tracked separately via `optional_scrape_targets` and "
+            "does not affect the required-target completeness above)."
+        )
+    lines += [
         "",
         "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | max loss % (lost/sent) | ota deliveries ok/fail (median) | ota delivery p50 ms |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",

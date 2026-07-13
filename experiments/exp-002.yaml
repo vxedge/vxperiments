@@ -3,6 +3,17 @@
 # payload (vxprobe reflector) on the same slice/subnet — container (netns),
 # qemu-microvm, libvirt VM. No competing load: this measures packaging
 # overhead in isolation. Schema: docs/ARCHITECTURE.md §6.1.
+#
+# One node per zone (mirrors exp-002b's pattern) so the runner can bring up
+# exactly one arm's node at a time via `vxedge zone up --vxid <that zone>` —
+# the original exp-002 grouped all three nodes under one zone, which meant
+# `zone up` always started all three backends concurrently even though only
+# one was being measured at a time. That was hardened out of exp-002b after
+# a real concurrent-VM CPU-contention bug (docs/STATUS.md "Anomaly caught
+# and fixed"); this retrofits the same fix here. Same nodes/IPs/backends as
+# before — only the zone grouping changed, which doesn't affect what's
+# measured (gateway endpoint traversal order is unchanged: cont, microvm,
+# libvirt, same as originally).
 experiment:
   id: exp-002
   name: packaging backend latency comparison
@@ -24,8 +35,8 @@ network:
       qos: { min_rate_mbps: 100, max_rate_mbps: 500, priority: 1 }
 
 zones:
-  - id: vxzone-front-left-01
-    name: packaging comparison zone
+  - id: z-cont
+    name: packaging comparison zone (container arm)
     role: front-left
     nodes:
       - id: node-cont-01
@@ -35,6 +46,10 @@ zones:
         backend: container
         network:
           - { iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.11/24 }
+  - id: z-microvm
+    name: packaging comparison zone (microvm arm)
+    role: front-left
+    nodes:
       - id: node-microvm-01
         type: ecu
         function: reflector under qemu-microvm packaging
@@ -42,6 +57,10 @@ zones:
         backend: qemu-microvm
         network:
           - { iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.12/24 }
+  - id: z-libvirt
+    name: packaging comparison zone (libvirt arm)
+    role: front-left
+    nodes:
       - id: node-libvirt-01
         type: ecu
         function: reflector under libvirt full-VM packaging

@@ -11,6 +11,38 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Fixed
+- `exp-002` hardened to isolate one arm at a time (2026-07-13), closing the "known gap" noted
+  in 0.1.0: `exp-002.yaml` restructured from one 3-node zone into one zone per arm
+  (`z-cont`/`z-microvm`/`z-libvirt`); `run-exp-002.sh` retrofitted with exp-002b's
+  `start_arm()`/`stop_arm()` isolation pattern plus every other exp-002b/exp-003 hardening
+  lesson (guarded `vxprobe send`, `tool_versions`/`cpu_pinning`, 10s warmup, surfaced `wait`
+  exit codes); `analyze_exp002.py` now refuses archives missing `isolation=="single-arm"`,
+  reports loss with its lost/sent denominator, and accepts `--out-dir=DIR`. Re-run
+  (2026-07-13, 15 archives, zero loss) **superseded the frozen result**: H3 still holds and
+  the arm ordering is unchanged, but libvirt's latency dropped measurably (p50 74.5→66.3µs,
+  p99 122.8→110.7µs, more than the original's own IQR) once it no longer shared the host
+  with idle container/microvm backends — container and microvm themselves barely moved.
+  Frozen summary updated in place (`results/exp-002/exp-002-summary.md`).
+- `exp-001` second-campaign reproducibility check (2026-07-13): reproducible — 14 of 15
+  median/metric pairs within the original run's IQR, H1 verdict unchanged (0.93x original
+  vs 0.95x rerun). Recorded separately from the frozen original:
+  `results/exp-001/exp-001-repro-check-2026-07-13.md`.
+- `exp-003` second-campaign reproducibility check (2026-07-13): 0 of 6 metric/arm pairs
+  within the original run's IQR (a uniform ~4-7µs downward shift across both arms,
+  same-day) — the weakest of the three reproducibility checks this session, and honestly
+  reported as such. The substantive H4 comparison is unaffected (both arms drifted
+  together; Δp50 -1.4µs original vs -0.7µs rerun, same order of magnitude/sign — **H4
+  still holds**). Reading: within-campaign IQRs bound repetition-to-repetition noise, not
+  cross-session host drift, which this host shows even hours apart on the same day; the
+  comparative hypotheses are robust to it, absolute µs figures from a single campaign are
+  not universal constants. Recorded separately:
+  `results/exp-003/exp-003-repro-check-2026-07-13.md`. Also fixed in the same pass:
+  `analyze_exp003.py`'s telemetry-completeness caveat was a hardcoded "~50%" claim (only
+  true of the pre-`optional_scrape_targets` archives); now computed dynamically per
+  campaign from `ingest/ingest-stats.json`'s required/optional scrape counters — confirmed
+  the schema fix works (this rerun: 100% required-target completeness both arms).
+
 ## [0.1.0] - 2026-07-13
 
 **Phase-1 gate passed**: H1, H3, and H4 all have reproducible numbers. Repos stay
