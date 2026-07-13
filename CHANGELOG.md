@@ -54,11 +54,14 @@ than a repo tag.
   when only a sibling binary's source changed — hit twice running exp-003. Replaced with
   `scripts/lib/freshness.sh`'s per-crate-dependency-graph check, verified against the
   exact regression that motivated it (2026-07-13).
+- Arm-conditional scrape targets: `exp-003.yaml` now declares the OTA burst driver's
+  exporter under the new `telemetry.prometheus.optional_scrape_targets` (see `vxedge`'s
+  and `vxtelemetry`'s CHANGELOGs) instead of as a required target. Future campaigns will
+  show 100% `baseline` completeness instead of the already-frozen, already-explained
+  ~50% figure (2026-07-13).
 
 ### Known gaps
 - `exp-002` still runs its 3 arms concurrently (retrofit to `exp-002b`'s single-arm
   isolation tracked, low priority — its own audit showed zero loss).
 - `exp-001`/`exp-003` don't yet have a formal second-campaign reproducibility check
   (`exp-002b` does).
-- Manifest schema has no arm-conditional telemetry scrape targets (see exp-003's Fixed
-  entry above — currently a documented, explained gap, not a blocker).

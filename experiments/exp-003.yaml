@@ -70,8 +70,11 @@ zones:
 telemetry:
   prometheus:
     scrape_targets:
-      - "127.0.0.1:9801"   # vxprobe live exporter
-      - "127.0.0.1:9902"   # vxota-probe live exporter (ota-burst arm only)
+      - "127.0.0.1:9801"   # vxprobe live exporter (always up)
+    optional_scrape_targets:
+      - "127.0.0.1:9902"   # vxota-probe live exporter — only listens during ota-burst;
+                            # a failed scrape here (baseline arm) doesn't count against
+                            # completeness (docs/ARCHITECTURE.md §6)
 
 results:
   artifact_dir: results/exp-003

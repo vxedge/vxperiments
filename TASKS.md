@@ -78,12 +78,14 @@
       most invocations regardless of relevance, which would reintroduce false positives
       more often than it would catch the rare transitive-dependency-bump case it's meant
       to guard.)
-- [ ] Manifest schema has no arm-conditional `telemetry.prometheus.scrape_targets` — hit
-      by exp-003, whose `baseline` arm has nothing listening on the OTA burst driver's
-      exporter port by design, dragging aggregate vxtelemetry completeness to ~50% (fully
-      explained, not real data loss; the adas-relevant target was 100% complete). Low
-      priority (the analyzer already explains it), but worth fixing before the pattern is
-      copied into a future experiment where it could mask a real completeness problem.
+- [x] Arm-conditional scrape targets fixed (2026-07-13): manifest schema gained
+      `telemetry.prometheus.optional_scrape_targets` (vxedge-core, docs/ARCHITECTURE.md
+      §6); `vxtelemetry` tracks their failures in separate counters that never lower
+      `completeness_pct()`. `exp-003.yaml` now declares the OTA burst driver's exporter
+      there instead of as a required target — future exp-003 campaigns will show 100%
+      completeness on `baseline` archives instead of the ~50% figure the already-frozen
+      2026-07-13 campaign shows (that figure remains correctly explained in
+      `results/exp-003/exp-003-summary.md`, not re-run just for this).
 - [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →

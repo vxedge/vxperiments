@@ -31,7 +31,10 @@ discipline (ARCHITECTURE §12 is the spec; this is the practice).
   (PREEMPT_RT or not), CPU pinning/isolcpus, governor, load average before start, and the
   timestamping method (userspace vs kernel). Missing metadata = invalid run.
 - The host does nothing else during a run. If completeness (vxtelemetry) < 100%, the run is
-  flagged and excluded unless the gap is explained.
+  flagged and excluded unless the gap is explained. If the gap is a target that's expected
+  to be absent under some arms (a service exporter that only runs during one arm, say),
+  declare it under `telemetry.prometheus.optional_scrape_targets` (§6) instead of writing a
+  manual explanation each time — a failed scrape there never lowers completeness.
 
 ## Analysis
 
