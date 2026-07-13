@@ -2,7 +2,10 @@
 # exp-003 campaign runner — ADAS slice SLA under OTA co-location (H4).
 #
 # Run as root from the vxperiments repo root:
-#   sudo -E env "PATH=$PATH" ./scripts/run-exp-003.sh [--quick]
+#   sudo -E env "PATH=$PATH" ./scripts/run-exp-003.sh [--quick|--repro]
+#
+# --repro: full campaign written to results/exp-003-repro-<date>/ — the frozen
+#          results/exp-003/ dir is never overwritten in place (lib/results_dir.sh).
 #
 # --quick: 1 repetition x 2 arms, short windows — pipeline validation only;
 #          sample counts are below tail-percentile support and MUST NOT be
@@ -18,8 +21,12 @@
 # heaviest infotainment-load point.
 set -euo pipefail
 
-QUICK=0
-[[ "${1:-}" == "--quick" ]] && QUICK=1
+QUICK=0; REPRO=0
+for arg in "$@"; do case "$arg" in
+  --quick) QUICK=1 ;;
+  --repro) REPRO=1 ;;
+  *) echo "error: unknown argument '$arg' (supported: --quick, --repro)" >&2; exit 1 ;;
+esac; done
 
 if [[ $(id -u) -ne 0 ]]; then
   echo "error: needs root (CAP_NET_ADMIN) — sudo -E env \"PATH=\$PATH\" $0" >&2
@@ -51,7 +58,8 @@ check_fresh_bin "$WS/vxota" "$VXOTA" "$WS/vxota/crates/vxota"
 check_fresh_bin "$WS/vxota" "$VXOTA_PROBE" "$WS/vxota/crates/vxota-probe"
 
 MANIFEST="$REPO_DIR/experiments/exp-003.yaml"
-RESULTS="$REPO_DIR/results/exp-003"
+source "$REPO_DIR/scripts/lib/results_dir.sh"
+RESULTS="$(resolve_results_dir "$REPO_DIR" exp-003 "$QUICK" "$REPRO")"
 RUNTIME=$(mktemp -d /tmp/exp-003.XXXXXX)
 SOCK="$RUNTIME/vxedge.sock"
 

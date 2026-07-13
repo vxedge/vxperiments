@@ -65,6 +65,12 @@
       counters, confirming the schema fix works (this rerun: 100% required-target
       completeness both arms, optional-target completeness 0%/100% baseline/ota-burst
       exactly as designed).
+- [x] Frozen-campaign protection in every runner (2026-07-13): `lib/results_dir.sh` —
+      full runs refuse a results dir already holding archives; `--repro` writes to
+      `results/<exp>-repro-<date>/`, `--quick` to `results/<exp>-quick/`. Root cause:
+      exp-003's original archives were overwritten in place by its repro rerun, losing
+      the original manifest digest to a truncated summary prefix (docs/STATUS.md risk
+      item). Behavior-tested against the live tree; shellcheck-clean.
 - [ ] CI: manifest-validation on every PR (`vxedge manifest validate` over experiments/ and
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions

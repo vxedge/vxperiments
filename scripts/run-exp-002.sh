@@ -2,7 +2,10 @@
 # exp-002 campaign runner — packaging backend vs latency (H3).
 #
 # Run as root from the vxperiments repo root:
-#   sudo -E env "PATH=$PATH" ./scripts/run-exp-002.sh [--quick]
+#   sudo -E env "PATH=$PATH" ./scripts/run-exp-002.sh [--quick|--repro]
+#
+# --repro: full campaign written to results/exp-002-repro-<date>/ — the frozen
+#          results/exp-002/ dir is never overwritten in place (lib/results_dir.sh).
 #
 # --quick: 1 repetition, short windows — pipeline/backend validation only
 #          (also the first privileged exercise of the microvm/libvirt backends).
@@ -19,8 +22,12 @@
 # so each arm can be brought up and torn down independently.
 set -euo pipefail
 
-QUICK=0
-[[ "${1:-}" == "--quick" ]] && QUICK=1
+QUICK=0; REPRO=0
+for arg in "$@"; do case "$arg" in
+  --quick) QUICK=1 ;;
+  --repro) REPRO=1 ;;
+  *) echo "error: unknown argument '$arg' (supported: --quick, --repro)" >&2; exit 1 ;;
+esac; done
 
 if [[ $(id -u) -ne 0 ]]; then
   echo "error: needs root (CAP_NET_ADMIN) — sudo -E env \"PATH=\$PATH\" $0" >&2
@@ -49,7 +56,8 @@ check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
 MANIFEST="$REPO_DIR/experiments/exp-002.yaml"
-RESULTS="$REPO_DIR/results/exp-002"
+source "$REPO_DIR/scripts/lib/results_dir.sh"
+RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002 "$QUICK" "$REPRO")"
 RUNTIME=$(mktemp -d /tmp/exp-002.XXXXXX)
 SOCK="$RUNTIME/vxedge.sock"
 

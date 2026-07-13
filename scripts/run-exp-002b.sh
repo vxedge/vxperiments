@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # exp-002b campaign runner — H3 decomposition + per-arm resource cost.
-#   sudo -E env "PATH=$PATH" ./scripts/run-exp-002b.sh [--quick]
+#   sudo -E env "PATH=$PATH" ./scripts/run-exp-002b.sh [--quick|--repro]
+# --repro: full campaign to results/exp-002b-repro-<date>/ — the frozen
+#          results/exp-002b/ dir is never overwritten in place (lib/results_dir.sh).
 # Arms (identical payload/kernel/1vCPU/128MiB):
 #   container      platform netns backend (baseline)
 #   microvm-mmio   platform qemu-microvm backend (virtio-mmio)
@@ -12,7 +14,12 @@
 # microvm-pci; vhost = q35-vhost vs q35-pci; management = libvirt-q35 vs q35-pci.
 set -euo pipefail
 
-QUICK=0; [[ "${1:-}" == "--quick" ]] && QUICK=1
+QUICK=0; REPRO=0
+for arg in "$@"; do case "$arg" in
+  --quick) QUICK=1 ;;
+  --repro) REPRO=1 ;;
+  *) echo "error: unknown argument '$arg' (supported: --quick, --repro)" >&2; exit 1 ;;
+esac; done
 [[ $(id -u) -eq 0 ]] || { echo "error: needs root — sudo -E env \"PATH=\$PATH\" $0" >&2; exit 1; }
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"; WS="$(dirname "$REPO_DIR")"
@@ -34,7 +41,8 @@ check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
 MANIFEST="$REPO_DIR/experiments/exp-002b.yaml"
-RESULTS="$REPO_DIR/results/exp-002b"
+source "$REPO_DIR/scripts/lib/results_dir.sh"
+RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002b "$QUICK" "$REPRO")"
 RUNTIME=$(mktemp -d /tmp/exp-002b.XXXXXX); SOCK="$RUNTIME/vxedge.sock"
 
 # arm -> addr | tap (for runner-QEMU arms) | resource-match regex
