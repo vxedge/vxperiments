@@ -27,14 +27,11 @@ done
   exit 1
 }
 
-check_fresh() {
-  local newer
-  newer=$(find "$1" \( -name '*.rs' -o -name 'Cargo.toml' -o -name '*.proto' \) \
-            -not -path '*/target/*' -newer "$2" -print -quit 2>/dev/null)
-  [[ -z "$newer" ]] || { echo "error: $2 older than $newer — rebuild + touch as your user" >&2; exit 1; }
-}
-check_fresh "$WS/vxedge" "$VXEDGED"; check_fresh "$WS/vxagents" "$VXPROBE"
-check_fresh "$WS/vxtelemetry" "$VXTELEMETRY"
+source "$REPO_DIR/scripts/lib/freshness.sh"
+check_fresh_bin "$WS/vxedge" "$VXEDGED" "$WS/vxedge/crates/vxedged" "$WS/vxedge/proto"
+check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedge/proto"
+check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
+check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
 MANIFEST="$REPO_DIR/experiments/exp-002b.yaml"
 RESULTS="$REPO_DIR/results/exp-002b"

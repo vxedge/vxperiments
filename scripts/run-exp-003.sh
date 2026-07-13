@@ -38,24 +38,17 @@ for bin in "$VXEDGED" "$VXEDGE" "$VXPROBE" "$VXTELEMETRY" "$VXOTA" "$VXOTA_PROBE
   [[ -x "$bin" ]] || { echo "error: missing $bin — cargo build each repo first" >&2; exit 1; }
 done
 
-# Staleness gate: any source file newer than the binary means someone edited
-# code without rebuilding — refuse rather than measure with stale code.
-check_fresh() { # $1=repo dir, $2=binary
-  local newer
-  newer=$(find "$1" \( -name '*.rs' -o -name 'Cargo.toml' -o -name 'Cargo.lock' -o -name '*.proto' \) \
-            -not -path '*/target/*' -newer "$2" -print -quit 2>/dev/null)
-  if [[ -n "$newer" ]]; then
-    echo "error: $2 is older than source file $newer — rebuild (as your user, not root):" >&2
-    echo "       cd $1 && cargo build --workspace && touch $2" >&2
-    exit 1
-  fi
-}
-check_fresh "$WS/vxedge" "$VXEDGED"
-check_fresh "$WS/vxedge" "$VXEDGE"
-check_fresh "$WS/vxagents" "$VXPROBE"
-check_fresh "$WS/vxtelemetry" "$VXTELEMETRY"
-check_fresh "$WS/vxota" "$VXOTA"
-check_fresh "$WS/vxota" "$VXOTA_PROBE"
+# Staleness gate: any source file a binary actually depends on (per-crate,
+# not whole-repo — see scripts/lib/freshness.sh) newer than the binary means
+# someone edited code without rebuilding — refuse rather than measure with
+# stale code.
+source "$REPO_DIR/scripts/lib/freshness.sh"
+check_fresh_bin "$WS/vxedge" "$VXEDGED" "$WS/vxedge/crates/vxedged" "$WS/vxedge/proto"
+check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedge/proto"
+check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
+check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
+check_fresh_bin "$WS/vxota" "$VXOTA" "$WS/vxota/crates/vxota"
+check_fresh_bin "$WS/vxota" "$VXOTA_PROBE" "$WS/vxota/crates/vxota-probe"
 
 MANIFEST="$REPO_DIR/experiments/exp-003.yaml"
 RESULTS="$REPO_DIR/results/exp-003"

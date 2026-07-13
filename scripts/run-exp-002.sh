@@ -38,20 +38,11 @@ done
   exit 1
 }
 
-check_fresh() { # $1=repo dir, $2=binary  (source-mtime staleness gate)
-  local newer
-  newer=$(find "$1" \( -name '*.rs' -o -name 'Cargo.toml' -o -name 'Cargo.lock' -o -name '*.proto' \) \
-            -not -path '*/target/*' -newer "$2" -print -quit 2>/dev/null)
-  if [[ -n "$newer" ]]; then
-    echo "error: $2 is older than source file $newer — rebuild (as your user):" >&2
-    echo "       cd $1 && cargo build --workspace && touch $2" >&2
-    exit 1
-  fi
-}
-check_fresh "$WS/vxedge" "$VXEDGED"
-check_fresh "$WS/vxedge" "$VXEDGE"
-check_fresh "$WS/vxagents" "$VXPROBE"
-check_fresh "$WS/vxtelemetry" "$VXTELEMETRY"
+source "$REPO_DIR/scripts/lib/freshness.sh"
+check_fresh_bin "$WS/vxedge" "$VXEDGED" "$WS/vxedge/crates/vxedged" "$WS/vxedge/proto"
+check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedge/proto"
+check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
+check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
 MANIFEST="$REPO_DIR/experiments/exp-002.yaml"
 RESULTS="$REPO_DIR/results/exp-002"

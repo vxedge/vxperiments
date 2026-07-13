@@ -65,15 +65,19 @@
 - [ ] `exp-002` hardening: retrofit the same single-arm isolation the exp-002b incident
       forced (currently 3 arms run concurrently per rep; the frozen H3 result was clean
       but that was not guaranteed by the runner's design — verify or re-run isolated)
-- [ ] `check_fresh()` (shared across run-exp-*.sh) does a whole-repo staleness check
-      against each individual binary, which false-positives on multi-binary repos when
-      only one binary's source changed (hit twice running exp-003: vxedge-core edits
-      flagged the unrelated `vxedge` CLI binary; vxota-probe edits flagged the unrelated
-      `vxota` server binary — neither actually depends on the changed file, confirmed by
-      `cargo build --workspace` correctly relinking only the binary that did). Low
-      priority — the gate errs safe (blocks on stale-looking code, never measures with
-      genuinely stale code), the workaround is a documented `touch`; a real fix needs
-      per-binary dependency-graph awareness, not just a repo-wide file scan.
+- [x] `check_fresh()` whole-repo false-positive fixed (2026-07-13): extracted
+      `scripts/lib/freshness.sh`'s `check_fresh_bin()`, shared by all four run-exp-*.sh
+      scripts, which walks each crate's *actual* local path dependencies (parsed from its
+      own Cargo.toml, recursively) instead of scanning the whole repo. Verified against
+      the exact regression that motivated it: touching `vxota-probe`'s source no longer
+      flags the unrelated `vxota` server binary, while still correctly catching real
+      staleness. Also closed a smaller, previously-noted gap while consolidating:
+      `run-exp-002b.sh`'s `check_fresh` never covered the `vxedge` CLI binary at all
+      (only `vxedged`), despite the script calling it throughout — now covered like the
+      others. (Deliberately does *not* check `Cargo.lock`'s mtime — cargo touches it on
+      most invocations regardless of relevance, which would reintroduce false positives
+      more often than it would catch the rare transitive-dependency-bump case it's meant
+      to guard.)
 - [ ] Manifest schema has no arm-conditional `telemetry.prometheus.scrape_targets` — hit
       by exp-003, whose `baseline` arm has nothing listening on the OTA burst driver's
       exporter port by design, dragging aggregate vxtelemetry completeness to ~50% (fully

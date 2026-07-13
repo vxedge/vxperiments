@@ -21,8 +21,6 @@ than a repo tag.
 - `exp-002b` (H3 decomposition): full isolated campaign 2026-07-12, 5 reps x 6 arms.
   Decomposed the exp-002 finding: not machine type, but virtio transport (dominant),
   vhost-net, and management-layer defaults.
-- Analysis notebooks (`analyze_exp001.py`/`analyze_exp002.py`/`analyze_exp002b.py`):
-  archive-only, percentile tables + IQR, decomposition verdicts, headless/CI-runnable.
 - `exp-003` (H4, OTA co-location): full campaign 2026-07-13, 5 reps x 2 arms, zero loss
   both arms. **H4 HOLDS** — adas p50 45.8µs under a sustained OTA delivery burst
   (~355 successful deliveries/rep, zero failures) vs 47.2µs baseline, well within IQR.
@@ -31,6 +29,8 @@ than a repo tag.
 - Analysis notebooks (`analyze_exp001.py`/`analyze_exp002.py`/`analyze_exp002b.py`/
   `analyze_exp003.py`): archive-only, percentile tables + IQR, decomposition/comparison
   verdicts, headless/CI-runnable.
+- `scripts/lib/freshness.sh`: shared per-binary staleness check used by all four
+  run-exp-*.sh campaign runners (2026-07-13).
 
 ### Fixed
 - exp-002b's first campaign attempt ran all 6 arms concurrently, causing CPU-contention-
@@ -49,6 +49,11 @@ than a repo tag.
   listening during that arm by design — not real data loss (the adas-relevant target was
   100% complete every repetition). Explained directly in the analyzer output; no re-run
   needed (2026-07-13).
+- `check_fresh()` (duplicated in every run-exp-*.sh) compared any source file in the
+  *whole repo* against each individual binary, false-positiving on multi-binary repos
+  when only a sibling binary's source changed — hit twice running exp-003. Replaced with
+  `scripts/lib/freshness.sh`'s per-crate-dependency-graph check, verified against the
+  exact regression that motivated it (2026-07-13).
 
 ### Known gaps
 - `exp-002` still runs its 3 arms concurrently (retrofit to `exp-002b`'s single-arm
