@@ -15,6 +15,11 @@
 # job is "everything green", and the runners' own error messages say the fix.
 set -uo pipefail
 
+if [[ $# -gt 0 ]]; then
+  echo "error: unknown argument(s) '$*' — smoke always runs the quick profile of every experiment; full/--repro campaigns are run per-experiment, deliberately" >&2
+  exit 1
+fi
+
 if [[ $(id -u) -ne 0 ]]; then
   echo "error: needs root (the runners provision real gateways) — sudo -E env \"PATH=\$PATH\" $0" >&2
   exit 1
