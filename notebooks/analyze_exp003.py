@@ -286,7 +286,11 @@ def main():
         lines.append("- UNRELIABLE — loss anomaly in one or both arms; re-run before drawing a conclusion")
     else:
         delta = round(burst["p50_us"] - baseline["p50_us"], 1)
-        threshold = max(baseline["p50_iqr_us"], burst["p50_iqr_us"], 1.0)
+        # Quick profile: single rep => degenerate IQR; floor at the quick-noise
+        # band (10 µs). Full campaigns keep the IQR-based threshold.
+        threshold = max(
+            baseline["p50_iqr_us"], burst["p50_iqr_us"], 10.0 if quick else 1.0
+        )
         # One-sided by construction: H4 claims the burst does not COMPROMISE
         # the SLA, so only burst-slower-than-baseline beyond the threshold is
         # a violation. Burst faster than baseline is session noise (this host

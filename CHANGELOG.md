@@ -11,7 +11,24 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Added
+- `scripts/run-smoke.sh` (2026-07-14): every experiment's `--quick` pipeline + analyzer,
+  chained, ~4 min, single PASS/FAIL summary; rejects unknown args; hands quick dirs back
+  to the invoking user. First two owner-run executions: SMOKE PASS both.
+- Frozen-campaign protection (2026-07-14, `scripts/lib/results_dir.sh`): full runs refuse
+  a results dir holding archives; `--repro` → `results/<exp>-repro-<date>/`, `--quick` →
+  `results/<exp>-quick/`. Root cause: exp-003's original archives were overwritten in
+  place by its repro rerun.
+
 ### Fixed
+- Verdict noise-hardening from the first live smoke runs (2026-07-14):
+  `analyze_exp003.py`'s H4 verdict is now one-sided (burst *faster* than baseline is
+  session drift, never a violation — the sign-blind check printed a false
+  "DOES NOT HOLD"); all three verdict-printing analyzers floor their threshold at the
+  10 µs quick-noise band under quick profiles (a +5.2 µs machine-type delta had printed
+  "MATTERS", contradicting the full campaigns' headline "no effect" finding). Full
+  campaigns keep IQR-based thresholds unchanged. `run-exp-001/003` use
+  `ip addr replace` (idempotent) for experiment IPs.
 - `exp-002` hardened to isolate one arm at a time (2026-07-13), closing the "known gap" noted
   in 0.1.0: `exp-002.yaml` restructured from one 3-node zone into one zone per arm
   (`z-cont`/`z-microvm`/`z-libvirt`); `run-exp-002.sh` retrofitted with exp-002b's

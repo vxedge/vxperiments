@@ -171,7 +171,11 @@ def main():
             r["arm"]
             for r in rows
             if r["arm"] != baseline["arm"]
-            and abs(r["p50_us"] - baseline["p50_us"]) > max(baseline["p50_iqr_us"], 1.0)
+            # Quick profile: single rep => degenerate IQR; floor at the quick-noise
+            # band (10 µs: session drift 4-7 µs + single-rep scatter) so verdicts
+            # don't flip on noise. Full campaigns keep the IQR-based threshold.
+            and abs(r["p50_us"] - baseline["p50_us"])
+            > max(baseline["p50_iqr_us"], 10.0 if quick else 1.0)
         ]
         if distinguishable:
             lines.append(

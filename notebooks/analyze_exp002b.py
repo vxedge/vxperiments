@@ -228,7 +228,10 @@ def main():
             )
             continue
         delta = round(a["p50_us"] - b["p50_us"], 1)
-        threshold = max(a["p50_iqr_us"], b["p50_iqr_us"], 1.0)
+        # Quick profile: single rep => degenerate IQR; floor at the quick-noise
+        # band (10 µs) so decomposition verdicts don't flip on session noise
+        # (bit on 2026-07-14: machine printed MATTERS at +5.2 µs quick-noise).
+        threshold = max(a["p50_iqr_us"], b["p50_iqr_us"], 10.0 if quick else 1.0)
         holds = abs(delta) > threshold
         verdict = (
             f"MATTERS (Δp50 {delta:+} µs, exceeds IQR {threshold} µs)"
