@@ -137,9 +137,9 @@ for rep in $(seq 1 "$REPS"); do
     echo "-- $tag: gateway + ota service up"
     "${VXEDGE_C[@]}" up --manifest "$MANIFEST" >/dev/null
 
-    ip addr add 10.101.0.2/24 dev vzp0 && ip link set vzp0 up
+    ip addr replace 10.101.0.2/24 dev vzp0 && ip link set vzp0 up
     ip link add link vxup0p name vxup0p.101 type vlan id 101
-    ip addr add 10.101.0.1/24 dev vxup0p.101 && ip link set vxup0p.101 up
+    ip addr replace 10.101.0.1/24 dev vxup0p.101 && ip link set vxup0p.101 up
     ip link set vxup0p up
 
     "${VXEDGE_C[@]}" ota up --experiment "$MANIFEST" >/dev/null

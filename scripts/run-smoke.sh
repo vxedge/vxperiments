@@ -51,6 +51,15 @@ step "exp-002b analyze"            python3 notebooks/analyze_exp002b.py results/
 step "exp-003 quick (H4 pipeline)" ./scripts/run-exp-003.sh --quick
 step "exp-003 analyze"             python3 notebooks/analyze_exp003.py results/exp-003-quick
 
+# The runners chown their archives back to the invoking user, but the
+# analyzers above ran as root and re-created summary files root-owned —
+# hand the whole quick dirs back so unprivileged re-analysis works.
+if [[ -n "${SUDO_UID:-}" ]]; then
+  for d in results/*-quick; do
+    [[ -d "$d" ]] && chown -R "$SUDO_UID:${SUDO_GID:-$SUDO_UID}" "$d"
+  done
+fi
+
 echo
 echo "=== smoke summary"
 for r in "${RESULTS[@]}"; do echo "  $r"; done

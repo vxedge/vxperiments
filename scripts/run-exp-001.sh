@@ -115,12 +115,12 @@ for rep in $(seq 1 "$REPS"); do
     "$VXEDGE" --endpoint "unix://$SOCK" up --manifest "$MANIFEST" >/dev/null
 
     # Experiment IP wiring (fresh each cycle; interfaces are recreated by up).
-    ip addr add 10.101.0.2/24 dev vzp0 && ip link set vzp0 up
-    ip addr add 10.103.0.2/24 dev vzp1 && ip link set vzp1 up
+    ip addr replace 10.101.0.2/24 dev vzp0 && ip link set vzp0 up
+    ip addr replace 10.103.0.2/24 dev vzp1 && ip link set vzp1 up
     ip link add link vxup0p name vxup0p.101 type vlan id 101
     ip link add link vxup0p name vxup0p.103 type vlan id 103
-    ip addr add 10.101.0.1/24 dev vxup0p.101 && ip link set vxup0p.101 up
-    ip addr add 10.103.0.1/24 dev vxup0p.103 && ip link set vxup0p.103 up
+    ip addr replace 10.101.0.1/24 dev vxup0p.101 && ip link set vxup0p.101 up
+    ip addr replace 10.103.0.1/24 dev vxup0p.103 && ip link set vxup0p.103 up
     ip link set vxup0p up
 
     INGEST="$RUNTIME/ingest-$tag"
