@@ -1,1 +1,3 @@
 results/**/*.zip
+results/*-quick/
+results/*-repro-*/
