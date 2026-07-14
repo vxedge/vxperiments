@@ -71,6 +71,10 @@
       exp-003's original archives were overwritten in place by its repro rerun, losing
       the original manifest digest to a truncated summary prefix (docs/STATUS.md risk
       item). Behavior-tested against the live tree; shellcheck-clean.
+- [x] `scripts/run-smoke.sh` (2026-07-14): H* pipeline smoke — every experiment's
+      `--quick` mode + analyzer, chained, ~5 min total, single PASS/FAIL summary. Keeps
+      the H1/H3/H4 pipelines verifiably alive after any change; full campaigns and
+      `--repro` reruns stay deliberate/manual (idle host, methodology skill)
 - [ ] CI: manifest-validation on every PR (`vxedge manifest validate` over experiments/ and
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
