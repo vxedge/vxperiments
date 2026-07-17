@@ -3,8 +3,23 @@
 # exp-001's own frozen numbers, per the model's own doc comment — no
 # same-day rerun needed).
 #
-# Run as root from the vxperiments repo root:
-#   sudo -E env "PATH=$PATH" ./scripts/run-exp-010.sh [--quick|--repro]
+# Run as your normal user (NOT under sudo) from the vxperiments repo root:
+#   ./scripts/run-exp-010.sh [--quick|--repro]
+#
+# **Do not run this script itself under `sudo`** — unlike run-exp-001.sh
+# (pure VLAN/HTB, no podman involved), this campaign brings up the real 5G
+# core via podman. Running the whole process as root switches podman to
+# root's own separate rootless identity/storage, which never had
+# `vx5g-core`/`vx5g-ran` built into it (`podman build` was run as your own
+# user) — `podman run vx5g-core` under root then fails trying to resolve
+# "vx5g-core" as a short registry name instead of finding the local image.
+# Exactly the same trap documented in
+# crates/vxedge-core/tests/fiveg_podman.rs's own module comment. Host
+# networking (bridge/vlan/route) still needs CAP_NET_ADMIN regardless —
+# `gateway::Shell`'s escalated calls shell out to `sudo ip`/`sudo bridge`
+# internally, scoped to just those calls, so this script caches a sudo
+# credential up front (`sudo -v`) rather than running the whole thing as
+# root.
 #
 # --repro/--quick: same meaning as run-exp-001.sh (lib/results_dir.sh).
 # default: 5 repetitions x 5 load levels, 10s warmup + 60s measured probe
@@ -50,10 +65,16 @@ for arg in "$@"; do case "$arg" in
   *) echo "error: unknown argument '$arg' (supported: --quick, --repro)" >&2; exit 1 ;;
 esac; done
 
-if [[ $(id -u) -ne 0 ]]; then
-  echo "error: needs root (CAP_NET_ADMIN) — sudo -E env \"PATH=\$PATH\" $0" >&2
+if [[ $(id -u) -eq 0 ]]; then
+  echo "error: do not run this script itself under sudo/as root (see header comment)" >&2
+  echo "       — run as your normal user; it caches a sudo credential for the network ops it needs" >&2
   exit 1
 fi
+
+# Cache a sudo credential so Shell's internal escalated calls (bridge/vlan/
+# route provisioning, entering pod netns) don't block on a password prompt
+# partway through a run.
+sudo -v
 
 # --- locations (meta-workspace layout: repos side by side) -------------------
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -185,10 +206,6 @@ for rep in $(seq 1 "$REPS"); do
     echo "   archived $RESULTS/$tag.zip (p99=${p99}us loss=${loss}%)"
   done
 done
-
-if [[ -n "${SUDO_UID:-}" ]]; then
-  chown -R "$SUDO_UID:${SUDO_GID:-$SUDO_UID}" "$RESULTS"
-fi
 
 echo "== campaign complete: $(ls "$RESULTS"/*.zip | wc -l) archives in $RESULTS"
 echo "== analyze: python3 notebooks/analyze_exp010.py $RESULTS --baseline results/exp-001"
