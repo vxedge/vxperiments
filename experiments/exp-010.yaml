@@ -1,0 +1,117 @@
+# exp-010 — H2: real S-NSSAI slicing vs static VLAN mapping, snssai arm.
+# Hand-derived from vxmodels/models/experiments/exp-010-h2-real-slicing.sysml
+# (Exp010RealSlicingComparison) — diffed field-by-field against exp-001.yaml
+# below every place they should agree, per the sysml-authoring skill's
+# verification-loop rule. Schema: docs/ARCHITECTURE.md §6.1.
+#
+# The model's own doc comment is explicit that the vlan arm of this
+# comparison *is* exp-001 itself: identical topology, identical probe
+# methodology, identical campaign profile (reps/warmup/window/pps/loads) —
+# only the slice-provisioning mechanism differs, so exp-001's already-frozen
+# numbers serve as the vlan-arm baseline without a same-day rerun. This
+# manifest therefore covers only the snssai arm: `network.slices` are
+# `mode: s-nssai` (real Open5GS+UERANSIM PDU sessions, vxedge-core::fiveg)
+# instead of `mode: vlan`+HTB, everything else copied unchanged from
+# exp-001.yaml.
+#
+# Diff against exp-001.yaml, field by field:
+#   - network.slices: mode vlan+vlan-id+qos -> mode s-nssai+s_nssai (sst/sd)
+#     per slice; same two slice ids (adas, infotainment), same order (fiveg
+#     assigns UE subnets by declaration order: adas -> 10.46.0.0/16,
+#     infotainment -> 10.47.0.0/16).
+#   - zones/nodes: identical ids/roles/functions; NodeIface drops `vlan:`
+#     (s-nssai slices aren't VLAN-tagged) but keeps the same `slice:`
+#     binding — the node is a logical placeholder for TrafficPlan's
+#     zone:node -> slice_id resolution, same as exp-001; the actual traffic
+#     endpoint is a fiveg-managed UE pod, not a zone-provisioned container
+#     (proven live 2026-07-17, docs/STATUS.md "TrafficService live end to
+#     end").
+#   - traffic_profiles: exp-001 has the probe SOURCE on the adas node and
+#     TARGET `internet` (host-side uplink reflector) because vlan transport
+#     addresses are provisioned host-side. s-nssai targets work the other
+#     way — the UE is the only endpoint whose reflector needs to run
+#     somewhere (fiveg::ue_probe_up, inside the UE's own pod); a plain
+#     host-side reflector for a UE-bound probe would reintroduce the
+#     UE-netns 0.0.0.0-bind bug ue_probe_up already fixes (docs/STATUS.md,
+#     "UDP reply-routing" bug writeup). So source/target are flipped from
+#     exp-001: `source: internet`, `target: <zone>:<node>` for both
+#     profiles — exactly the shape live-verified as `h2-probe` in
+#     `crates/vxedge-core/tests/traffic_podman.rs`. `payload_bytes` carried
+#     over unchanged (not yet wired into vxprobe/vxtraffic's own CLI args,
+#     same limitation exp-001 already has).
+#   - Everything else (duration_s, results_prefix, network.defaults.bandwidth
+#     root rate, telemetry scrape target) copied verbatim.
+experiment:
+  id: exp-010
+  name: H2 real S-NSSAI slicing vs static VLAN mapping — snssai arm
+  description: >
+    H2: identical topology and probe methodology to exp-001 (adas p99 RTT
+    near baseline while infotainment is driven from idle to overload), but
+    network.slices are now real S-NSSAI PDU sessions over Open5GS+UERANSIM
+    (vxedge-core::fiveg) instead of VLAN/HTB. The vlan arm of this
+    comparison is exp-001 itself — same mechanism, frozen numbers, no
+    separate baseline campaign needed. Probe: 1000 pps UDP round-trips
+    against the adas UE's own reflector (fiveg::ue_probe_up). Load:
+    vxtraffic against the infotainment UE, swept per campaign profile
+    (0/100/250/400/600 mbit offered; root rate 500 mbit. H2 holds if the
+    snssai arm's adas p95/p99 isolation is at least as good as, and under
+    contention measurably better than, exp-001's vlan-arm numbers
+    (docs/ARCHITECTURE.md §2 H2, §12 analysis plan).
+  duration_s: 60
+  results_prefix: results/exp-010
+
+network:
+  defaults:
+    bandwidth: 500000000        # 500 mbit root rate — same shared bottleneck framing as exp-001
+  slices:
+    - id: adas
+      mode: s-nssai
+      s_nssai: { sst: 1, sd: '000001' }
+    - id: infotainment
+      mode: s-nssai
+      s_nssai: { sst: 2, sd: '000002' }
+
+zones:
+  - id: vxzone-front-left-01
+    name: front-left ADAS zone
+    role: front-left
+    nodes:
+      - id: node-adas-probe-01
+        type: ecu
+        function: ADAS-representative UE (vxprobe reflector runs inside its own pod, ue_probe_up)
+        image: { url: local/vxprobe:host-process, kind: container }
+        backend: container
+        network:
+          - { iface: eth0, slice: adas }
+  - id: vxzone-rear-left-01
+    name: rear-left infotainment zone
+    role: rear-left
+    nodes:
+      - id: node-infot-load-01
+        type: infotainment
+        function: infotainment-representative UE (vxtraffic load sink)
+        image: { url: local/vxtraffic:host-process, kind: container }
+        backend: container
+        network:
+          - { iface: eth0, slice: infotainment }
+
+traffic_profiles:
+  adas-probe:
+    source: internet
+    target: vxzone-front-left-01:node-adas-probe-01
+    pps: 1000
+    payload_bytes: 64
+  infotainment-load:
+    source: internet
+    target: vxzone-rear-left-01:node-infot-load-01
+    bandwidth_mbps: 400             # nominal; the campaign sweeps 0..600 (run-exp-010.sh)
+    payload_bytes: 1200
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"            # vxprobe live exporter
+
+results:
+  artifact_dir: results/exp-010
+  upload: false

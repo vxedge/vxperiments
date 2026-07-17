@@ -139,7 +139,42 @@
       completeness on `baseline` archives instead of the ~50% figure the already-frozen
       2026-07-13 campaign shows (that figure remains correctly explained in
       `results/exp-003/exp-003-summary.md`, not re-run just for this).
-- [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared
+- [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared.
+      **Not yet run — mechanism, manifest, and runner are ready** (2026-07-17). Modeled
+      model-first (`vxmodels/models/experiments/exp-010-h2-real-slicing.sysml`,
+      `Exp010RealSlicingComparison`); the model's own doc comment is explicit the vlan arm
+      of this comparison is exp-001 itself (identical mechanism, already-frozen numbers, no
+      same-day rerun) — this campaign covers only the snssai arm.
+      `experiments/exp-010.yaml` hand-derived from the model (diffed field-by-field against
+      `exp-001.yaml` in its own header comment, per the sysml-authoring skill's verification-
+      loop rule): identical topology/probe methodology, `network.slices` real `s-nssai`
+      instead of `vlan`+HTB, `traffic_profiles` source/target flipped from exp-001 (UE is the
+      target/reflector side, matching how `ue_probe_up` actually has to run — a plain
+      host-side reflector for a UE-bound probe would reintroduce the UE-netns 0.0.0.0-bind
+      bug it exists to fix). Confirmed to resolve cleanly through the real `GatewayPlan`/
+      `FiveGPlan`/`TrafficPlan` stack (not just schema-valid) before committing.
+      `scripts/run-exp-010.sh` built mirroring `run-exp-001.sh`'s structure (freshness gate,
+      `--quick`/`--repro`, frozen-results protection) but driven entirely through real vxAPI
+      RPCs (`vxedge up`, `vxedge traffic up --profile`) — no raw `ip addr`/`ip link add`
+      anywhere, the engineering bar this campaign was explicitly built to clear. Found and
+      fixed one real `TrafficService` gap while wiring the runner: `profile_up` never passed
+      `--duration-s`/`--payload-bytes` to the spawned `vxprobe`/`vxtraffic` processes, so
+      every profile silently used the tool's own 10s default regardless of the manifest's
+      `experiment.duration_s` — would have under-sampled H2's 60s-window tail percentiles
+      exactly the way `experiment-methodology` warns against. Fixed: `TrafficSvc::up` now
+      reads `experiment.duration_s` and threads it (and `ResolvedProfile.payload_bytes`,
+      previously resolved but silently unused) into the spawn args — `vxedge/TASKS.md` has
+      the full account. Since `TrafficUpRequest` has no per-call rate/duration override, the
+      runner generates two small manifest variants per rep×load (different
+      `experiment.duration_s` for the load phase vs. the probe phase, mirroring exp-001's own
+      `WARMUP_S+PROBE_S+4` vs. `PROBE_S` split) — every archived `manifest.yaml` still records
+      the canonical, unmodified `exp-010.yaml`'s checksum, not a variant's. `notebooks/
+      analyze_exp010.py` built alongside (same shape as `analyze_exp001.py`, plus a
+      `--baseline results/exp-001` comparison table and H2 verdict). All of the above smoke-
+      tested (manifest validation, real plan resolution, sed-generated variants, analyzer on
+      synthetic archives) — the actual live campaign (`sudo -E env "PATH=$PATH"
+      ./scripts/run-exp-010.sh`, 5 reps × 5 loads, real podman/5G core, ~45–90 min) has not
+      run yet since it needs root and takes real wall-clock time
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
