@@ -202,6 +202,31 @@ def main():
                 f"- **H2 {'HOLDS' if held else 'DOES NOT HOLD'}** on this host"
                 + (" (quick profile — indicative only)" if quick else "")
             )
+            if not held and not quick:
+                verdict_lines += [
+                    "",
+                    "### Root cause (code-verified, not just observed)",
+                    "",
+                    "`vxedge-core::fiveg::subscriber` hardcodes an identical QCI/5QI=9, "
+                    "ARP priority_level=8, and 1 Gbps AMBR for *every* subscriber and *every* "
+                    "slice — confirmed by inspecting `subscriber.rs`'s rendered MongoDB "
+                    "documents; `render_smf`/`render_upf` in `render.rs` never reference the "
+                    "manifest's `Slice.qos` block at all (`grep` for `qos`/`5qi`/`ambr` across "
+                    "`fiveg/render.rs` returns nothing). The vlan arm's isolation, by contrast, "
+                    "comes from real HTB priority + min/max rate enforcement at the kernel "
+                    "queueing layer (`gateway::provision::apply_slices`). So the two arms are "
+                    "not actually comparing \"static VLAN mapping\" vs \"real S-NSSAI slicing\" "
+                    "on equal terms yet — they're comparing \"VLAN mapping *with* enforced QoS\" "
+                    "vs \"S-NSSAI slicing *without* any QoS differentiation\" (real separate "
+                    "PDU sessions/signaling, but both slices' traffic still competes "
+                    "undifferentiated for the same gNB/UPF forwarding path). This is a real, "
+                    "previously-undocumented gap distinct from the already-tracked URSP-style "
+                    "`slice_policy` item (that one is about UE-side multi-session routing, not "
+                    "network-side QoS enforcement) — closing it (per-slice 5QI/ARP/AMBR from "
+                    "`Slice.qos`, rendered into each slice's subscriber/SMF/UPF config) is a "
+                    "precondition for a fair H2 test, not evidence against the hypothesis "
+                    "itself.",
+                ]
         lines += verdict_lines
     else:
         lines += [

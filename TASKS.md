@@ -139,42 +139,43 @@
       completeness on `baseline` archives instead of the ~50% figure the already-frozen
       2026-07-13 campaign shows (that figure remains correctly explained in
       `results/exp-003/exp-003-summary.md`, not re-run just for this).
-- [ ] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared.
-      **Not yet run — mechanism, manifest, and runner are ready** (2026-07-17). Modeled
-      model-first (`vxmodels/models/experiments/exp-010-h2-real-slicing.sysml`,
+- [x] `exp-010` — H2: identical topology, `mode: vlan` vs `mode: s-nssai` slices compared.
+      **Campaign complete, real numbers in hand (2026-07-18): H2 DOES NOT HOLD as measured,
+      root cause identified.** Modeled model-first
+      (`vxmodels/models/experiments/exp-010-h2-real-slicing.sysml`,
       `Exp010RealSlicingComparison`); the model's own doc comment is explicit the vlan arm
       of this comparison is exp-001 itself (identical mechanism, already-frozen numbers, no
       same-day rerun) — this campaign covers only the snssai arm.
       `experiments/exp-010.yaml` hand-derived from the model (diffed field-by-field against
-      `exp-001.yaml` in its own header comment, per the sysml-authoring skill's verification-
-      loop rule): identical topology/probe methodology, `network.slices` real `s-nssai`
-      instead of `vlan`+HTB, `traffic_profiles` source/target flipped from exp-001 (UE is the
-      target/reflector side, matching how `ue_probe_up` actually has to run — a plain
-      host-side reflector for a UE-bound probe would reintroduce the UE-netns 0.0.0.0-bind
-      bug it exists to fix). Confirmed to resolve cleanly through the real `GatewayPlan`/
-      `FiveGPlan`/`TrafficPlan` stack (not just schema-valid) before committing.
-      `scripts/run-exp-010.sh` built mirroring `run-exp-001.sh`'s structure (freshness gate,
-      `--quick`/`--repro`, frozen-results protection) but driven entirely through real vxAPI
-      RPCs (`vxedge up`, `vxedge traffic up --profile`) — no raw `ip addr`/`ip link add`
-      anywhere, the engineering bar this campaign was explicitly built to clear. Found and
-      fixed one real `TrafficService` gap while wiring the runner: `profile_up` never passed
-      `--duration-s`/`--payload-bytes` to the spawned `vxprobe`/`vxtraffic` processes, so
-      every profile silently used the tool's own 10s default regardless of the manifest's
-      `experiment.duration_s` — would have under-sampled H2's 60s-window tail percentiles
-      exactly the way `experiment-methodology` warns against. Fixed: `TrafficSvc::up` now
-      reads `experiment.duration_s` and threads it (and `ResolvedProfile.payload_bytes`,
-      previously resolved but silently unused) into the spawn args — `vxedge/TASKS.md` has
-      the full account. Since `TrafficUpRequest` has no per-call rate/duration override, the
-      runner generates two small manifest variants per rep×load (different
-      `experiment.duration_s` for the load phase vs. the probe phase, mirroring exp-001's own
-      `WARMUP_S+PROBE_S+4` vs. `PROBE_S` split) — every archived `manifest.yaml` still records
-      the canonical, unmodified `exp-010.yaml`'s checksum, not a variant's. `notebooks/
-      analyze_exp010.py` built alongside (same shape as `analyze_exp001.py`, plus a
-      `--baseline results/exp-001` comparison table and H2 verdict). All of the above smoke-
-      tested (manifest validation, real plan resolution, sed-generated variants, analyzer on
-      synthetic archives) — the actual live campaign (`sudo -E env "PATH=$PATH"
-      ./scripts/run-exp-010.sh`, 5 reps × 5 loads, real podman/5G core, ~45–90 min) has not
-      run yet since it needs root and takes real wall-clock time
+      `exp-001.yaml` in its own header comment); `scripts/run-exp-010.sh` drives everything
+      through real vxAPI RPCs (`vxedge up`, `vxedge traffic up --profile`), no raw `ip`
+      anywhere — the engineering bar this campaign was built to clear. Found and fixed two
+      real bugs getting there: (1) `TrafficService`'s `profile_up` never passed
+      `--duration-s`/`--payload-bytes` to the spawned probes, silently undershooting the 60s
+      measured window (`vxedge/TASKS.md` has the account); (2) the script itself initially
+      ran the whole process under `sudo`, which switches podman to root's own separate
+      identity/storage — never had `vx5g-core`/`vx5g-ran` built into it, broke image
+      resolution on the very first live attempt. Fixed: run as a normal user, `Shell`'s own
+      `escalate: true` already sudo-wraps just the `ip`/`bridge`/`tc` calls that need it
+      (matches `verify_traffic_service.sh`'s already-proven pattern and the warning already
+      in `fiveg_podman.rs`'s own module comment — this was a live-caught instance of exactly
+      that documented trap). `notebooks/analyze_exp010.py` built alongside
+      `analyze_exp001.py`'s own shape, plus a `--baseline results/exp-001` comparison + H2
+      verdict.
+      **Real campaign** (25 archives, 5 reps x 5 loads, 60s window/1000pps, 60k
+      samples/point, zero loss every point): adas p99 grows 329.2us (0mbit) -> 410.9us
+      (600mbit) in the snssai arm (1.25x) vs 77.3us -> 71.7us (0.93x, essentially flat) in
+      the vlan arm (exp-001) — **H2 does not hold on this host**. Root-caused by code
+      inspection, not left as a data mystery: `fiveg::subscriber` hardcodes an identical
+      QCI/5QI=9, ARP priority_level=8, and 1 Gbps AMBR for every subscriber/slice;
+      `render_smf`/`render_upf` never reference the manifest's `Slice.qos` block at all — the
+      vlan arm's isolation comes from real HTB priority+rate enforcement the snssai arm has
+      no equivalent of, so this is an unequal comparison, not evidence against the
+      hypothesis. New gap tracked: `vxedge/TASKS.md` "Per-slice QoS (5QI/ARP/AMBR)
+      differentiation in `fiveg`" — closing it is the precondition for a fair H2 re-test.
+      Full evidence record: `vxmodels/models/requirements/verification.sysml`'s
+      `Exp010RealSlicingVerification` (`verify h2`, both parse/type-check clean against the
+      pinned SysIDE toolchain), `results/exp-010/exp-010-summary.md`.
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
