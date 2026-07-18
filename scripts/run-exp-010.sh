@@ -86,67 +86,22 @@ fi
 # partway through a run.
 sudo -v
 
-# --- host-confound mitigation, not a mechanism change ------------------------
-# Found live 2026-07-18: this campaign's own governor was left on `powersave`
-# (previous scripts only ever *recorded* cpu_governor, never set it), and
-# nothing anywhere pins the measurement-critical processes away from the ~13
-# containers this campaign's own 5G core spins up on the same host. Neither
-# is new debt (both were already tracked: exp-002b/003's `cpu_pinning: "none"`
-# field, docs/STATUS.md's "Non-PREEMPT_RT kernel" caveat) — they just never
-# mattered enough to fix before, because every prior campaign's effect size
-# was large enough to survive them. H2's post-HTB-fix effect size (tens of
-# µs) is not, so this is the first campaign where closing them is actually
-# load-bearing rather than polish.
-ORIG_GOVERNORS=()
-for gov_file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-  ORIG_GOVERNORS+=("$gov_file:$(cat "$gov_file" 2>/dev/null || echo unknown)")
-done
-if [[ ${#ORIG_GOVERNORS[@]} -gt 0 ]]; then
-  echo "== pinning cpu governor to performance (was: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo unknown)) =="
-  for gov_file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-    echo performance | sudo tee "$gov_file" >/dev/null 2>&1 || true
-  done
-else
-  echo "== no cpufreq scaling_governor files found (VM/container host?) — skipping governor pin =="
-fi
-restore_governors() {
-  for entry in "${ORIG_GOVERNORS[@]:-}"; do
-    [[ -z "$entry" ]] && continue
-    local f="${entry%%:*}" v="${entry#*:}"
-    [[ "$v" == "unknown" ]] && continue
-    echo "$v" | sudo tee "$f" >/dev/null 2>&1 || true
-  done
-}
-
-# Reserve the last 1-2 cores (host-size-dependent) for vxedged + the
-# host-side vxprobe/vxtraffic processes TrafficService spawns, taskset'd
-# there right after each one starts. Best-effort, not a hard guarantee:
-# podman's own containers (the 5G core NFs, UPFs, gNB, both UEs — including
-# adas-probe's own *reflector*, which runs inside the UE's pod, not as a
-# host process this script can see a pidfile for) are not cpuset-restricted
-# away from these cores, so this reduces scheduling contention on the
-# measurement path without eliminating it. Recorded honestly in
-# run-env.json's own cpu_pinning field, not oversold as full isolation.
-NPROC=$(nproc)
-if [[ "$NPROC" -ge 4 ]]; then
-  MEAS_CORES="$((NPROC - 2))-$((NPROC - 1))"
-elif [[ "$NPROC" -ge 2 ]]; then
-  MEAS_CORES="$((NPROC - 1))"
-else
-  MEAS_CORES=""
-fi
-if [[ -n "$MEAS_CORES" ]]; then
-  echo "== reserving cores $MEAS_CORES (of $NPROC) for vxedged + measurement processes (best-effort, containers unrestricted) =="
-else
-  echo "== single-core host — cannot reserve measurement cores, skipping =="
-fi
-pin_if_alive() { # $1 = pid
-  [[ -n "$MEAS_CORES" && -n "${1:-}" ]] && taskset -pc "$MEAS_CORES" "$1" >/dev/null 2>&1 || true
-}
-
 # --- locations (meta-workspace layout: repos side by side) -------------------
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 WS="$(dirname "$REPO_DIR")"
+
+# --- host-confound mitigation, not a mechanism change -------------------------
+# Found live 2026-07-18: this campaign's own governor was left on `powersave`
+# (previous scripts only ever *recorded* cpu_governor, never set it), and
+# nothing pinned the measurement-critical processes away from the ~13
+# containers this campaign's own 5G core spins up on the same host. Neither
+# is new debt — see scripts/lib/host_pinning.sh's own header for why it just
+# never mattered enough to fix before. Shared with
+# scripts/calibrate-exp-010-noise-floor.sh so both use the identical
+# mitigation, not two copies that can drift apart.
+source "$REPO_DIR/scripts/lib/host_pinning.sh"
+pin_cpu_governor_performance
+reserve_measurement_cores
 VXEDGED="$WS/vxedge/target/debug/vxedged"
 VXEDGE="$WS/vxedge/target/debug/vxedge"
 VXPROBE="$WS/vxagents/target/release/vxprobe"
@@ -184,15 +139,16 @@ cleanup() {
   "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$CANONICAL_MANIFEST" >/dev/null 2>&1
   [[ -n "${DAEMON_PID:-}" ]] && kill "$DAEMON_PID" 2>/dev/null
   echo "== restoring original cpu governor(s) =="
-  restore_governors
+  restore_cpu_governors
 }
 trap cleanup EXIT
 
-env_metadata() { # $1=load $2=rep -> json on stdout
+env_metadata() { # $1=load $2=rep $3=position-in-sequence $4=full-sequence -> json on stdout
   cat <<EOF
 {
   "experiment": "exp-010", "hypothesis": "H2", "slice_mode": "snssai",
   "load_mbps": $1, "repetition": $2,
+  "position_in_rep_sequence": $3, "rep_load_sequence": "$4",
   "warmup_s": $WARMUP_S, "probe_window_s": $PROBE_S,
   "load_phase_duration_s": $((WARMUP_S + PROBE_S + 4)),
   "probe_pps": 1000, "quick_profile": $QUICK,
@@ -201,7 +157,7 @@ env_metadata() { # $1=load $2=rep -> json on stdout
   "kernel": "$(uname -r)",
   "preempt_rt": $(uname -v | grep -qi preempt_rt && echo true || echo false),
   "cpu_governor": "$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo unknown)",
-  "cpu_pinning": "$([ -n "$MEAS_CORES" ] && echo "vxedged+host-side vxprobe/vxtraffic processes taskset to cores $MEAS_CORES of $NPROC; best-effort, podman containers (incl. adas-probe's own reflector, which runs inside the UE pod) not cpuset-restricted away from them" || echo "none (single-core host)")",
+  "cpu_pinning": "vxedged + host-side vxprobe/vxtraffic: $(cpu_pinning_description). adas-probe's own reflector runs inside the UE pod, not pinned",
   "loadavg_at_start": "$(cut -d' ' -f1-3 /proc/loadavg)",
   "timestamping": "userspace-monotonic (SO_TIMESTAMPING follow-up open)",
   "tool_versions": {
@@ -227,7 +183,22 @@ for i in $(seq 1 30); do [[ -S "$SOCK" ]] && break; sleep 0.5; done
 pin_if_alive "$DAEMON_PID"
 
 for rep in $(seq 1 "$REPS"); do
-  for load in "${LOADS_MBPS[@]}"; do
+  # Randomize load order per repetition — every prior campaign script in
+  # this project (exp-001 through the pre-randomization exp-010) runs loads
+  # in the same fixed sequence every rep, so a position-correlated host
+  # effect (podman/mongo cache warmth, thermal ramp after N consecutive pod
+  # boots, systemd housekeeping) would look identical to a load-correlated
+  # one. Shuffling breaks that confound apart: if an anomaly follows a
+  # specific load value regardless of when it runs, it's the mechanism; if
+  # it follows a fixed position in the sequence regardless of load, it's
+  # the host. docs/STATUS.md's "H2's real campaign" entry is the finding
+  # that made this worth doing — a reproducible bump at 250mbit that didn't
+  # fit a monotonic-under-load story.
+  mapfile -t REP_LOADS < <(printf '%s\n' "${LOADS_MBPS[@]}" | shuf)
+  echo "-- rep$rep load order (randomized): ${REP_LOADS[*]}"
+  position=0
+  for load in "${REP_LOADS[@]}"; do
+    position=$((position + 1))
     tag="rep${rep}-load${load}"
     echo "-- $tag: vxedge up (gateway + real 5G core + both UE pods)"
 
@@ -246,7 +217,7 @@ for rep in $(seq 1 "$REPS"); do
 
     INGEST="$RUNTIME/ingest-$tag"
     mkdir -p "$INGEST"
-    env_metadata "$load" "$rep" > "$INGEST/run-env.json"
+    env_metadata "$load" "$rep" "$position" "${REP_LOADS[*]}" > "$INGEST/run-env.json"
 
     if [[ "$load" -gt 0 ]]; then
       echo "   starting infotainment-load @ ${load}mbit (runs $((WARMUP_S + PROBE_S + 4))s)"
