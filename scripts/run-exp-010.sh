@@ -244,8 +244,15 @@ for rep in $(seq 1 "$REPS"); do
     "$VXEDGE" --endpoint "unix://$SOCK" traffic down --manifest "$PROBE_MANIFEST"
     "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$PROBE_MANIFEST"
 
+    # --record-image: content-addressed identities of the images this
+    # campaign actually ran (§13 reproducibility) land in each archive's
+    # metadata.json. These names mirror FiveGLifecycleConfig::default() +
+    # fiveg's mongo pin — the runner knows its images; vxtelemetry
+    # deliberately doesn't guess (see its collect --help).
     "$VXTELEMETRY" collect --manifest "$CANONICAL_MANIFEST" --ingest-dir "$INGEST" \
-      --out "$RESULTS/$tag.zip" >/dev/null
+      --out "$RESULTS/$tag.zip" \
+      --record-image vx5g-core --record-image vx5g-ran \
+      --record-image docker.io/library/mongo:7 >/dev/null
     p99=$(jq -r '.rtt_us.p99 // "?"' "$INGEST/probe-summary.json" 2>/dev/null || echo '?')
     loss=$(jq -r '.loss_pct // "?"' "$INGEST/probe-summary.json" 2>/dev/null || echo '?')
     echo "   archived $RESULTS/$tag.zip (p99=${p99}us loss=${loss}%)"
