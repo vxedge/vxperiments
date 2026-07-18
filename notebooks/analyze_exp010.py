@@ -202,31 +202,21 @@ def main():
                 f"- **H2 {'HOLDS' if held else 'DOES NOT HOLD'}** on this host"
                 + (" (quick profile — indicative only)" if quick else "")
             )
-            if not held and not quick:
-                verdict_lines += [
-                    "",
-                    "### Root cause (code-verified, not just observed)",
-                    "",
-                    "`vxedge-core::fiveg::subscriber` hardcodes an identical QCI/5QI=9, "
-                    "ARP priority_level=8, and 1 Gbps AMBR for *every* subscriber and *every* "
-                    "slice — confirmed by inspecting `subscriber.rs`'s rendered MongoDB "
-                    "documents; `render_smf`/`render_upf` in `render.rs` never reference the "
-                    "manifest's `Slice.qos` block at all (`grep` for `qos`/`5qi`/`ambr` across "
-                    "`fiveg/render.rs` returns nothing). The vlan arm's isolation, by contrast, "
-                    "comes from real HTB priority + min/max rate enforcement at the kernel "
-                    "queueing layer (`gateway::provision::apply_slices`). So the two arms are "
-                    "not actually comparing \"static VLAN mapping\" vs \"real S-NSSAI slicing\" "
-                    "on equal terms yet — they're comparing \"VLAN mapping *with* enforced QoS\" "
-                    "vs \"S-NSSAI slicing *without* any QoS differentiation\" (real separate "
-                    "PDU sessions/signaling, but both slices' traffic still competes "
-                    "undifferentiated for the same gNB/UPF forwarding path). This is a real, "
-                    "previously-undocumented gap distinct from the already-tracked URSP-style "
-                    "`slice_policy` item (that one is about UE-side multi-session routing, not "
-                    "network-side QoS enforcement) — closing it (per-slice 5QI/ARP/AMBR from "
-                    "`Slice.qos`, rendered into each slice's subscriber/SMF/UPF config) is a "
-                    "precondition for a fair H2 test, not evidence against the hypothesis "
-                    "itself.",
-                ]
+            # Deliberately no hardcoded "why" here: a root-cause explanation
+            # is a claim about the current state of vxedge-core's mechanism,
+            # which this script has no way to verify and which drifts out of
+            # sync with reality as the mechanism changes across campaigns
+            # (found live 2026-07-18 — text written for the first, pre-fix
+            # campaign kept printing unconditionally on every "does not
+            # hold" verdict, including a later run where the actual root
+            # cause it described no longer applied). Root-cause analysis
+            # belongs in the boards for each specific campaign, authored
+            # by whoever actually investigated that run — not baked into
+            # a script that can't know what changed between runs. The
+            # per-load-level table above already carries every number
+            # needed to judge the shape of the result (monotonic growth
+            # vs. a flat/noisy band, a single outlier vs. a trend) without
+            # this script asserting a cause on the reader's behalf.
         lines += verdict_lines
     else:
         lines += [
