@@ -250,6 +250,11 @@
       cell vs noisy neighbor under KVM static partitioning (rung 0); rerun per hypervisor
       ladder rung (Xen dom0less, QNX Hypervisor — phase 4)
 - [ ] `exp-012` — HTB vs TSN (taprio/gPTP) slice isolation comparison on identical topology
-- [ ] `exp-020` — V2X: two vehicle instances + RSU node, V2V/V2I flows over a dedicated slice
+- [ ] `exp-020` — V2X: two vehicle instances + RSU node, V2V/V2I flows over a dedicated slice.
+      Candidate traffic source for V2V specifically (not a required dependency, not
+      actionable until phase-2 completes and CARLA's single-vehicle closed loop lands):
+      Waymax (https://github.com/waymo-research/waymax) — JAX-based, GPU-light multi-agent
+      simulator, cheaper than N full CARLA instances for N simulated vehicles. Mirrored in
+      `docs/TASKS.md` phase 3's V2X groundwork item
 - [ ] End-to-end vehicle demo experiment referencing vx-vehicle-01
 - [ ] Paper dataset freeze: tag manifests + digests used in submitted figures
