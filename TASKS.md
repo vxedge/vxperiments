@@ -184,9 +184,57 @@
       held p50 276.5µs/p99 340.5µs throughout — a single unpowered rep, not yet a
       campaign. **Full evidence record for the pre-fix result**:
       `vxmodels/models/requirements/verification.sysml`'s `Exp010RealSlicingVerification`
-      (`verify h2`), `results/exp-010/exp-010-summary.md` — both frozen as the honest
-      record of what that campaign measured; a fair re-test with the fix in place is the
-      next step, not yet run as a full campaign.
+      (`verify h2`), `results/exp-010-no-qos-2026-07-18/exp-010-summary.md` — preserved as
+      the honest record of what that campaign measured (moved aside so the corrected
+      rerun could become the canonical `results/exp-010/`, matching `exp-002`'s own
+      retrofit precedent).
+      **Full 5×5 rerun with the qos fix in place (2026-07-18): still formally borderline
+      (snssai 1.03x growth vs a 1.023x threshold — a 0.007 margin), but qualitatively a
+      different result from the pre-fix campaign** — non-monotonic (321→334→369→328→330µs
+      across loads, not a clean climb), with a specific, reproducible bump at 250mbit
+      (tight IQR of 5.0µs across all 5 reps) that doesn't fit a "degrades under increasing
+      contention" story. `analyze_exp010.py`'s hardcoded root-cause text (written for the
+      pre-fix campaign) was printing unconditionally regardless of what actually changed —
+      removed; root-cause explanations belong in the boards, per-campaign, not baked into
+      a script.
+      **Host-confound investment, not another patch aimed at the number**: rather than
+      keep tuning the verdict threshold, closed real, previously-tracked-but-never-fixed
+      testbed gaps — this campaign's own governor was left on `powersave` (nobody ever
+      set it; every prior script only recorded it), and nothing pinned the
+      measurement-critical processes away from the ~13 containers this campaign's own 5G
+      core spins up. `scripts/lib/host_pinning.sh` (new, shared) sets `performance`
+      governor for the run's duration and taskset's `vxedged`+the host-side
+      `vxprobe`/`vxtraffic` processes to reserved cores — best-effort, honestly recorded
+      per-archive, not oversold as full isolation. `run-exp-010.sh` also now randomizes
+      load order per repetition (every prior campaign in this project used a fixed
+      sequence, so a position-correlated host effect would be indistinguishable from a
+      load-correlated one — exactly the ambiguity the 250mbit bump raised) and records the
+      applied order + position for direct analysis. New
+      `scripts/calibrate-exp-010-noise-floor.sh` + `notebooks/analyze_noise_floor.py`:
+      adas-probe alone, full rebuild between reps, characterizes session-to-session
+      variance with zero stimulus — not a hypothesis test, the background any future data
+      point needs to clear before being called a real effect.
+      **H2 HOLDS — real, final verdict (2026-07-18).** Noise-floor calibration ran first
+      (15 reps, zero stimulus): p99 median 338.9µs, IQR 14.3µs, range 316.7–355.3µs (spread
+      38.7µs) — the background any campaign point needs to clear. Then the full 5×5
+      campaign, now with governor pinning + cpu affinity + randomized load order: adas p99
+      growth baseline→600mbit is **1.00x** (345.3µs → 345.9µs, essentially flat) vs vlan's
+      own 0.93x — comfortably inside the 1.10x tolerance. **H2 HOLDS.**
+      The 250mbit elevation (median 352.0µs, still the highest of the five points) persists,
+      but randomization proves it's load-correlated, not position-correlated: it ran at
+      every one of the five possible sequence positions across the five reps (position 3,
+      5, 4, 1, 2 respectively — recorded in each run's own `run-env.json`) and stayed
+      elevated regardless of when it ran. Its magnitude shrunk substantially though —
+      inside the noise floor's observed range, with a tighter IQR (13.1µs) than the noise
+      floor itself (14.3µs) — a real but small effect, not the dominant signal it looked
+      like before the host-confound work landed.
+      Full evidence trail preserved, not just the final answer: `results/exp-010-no-qos-
+      2026-07-18/` (pre-HTB-fix, DOES NOT HOLD, root cause identified), `results/exp-010-
+      qos-fix-unmitigated-2026-07-18/` (HTB fix landed, still formally borderline DOES NOT
+      HOLD by a 0.007 margin), `results/exp-010-noise-floor-2026-07-18/` (calibration),
+      `results/exp-010/` (this final HOLDS campaign, now canonical).
+      `vxmodels/models/requirements/verification.sysml`'s `Exp010RealSlicingVerification`
+      updated with the full trajectory (`verify h2`).
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
