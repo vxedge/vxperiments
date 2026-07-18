@@ -15,10 +15,23 @@
 # exp-001.yaml.
 #
 # Diff against exp-001.yaml, field by field:
-#   - network.slices: mode vlan+vlan-id+qos -> mode s-nssai+s_nssai (sst/sd)
-#     per slice; same two slice ids (adas, infotainment), same order (fiveg
-#     assigns UE subnets by declaration order: adas -> 10.46.0.0/16,
-#     infotainment -> 10.47.0.0/16).
+#   - network.slices: mode vlan+vlan-id -> mode s-nssai+s_nssai (sst/sd) per
+#     slice; `qos` (min_rate_mbps/max_rate_mbps/priority) copied verbatim —
+#     added 2026-07-18, not present in the original snssai-arm campaign.
+#     Real, not cosmetic: exp-010's first live run showed adas p99 growing
+#     1.25x under load (H2 DOES NOT HOLD) with a code-verified root cause —
+#     Open5GS's own subscriber-level AMBR is recorded but not enforced by
+#     its software UPF (confirmed live: a patched 20mbit AMBR had zero
+#     measured effect). `qos` here now drives a real kernel-level HTB class
+#     per slice (`gateway::provision::apply_fiveg_slice_qos`, opt-in via
+#     `fiveg::SliceSession.qos`, applied on the same host-side interface
+#     `apply_fiveg_uplink` already creates — the true convergence point for
+#     both profiles' host-originated downlink traffic, mirroring
+#     `apply_slices`'s already-proven mechanism exactly), not a 5G-core
+#     signaling field with no actual effect in this deployment. Same two
+#     slice ids (adas, infotainment), same order (fiveg assigns UE subnets
+#     by declaration order: adas -> 10.46.0.0/16, infotainment ->
+#     10.47.0.0/16).
 #   - zones/nodes: identical ids/roles/functions; NodeIface drops `vlan:`
 #     (s-nssai slices aren't VLAN-tagged) but keeps the same `slice:`
 #     binding — the node is a logical placeholder for TrafficPlan's
@@ -37,8 +50,8 @@
 #     exp-001: `source: internet`, `target: <zone>:<node>` for both
 #     profiles — exactly the shape live-verified as `h2-probe` in
 #     `crates/vxedge-core/tests/traffic_podman.rs`. `payload_bytes` carried
-#     over unchanged (not yet wired into vxprobe/vxtraffic's own CLI args,
-#     same limitation exp-001 already has).
+#     over unchanged (wired into vxprobe/vxtraffic's own CLI args
+#     2026-07-18, alongside `experiment.duration_s` — see vxedge/TASKS.md).
 #   - Everything else (duration_s, results_prefix, network.defaults.bandwidth
 #     root rate, telemetry scrape target) copied verbatim.
 experiment:
@@ -67,9 +80,11 @@ network:
     - id: adas
       mode: s-nssai
       s_nssai: { sst: 1, sd: '000001' }
+      qos: { min_rate_mbps: 100, max_rate_mbps: 200, priority: 1 }
     - id: infotainment
       mode: s-nssai
       s_nssai: { sst: 2, sd: '000002' }
+      qos: { min_rate_mbps: 0, max_rate_mbps: 400, priority: 5 }
 
 zones:
   - id: vxzone-front-left-01

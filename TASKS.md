@@ -171,11 +171,22 @@
       `render_smf`/`render_upf` never reference the manifest's `Slice.qos` block at all — the
       vlan arm's isolation comes from real HTB priority+rate enforcement the snssai arm has
       no equivalent of, so this is an unequal comparison, not evidence against the
-      hypothesis. New gap tracked: `vxedge/TASKS.md` "Per-slice QoS (5QI/ARP/AMBR)
-      differentiation in `fiveg`" — closing it is the precondition for a fair H2 re-test.
-      Full evidence record: `vxmodels/models/requirements/verification.sysml`'s
-      `Exp010RealSlicingVerification` (`verify h2`, both parse/type-check clean against the
-      pinned SysIDE toolchain), `results/exp-010/exp-010-summary.md`.
+      hypothesis. Gap tracked and **closed same day**: `vxedge/TASKS.md`'s "Per-slice
+      downlink QoS enforcement for s-nssai slices" — the obvious-looking fix (render
+      `Slice.qos` into subscriber 5QI/ARP/AMBR) was checked empirically before writing it
+      (a hand-patched 20mbit AMBR had zero measured effect — Open5GS's software UPF
+      records it but doesn't enforce it here), so the real fix is kernel-level HTB
+      (`gateway::provision::apply_fiveg_slice_qos`, the same proven mechanism
+      `apply_slices` already uses for the vlan arm) instead. `experiments/exp-010.yaml`
+      now declares `qos` on both slices (copied verbatim from `exp-001.yaml`) to opt in.
+      Live-verified: `tc` output confirms the tree installs exactly as designed; a
+      600mbit offered load capped to ~395mbit received with zero packet loss, adas-probe
+      held p50 276.5µs/p99 340.5µs throughout — a single unpowered rep, not yet a
+      campaign. **Full evidence record for the pre-fix result**:
+      `vxmodels/models/requirements/verification.sysml`'s `Exp010RealSlicingVerification`
+      (`verify h2`), `results/exp-010/exp-010-summary.md` — both frozen as the honest
+      record of what that campaign measured; a fair re-test with the fix in place is the
+      next step, not yet run as a full campaign.
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
