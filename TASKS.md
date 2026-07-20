@@ -235,7 +235,11 @@
       `results/exp-010/` (this final HOLDS campaign, now canonical).
       `vxmodels/models/requirements/verification.sysml`'s `Exp010RealSlicingVerification`
       updated with the full trajectory (`verify h2`).
-- [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice
+- [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice. The
+      other, still-open half of phase 2's gate (`docs/TASKS.md`) — H2's vlan-vs-s-nssai
+      half HOLDS (2026-07-18). Blocked on `vxcompute` landing its first code (zero as of
+      2026-07-19): Autoware/ROS2 container + CARLA server + carla-ros-bridge wiring,
+      closed-loop actuation back into CARLA
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
 - [ ] `exp-014` — harness topology as variable: star vs daisy-chained zones under identical
