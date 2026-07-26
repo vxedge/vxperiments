@@ -237,9 +237,12 @@
       updated with the full trajectory (`verify h2`).
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice. The
       other, still-open half of phase 2's gate (`docs/TASKS.md`) — H2's vlan-vs-s-nssai
-      half HOLDS (2026-07-18). Blocked on `vxcompute` landing its first code (zero as of
-      2026-07-19): Autoware/ROS2 container + CARLA server + carla-ros-bridge wiring,
-      closed-loop actuation back into CARLA
+      half HOLDS (2026-07-18). **Re-scoped 2026-07-26** (`docs/TASKS.md` Track P/D): blocked
+      on `vxparts` (renamed/merged from `vxzones`+`vxcompute`) landing Autoware/ROS2 + CARLA
+      server + carla-ros-bridge as real published parts, plus the `ARCHITECTURE.md` §6
+      schema gaining a structured `parts:` list (Track D dimension 1) so this experiment's
+      manifest can reference them — same zero-code blocker as before, now with a named
+      dependency chain instead of an open-ended "vxcompute needs code"
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
 - [ ] `exp-014` — harness topology as variable: star vs daisy-chained zones under identical
