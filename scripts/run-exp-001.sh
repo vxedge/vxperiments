@@ -81,9 +81,15 @@ else
 fi
 source "$REPO_DIR/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-001 "$QUICK" "$REPRO")"
-# An equivalence run is not the frozen campaign and must never land on top of it.
-if [[ $WORKSPACE -eq 1 && $QUICK -eq 0 && $REPRO -eq 0 ]]; then
-  RESULTS="$REPO_DIR/results/exp-001-workspace-$(date +%Y-%m-%d)"
+# An equivalence run is not the frozen campaign and must never land on top of it — including
+# the --quick and --repro dirs, which are shared with the frozen path and would otherwise be
+# silently overwritten by a run provisioned from a different source.
+if [[ $WORKSPACE -eq 1 ]]; then
+  if [[ $QUICK -eq 1 ]]; then
+    RESULTS="$REPO_DIR/results/exp-001-workspace-quick"
+  else
+    RESULTS="$REPO_DIR/results/exp-001-workspace-$(date +%Y-%m-%d)"
+  fi
 fi
 
 RUNTIME=$(mktemp -d /tmp/exp-001.XXXXXX)
