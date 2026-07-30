@@ -249,6 +249,37 @@
       load (per-link `impairments`, BASE-T1 emulation)
 - [ ] Determinism-controls ablation: PREEMPT_RT / pinning / VPP on-off matrix
 
+## Workspace migration (decided 2026-07-30 — §6.0 becomes the only authored schema)
+
+Every experiment here is currently a hand-written §6.1 manifest driven by a campaign script that
+does its own provisioning (`vxedge up --manifest`, then `vxprobe`/`vxtraffic` as raw binaries,
+then `vxedge down`). §6.1 is being retired as an authoring surface, so each experiment becomes a
+**workspace folder** run by `vxedge experiment up` from inside that folder.
+
+**This migration is the real test of §6.0.** The acceptance criterion is not "it validates" — it
+is **numerical equivalence with the frozen result**. If workspace-form `exp-001` does not
+reproduce the recorded H1 numbers, the workspace model is wrong and we find out here rather than
+in phase 3. Migrate as *parallel copies*; the frozen manifests keep working until equivalence is
+proven, and phase-1 reproducibility stays anchored at the `v0.1.0` tag regardless.
+
+Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
+
+- [ ] **`exp-001` → workspace form.** First, because H1 is the simplest topology and has the
+      most reference data. Gate: p50/p95/p99 statistically indistinguishable from the frozen
+      campaign under the same sweep.
+- [ ] **`exp-003` → workspace form.**
+- [ ] **`exp-010` → workspace form.** Exercises `mode: s-nssai` lowering, which nothing has
+      covered yet — the VLAN path is the only one with a live consumer today.
+- [ ] **`exp-002`/`exp-002b` → workspace form, together with their `vxparts` cutover**, at H3
+      re-validation. Not before: they are gate-frozen, and migrating them twice (once for the
+      schema, once for parts) would be wasted work.
+- [ ] **Campaign scripts shrink to method.** Sweeps, repetitions, warmup and collection stay —
+      that is the experiment design and belongs here. Provisioning moves to `experiment up`.
+- [ ] **Author `exp-011` as a workspace now**, declaring `requires: {gpu: tier2}` in its `.vxp`.
+      It validates, commits, and refuses to start until a Tier 2 host exists — so the workspace
+      is ready the day the GPU decision resolves and blocks nothing in the meantime.
+- [ ] Retire the hand-authored §6.1 manifests once the equivalence runs above pass.
+
 ## Phase 3
 
 - [ ] `vehicles/vx-vehicle-01.yaml` — full OEM-representative composition (six zones, QNX +
