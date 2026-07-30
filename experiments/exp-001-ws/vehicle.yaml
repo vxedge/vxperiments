@@ -4,21 +4,24 @@ class: road
 subtype: car
 
 # Two zones only: H1 measures slice isolation at the gateway, so the smallest topology that
-# can express contention is the right one. Component ids are the frozen manifest's node ids,
-# so the two forms stay diffable.
-composition:
-  zones:
-    node-adas-probe-01:
-      class: zone
-      subtype: linux
-      position: front-left       # ADAS-representative probe endpoint (vxprobe)
-      backend: container         # H3's variable; here held fixed at the cheapest packaging
-    node-infot-load-01:
-      class: zone
-      subtype: linux
-      position: rear-left        # infotainment load source (vxtraffic)
-      backend: container
+# can express contention is the right one.
+zones:
+  front-left: {}
+  rear-left: {}
+
+# Device ids are the frozen manifest's node ids, so the two forms stay diffable. `backend` is
+# explicit because these are container-backed host processes — guessing it produced a workspace
+# that validated and then could not boot.
+devices:
+  node-adas-probe-01: { role: zone-controller, zone: front-left, backend: container }
+  node-infot-load-01: { role: zone-controller, zone: rear-left,  backend: container }
+
+# The software each device runs. Named for what it does rather than where it sits — that
+# separation is the point of the function layer, and it is what `parts.yaml` targets.
+functions:
+  adas-probe:   { deployed_on: node-adas-probe-01 }
+  infot-load:   { deployed_on: node-infot-load-01 }
 
 links:
-  - { id: trunk-adas,  endpoints: [node-adas-probe-01:eth0],  slice: adas }
+  - { id: trunk-adas,  endpoints: [node-adas-probe-01:eth0], slice: adas }
   - { id: trunk-infot, endpoints: [node-infot-load-01:eth0], slice: infotainment }

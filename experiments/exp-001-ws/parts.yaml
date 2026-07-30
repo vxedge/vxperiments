@@ -5,6 +5,6 @@ id: bl-exp-001
 # declares. A local ref needs no digest — it is content-hashed into the results archive.
 parts:
   - ref: local/vxprobe:host-process
-    target_ids: node-adas-probe-01
+    target_ids: adas-probe
   - ref: local/vxtraffic:host-process
-    target_ids: node-infot-load-01
+    target_ids: infot-load
