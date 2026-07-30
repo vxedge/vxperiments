@@ -1,0 +1,8 @@
+kind: baseline
+id: bl-exp-010
+
+parts:
+  - ref: local/vxprobe:host-process
+    target_ids: adas-probe
+  - ref: local/vxtraffic:host-process
+    target_ids: infot-load

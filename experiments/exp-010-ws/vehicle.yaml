@@ -1,0 +1,26 @@
+kind: vehicle
+id: vx-h2-vehicle
+class: road
+subtype: car
+
+# Deliberately the same shape as exp-001's vehicle: H2 compares transport mechanisms, so the
+# system under test must not move. Device ids are the frozen manifest's node ids.
+zones:
+  front-left: {}
+  rear-left: {}
+
+devices:
+  node-adas-probe-01: { role: zone-controller, zone: front-left, backend: container }
+  node-infot-load-01: { role: zone-controller, zone: rear-left,  backend: container }
+
+functions:
+  adas-probe: { deployed_on: node-adas-probe-01 }
+  infot-load: { deployed_on: node-infot-load-01 }
+
+# These links bind a slice but carry no VLAN — an `s-nssai` attachment has no bridge port, and
+# its lifecycle belongs to the 5G core rather than to vxgateway. That distinction silently
+# dropped every H2 attachment from the model once (fixed 2026-07-30), so this workspace is the
+# thing that keeps it honest.
+links:
+  - { id: ue-adas,  endpoints: [node-adas-probe-01:eth0], slice: adas }
+  - { id: ue-infot, endpoints: [node-infot-load-01:eth0], slice: infotainment }

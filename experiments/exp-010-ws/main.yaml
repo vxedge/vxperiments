@@ -1,0 +1,47 @@
+kind: experiment
+id: exp-010
+
+# H2: the same vehicle measured over real 5G slices (`mode: s-nssai`, Open5GS/UERANSIM)
+# instead of static VLANs. Only this file changes between H1 and H2 — the vehicle is
+# provably identical, which is what makes the comparison a controlled one.
+vehicles: [vx-h2-vehicle]
+baseline: bl-exp-010
+
+network:
+  defaults:
+    bandwidth: 500000000        # 500 mbit root rate — same shared bottleneck framing as exp-001
+  slices:
+    - id: adas
+      mode: s-nssai
+      s_nssai: { sst: 1, sd: '000001' }
+      qos: { min_rate_mbps: 100, max_rate_mbps: 200, priority: 1 }
+    - id: infotainment
+      mode: s-nssai
+      s_nssai: { sst: 2, sd: '000002' }
+      qos: { min_rate_mbps: 0, max_rate_mbps: 400, priority: 5 }
+
+traffic_profiles:
+  adas-probe:
+    source: internet
+    target: node-adas-probe-01   # a device id; §6.1 needed a synthesized zone prefix here
+    pps: 1000
+    payload_bytes: 64
+  infotainment-load:
+    source: internet
+    target: node-infot-load-01
+    bandwidth_mbps: 400             # nominal; the campaign sweeps 0..600 (run-exp-010.sh)
+    payload_bytes: 1200
+
+method:
+  duration_s: 60
+  repetitions: 5
+  warmup_s: 10
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"            # vxprobe live exporter
+
+results:
+  artifact_dir: results/exp-010
+  upload: false
