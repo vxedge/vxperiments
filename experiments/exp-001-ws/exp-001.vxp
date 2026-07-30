@@ -1,0 +1,8 @@
+# Package descriptor for exp-001 (H1). Identity and host requirements only, so a version
+# bump never touches experiment content.
+id: exp-001
+version: 0.1.0
+entry: main.yaml
+description: ADAS slice isolation under infotainment load (H1)
+requires:
+  gpu: none

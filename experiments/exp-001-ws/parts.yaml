@@ -1,0 +1,10 @@
+kind: baseline
+id: bl-exp-001
+
+# Local refs: exp-001's agents run as host processes, which is what the frozen manifest
+# declares. A local ref needs no digest — it is content-hashed into the results archive.
+parts:
+  - ref: local/vxprobe:host-process
+    target_ids: node-adas-probe-01
+  - ref: local/vxtraffic:host-process
+    target_ids: node-infot-load-01

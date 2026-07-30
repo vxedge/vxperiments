@@ -1,0 +1,45 @@
+kind: experiment
+id: exp-001
+
+# H1: per-slice VLAN mapping with hierarchical HTB queue-tree reservations in vxgateway keeps
+# ADAS (URLLC-like) p95/p99 RTT near baseline while the infotainment slice is driven from idle
+# to overload. One hypothesis, one variable: offered load sweeps 0 -> overload, everything
+# else fixed.
+vehicles: [vx-h1-vehicle]
+baseline: bl-exp-001
+
+# The vehicle names the slices; this file defines what they mean. Swapping `mode` here to
+# `s-nssai` is the H2 comparison, over a provably unchanged vehicle.
+network:
+  defaults:
+    bandwidth: 500000000        # 500 mbit root rate at the shared uplink bottleneck
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 100, max_rate_mbps: 200, priority: 1 }
+    - id: infotainment
+      mode: vlan
+      vlan: 103
+      qos: { min_rate_mbps: 0, max_rate_mbps: 400, priority: 5 }
+
+traffic_profiles:
+  infotainment-load:
+    source: node-infot-load-01   # component id; lowering qualifies it
+    target: internet             # uplink-side sink (fire-and-forget)
+    bandwidth_mbps: 400          # nominal; the campaign sweeps 0..600
+    payload_bytes: 1200
+
+method:
+  duration_s: 60
+  repetitions: 5
+  warmup_s: 10
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"         # vxprobe live exporter
+
+results:
+  artifact_dir: results/exp-001
+  upload: false

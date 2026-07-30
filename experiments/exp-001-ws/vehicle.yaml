@@ -1,0 +1,24 @@
+kind: vehicle
+id: vx-h1-vehicle
+class: road
+subtype: car
+
+# Two zones only: H1 measures slice isolation at the gateway, so the smallest topology that
+# can express contention is the right one. Component ids are the frozen manifest's node ids,
+# so the two forms stay diffable.
+composition:
+  zones:
+    node-adas-probe-01:
+      class: zone
+      subtype: linux
+      position: front-left       # ADAS-representative probe endpoint (vxprobe)
+      backend: container         # H3's variable; here held fixed at the cheapest packaging
+    node-infot-load-01:
+      class: zone
+      subtype: linux
+      position: rear-left        # infotainment load source (vxtraffic)
+      backend: container
+
+links:
+  - { id: trunk-adas,  endpoints: [node-adas-probe-01:eth0],  slice: adas }
+  - { id: trunk-infot, endpoints: [node-infot-load-01:eth0], slice: infotainment }
