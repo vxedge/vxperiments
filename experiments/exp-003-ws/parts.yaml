@@ -1,0 +1,7 @@
+kind: baseline
+id: bl-exp-003
+
+# `local/…` names a host process, not a registry artifact — there is nothing to pin.
+parts:
+  - ref: local/vxprobe:host-process
+    target_ids: adas-probe

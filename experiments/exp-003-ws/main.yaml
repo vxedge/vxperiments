@@ -1,0 +1,49 @@
+kind: experiment
+id: exp-003
+
+# H4: an OTA service co-located in central compute, driving a sustained artifact-delivery
+# burst, does not compromise the ADAS slice's SLA. Same adas slice/QoS/probe parameters as
+# exp-001, so the baseline arm is directly comparable to exp-001's load=0 point.
+vehicles: [vx-h4-vehicle]
+baseline: bl-exp-003
+
+network:
+  defaults:
+    bandwidth: 500000000
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 100, max_rate_mbps: 200, priority: 1 }
+
+services:
+  ota:
+    id: ota-01
+    type: ota
+    image: { url: local/vxota:host-process, kind: container }
+    config:
+      # Fixed, pre-seeded store path (script keygen/publish once, idempotent
+      # — mirrors how vxzones' guest bundle is a fixed pre-built path, not
+      # regenerated per repetition). Same rationale as exp-001/exp-002b's
+      # "host-process" image url: no container runtime integration yet
+      # (vxedge/TASKS.md §3), so this is a v1 process-backend placeholder.
+      artifacts: /tmp/vxota-exp003-store
+      listen: 127.0.0.1:9900
+
+method:
+  duration_s: 60
+  repetitions: 5
+  warmup_s: 10
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"   # vxprobe live exporter (always up)
+    optional_scrape_targets:
+      - "127.0.0.1:9902"   # vxota-probe live exporter — only listens during ota-burst;
+                            # a failed scrape here (baseline arm) doesn't count against
+                            # completeness (docs/ARCHITECTURE.md §6)
+
+results:
+  artifact_dir: results/exp-003
+  upload: false

@@ -1,0 +1,18 @@
+kind: vehicle
+id: vx-h4-vehicle
+class: road
+subtype: car
+
+# One zone: H4's variable is OTA co-location on the host, not topology, so the smallest vehicle
+# that carries the adas probe is the right one.
+zones:
+  front-left: {}
+
+devices:
+  node-adas-probe-01: { role: zone-controller, zone: front-left, backend: container }
+
+functions:
+  adas-probe: { deployed_on: node-adas-probe-01 }
+
+links:
+  - { id: trunk-adas, endpoints: [node-adas-probe-01:eth0], slice: adas }
