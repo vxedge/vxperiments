@@ -278,9 +278,21 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
       variable, so exp-002 was blocked too); `local/vxprobe:host-process` was rejected as an
       unpinned published ref though it names no artifact; and `vxedged` sudo-ed even when
       already root, which is how the campaign scripts run it. All fixed in `vxedge`.
-  - [ ] **Numerical equivalence** — p50/p95/p99 statistically indistinguishable from the frozen
-        campaign under the same sweep. Needs a full run on a host where the daemon can
-        provision. Until this passes, `experiments/exp-001.yaml` stays authoritative.
+  - [ ] **Numerical equivalence** — `./scripts/run-exp-001.sh --workspace` provisions from the
+        workspace and holds everything downstream byte-identical (same host-side `vzp0`/`vzp1`
+        addressing, same agent invocations, same sweep), so the only variable is which form the
+        gateway came from. Results land in `results/exp-001-workspace-<date>/`. Until p50/p95/p99
+        agree with the frozen campaign, `experiments/exp-001.yaml` stays authoritative.
+  - [ ] **Faithful measurement: run the agents inside the zones** — the direction of travel, and
+        the reason `--workspace` deliberately does *not* use `vxedge experiment up`. The frozen
+        campaign treats the host-side veth peers (`vzp0`/`vzp1`) as if they were the ECUs;
+        `experiment up` actually brings the zones up, which moves those peers into node netns and
+        renames them `eth0`. Running vxprobe/vxtraffic inside the zone netns measures the path an
+        ECU really takes — across the zone boundary — instead of a host process pretending to be
+        one. **This is a different measurement and needs its own baseline**, so it must not be
+        mixed into the equivalence check above: do that first, then re-baseline here.
+        Touches `run-exp-001.sh` (agents via `ip netns exec vx-<node-id>`), and the same change
+        applies to exp-003. Blocked on nothing.
 - [ ] **`exp-003` → workspace form.**
 - [ ] **`exp-010` → workspace form.** Exercises `mode: s-nssai` lowering, which nothing has
       covered yet — the VLAN path is the only one with a live consumer today.
