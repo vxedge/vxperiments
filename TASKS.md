@@ -264,9 +264,23 @@ proven, and phase-1 reproducibility stays anchored at the `v0.1.0` tag regardles
 
 Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 
-- [ ] **`exp-001` → workspace form.** First, because H1 is the simplest topology and has the
-      most reference data. Gate: p50/p95/p99 statistically indistinguishable from the frozen
-      campaign under the same sweep.
+- [x] **`exp-001` → workspace form** (2026-07-30, `experiments/exp-001-ws/`) — **structurally
+      equivalent**: both forms produce a byte-identical `GatewayPlan` and `TrafficPlan` (same
+      endpoint names `vz0`/`vzp0`, `vz1`/`vzp1`, vlans, slices, addresses). That is the check
+      that matters rather than a YAML diff — the forms legitimately differ in ids and defaults
+      while planning identically, and `run-exp-001.sh` addresses `vzp0`/`vzp1` by name, so a
+      renumbering would keep validating and quietly measure the wrong interface. Locked in by a
+      regression test in `vxedge-core`.
+
+      Found three §6.0 defects the scaffold templates could never surface: `backend` was not
+      expressible at all (these zones are container-backed host processes, so they lowered to
+      `kind: vm`, defaulted to libvirt and failed with `MissingBundle` — and `backend` is H3's
+      variable, so exp-002 was blocked too); `local/vxprobe:host-process` was rejected as an
+      unpinned published ref though it names no artifact; and `vxedged` sudo-ed even when
+      already root, which is how the campaign scripts run it. All fixed in `vxedge`.
+  - [ ] **Numerical equivalence** — p50/p95/p99 statistically indistinguishable from the frozen
+        campaign under the same sweep. Needs a full run on a host where the daemon can
+        provision. Until this passes, `experiments/exp-001.yaml` stays authoritative.
 - [ ] **`exp-003` → workspace form.**
 - [ ] **`exp-010` → workspace form.** Exercises `mode: s-nssai` lowering, which nothing has
       covered yet — the VLAN path is the only one with a live consumer today.
