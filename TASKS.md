@@ -296,9 +296,27 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 - [ ] **`exp-003` → workspace form.**
 - [ ] **`exp-010` → workspace form.** Exercises `mode: s-nssai` lowering, which nothing has
       covered yet — the VLAN path is the only one with a live consumer today.
-- [ ] **`exp-002`/`exp-002b` → workspace form, together with their `vxparts` cutover**, at H3
-      re-validation. Not before: they are gate-frozen, and migrating them twice (once for the
-      schema, once for parts) would be wasted work.
+- [ ] **`exp-002`/`exp-002b` → workspace form** — **BLOCKED 2026-07-31 on two §6.0 gaps**, found
+      by attempting it. Both are schema gaps in `vxedge`, not problems with these experiments.
+
+      1. **§6.0 cannot express a node address.** exp-002's three arms are distinguished by IP
+         (`10.101.0.11/.12/.13` on one shared vlan) — that is how the probe reaches each arm
+         separately. §6.1 carries it as `network[].ip`; §6.0's link endpoints are bare strings
+         (`node-cont-01:eth0`) with nowhere to put one. The model already has `Endpoint.ip_cidr`
+         waiting; the schema needs an object form for a link endpoint.
+
+      2. **§6.0 loses declaration order, and for exp-002 that is not cosmetic.** Devices live in
+         a map, so traversal is sorted id. exp-002 declares `cont, microvm, libvirt` and sorts to
+         `cont, libvirt, microvm`, so `vzp1`/`vzp2` would swap and `run-exp-002.sh` — which
+         addresses them by name — would measure libvirt while reporting microvm. The §6.1 adapter
+         already preserves declaration order via `device_order`; a §6.0 workspace has no way to
+         state one.
+
+         Renaming the arms so sorted order happens to match is **not** a fix: it makes
+         correctness depend on a coincidence in id spelling, and the next experiment re-breaks it.
+
+      Neither blocks the other migrations, which is why exp-001/003/010 are done. Both want
+      solving in `vxedge` first; see that repo's TASKS.md.
 - [ ] **Campaign scripts shrink to method.** Sweeps, repetitions, warmup and collection stay —
       that is the experiment design and belongs here. Provisioning moves to `experiment up`.
 - [ ] **Author `exp-011` as a workspace now**, declaring `requires: {gpu: tier2}` in its `.vxp`.
