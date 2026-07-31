@@ -76,6 +76,8 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 # workspace directory directly. The frozen `../experiments/exp-*.yaml` files are kept as
 # provenance for the results already recorded against them, not as inputs.
 MANIFEST="$REPO_DIR/experiments/exp-001-ws"
+source "$REPO_DIR/scripts/lib/results_dir.sh"
+RESULTS="$(resolve_results_dir "$REPO_DIR" exp-001 "$QUICK" "$REPRO")"
 
 RUNTIME=$(mktemp -d /tmp/exp-001.XXXXXX)
 
