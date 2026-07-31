@@ -1,6 +1,6 @@
 # exp-002 (workspace form)
 
-The §6.0 workspace that replaces `../exp-002.yaml` (H3: virtual-ECU packaging vs
+The §6.0 workspace that replaces `../retired-6.1/exp-002.yaml` (H3: virtual-ECU packaging vs
 zone-to-gateway latency). Run it from **inside this directory**:
 
 ```bash
@@ -11,7 +11,7 @@ vxedge experiment down
 
 ## Status: structurally equivalent, not yet numerically equivalent
 
-`../exp-002.yaml` stays authoritative until a campaign run reproduces the frozen H3 numbers
+`../retired-6.1/exp-002.yaml` stays authoritative until a campaign run reproduces the frozen H3 numbers
 through this workspace. Phase-1 results reproduce at the `v0.1.0` tag regardless.
 
 **Verified** — this workspace and the frozen manifest produce identical gateway, node, traffic

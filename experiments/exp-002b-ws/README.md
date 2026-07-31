@@ -1,6 +1,6 @@
 # exp-002b (workspace form)
 
-The §6.0 workspace that replaces `../exp-002b.yaml` (H3 decomposition: machine type, virtio
+The §6.0 workspace that replaces `../retired-6.1/exp-002b.yaml` (H3 decomposition: machine type, virtio
 transport, vhost, management layer, plus per-arm resource cost). Run it from **inside this
 directory**:
 
@@ -12,7 +12,7 @@ vxedge experiment down
 
 ## Status: structurally equivalent, not yet numerically equivalent
 
-`../exp-002b.yaml` stays authoritative until a campaign run reproduces the frozen numbers
+`../retired-6.1/exp-002b.yaml` stays authoritative until a campaign run reproduces the frozen numbers
 through this workspace.
 
 **Verified** — identical gateway, node, traffic and 5G plans across all six arms:

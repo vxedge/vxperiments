@@ -119,7 +119,7 @@ check_fresh_bin "$WS/vxagents" "$VXTRAFFIC" "$WS/vxagents/crates/vxtraffic"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
 # The §6.0 workspace is the input now: §6.1 manifests stopped being a provisioning input on
-# 2026-07-31. The frozen `../experiments/exp-010.yaml` stays as provenance for the results
+# 2026-07-31. The frozen `../experiments/retired-6.1/exp-010.yaml` stays as provenance for the results
 # already recorded against it.
 CANONICAL_WS="$REPO_DIR/experiments/exp-010-ws"
 source "$REPO_DIR/scripts/lib/results_dir.sh"

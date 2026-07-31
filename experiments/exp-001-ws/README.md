@@ -1,6 +1,6 @@
 # exp-001 (workspace form)
 
-The §6.0 workspace that replaces `../exp-001.yaml`. Run it from **inside this directory**:
+The §6.0 workspace that replaces `../retired-6.1/exp-001.yaml`. Run it from **inside this directory**:
 
 ```bash
 cd experiments/exp-001-ws
@@ -10,7 +10,7 @@ vxedge experiment down
 
 ## Status: structurally equivalent, not yet numerically equivalent
 
-`../exp-001.yaml` stays authoritative until a campaign run reproduces the frozen H1 numbers
+`../retired-6.1/exp-001.yaml` stays authoritative until a campaign run reproduces the frozen H1 numbers
 through this workspace. Phase-1 results reproduce at the `v0.1.0` tag regardless, so nothing
 here can invalidate them.
 

@@ -9,7 +9,7 @@ vxedge experiment up      # gateway + zones; does NOT start traffic
 vxedge experiment down
 ```
 
-This workspace replaced `../exp-003.yaml`, which is kept as provenance for the results
+This workspace replaced `../retired-6.1/exp-003.yaml`, which is kept as provenance for the results
 recorded against it and is no longer runnable (`ARCHITECTURE.md` §6.0.6).
 
 ## Files

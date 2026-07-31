@@ -52,7 +52,7 @@ check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedg
 check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxagents" "$VXTRAFFIC" "$WS/vxagents/crates/vxtraffic"
 
-CANONICAL_MANIFEST="$REPO_DIR/experiments/exp-010.yaml"
+CANONICAL_MANIFEST="$REPO_DIR/experiments/retired-6.1/exp-010.yaml"
 RESULTS="$REPO_DIR/results/exp-010-noise-floor-$(date +%Y-%m-%d)"
 mkdir -p "$RESULTS"
 RUNTIME=$(mktemp -d /tmp/exp-010-noisefloor.XXXXXX)
