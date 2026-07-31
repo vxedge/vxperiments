@@ -5,9 +5,23 @@ zone-to-gateway latency). Run it from **inside this directory**:
 
 ```bash
 cd experiments/exp-002-ws
-vxedge experiment up          # gateway + zones; does NOT start traffic
-vxedge experiment down
+./tools/fetch-parts.sh                                   # once: populate + verify parts/
+sudo -E env "PATH=$PATH" ./scripts/run.sh --quick        # pipeline validation
+sudo -E env "PATH=$PATH" ./scripts/run.sh --repro        # the campaign
 ```
+
+## This is a sandbox
+
+Everything the experiment needs is in this folder: its documents, its campaign
+(`scripts/run.sh`), its loadables (`parts/`, fetched and digest-verified by
+`tools/fetch-parts.sh`), and its results. The guest bundle is fetched rather than committed —
+19 MB of kernel and initramfs, and five sandboxes vendoring it would be 95 MB in git — but
+`parts/linux-probe.sha256` is committed, so a fetched copy is verified rather than trusted.
+
+One thing still reaches outside: `../../scripts/lib/*.sh` (frozen-results protection, CPU
+governor pinning, binary freshness) are shared across every experiment. Vendoring five copies
+would reintroduce exactly the drift that left four of five runners without governor pinning, so
+they stay shared until there is a better home for them — an open decision in `../../TASKS.md`.
 
 ## Status: structurally equivalent, not yet numerically equivalent
 

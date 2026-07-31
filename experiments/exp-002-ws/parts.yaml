@@ -8,5 +8,9 @@ id: bl-exp-002
 parts:
   - ref: local/vxprobe:host-process
     target_ids: reflector-cont
-  - ref: ../../../vxzones/images/linux-probe/bundle
+  # Sandbox-local: `./tools/fetch-parts.sh` populates it and verifies it against
+  # `parts/linux-probe.sha256`. A local ref needs no registry digest — it is content-hashed
+  # into the workspace identity (§13) and into the results archive.
+  - ref: ./parts/linux-probe
+    kind: bundle
     target_ids: [reflector-microvm, reflector-libvirt]

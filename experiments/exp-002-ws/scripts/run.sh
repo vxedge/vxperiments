@@ -2,7 +2,14 @@
 # exp-002 campaign runner — packaging backend vs latency (H3).
 #
 # Run as root from the vxperiments repo root:
-#   sudo -E env "PATH=$PATH" ./scripts/run-exp-002.sh [--quick|--repro]
+#   cd experiments/exp-002-ws && sudo -E env "PATH=$PATH" ./scripts/run.sh [--quick|--repro]
+#
+# This runner lives inside the sandbox it runs, so the experiment travels with its campaign.
+# One thing still reaches outside it: `scripts/lib/*.sh` (results-dir protection, governor
+# pinning, binary freshness) are shared across every experiment. Vendoring five copies would
+# reintroduce exactly the drift that left four of five runners without governor pinning, so
+# they stay shared until there is a better home for them — the open decision recorded in
+# TASKS.md.
 #
 # --repro: full campaign written to results/exp-002-repro-<date>/ — the frozen
 #          results/exp-002/ dir is never overwritten in place (lib/results_dir.sh).
@@ -34,7 +41,10 @@ if [[ $(id -u) -ne 0 ]]; then
   exit 1
 fi
 
-REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# This sandbox, and the meta-workspace it sits in. Resolved from this script's own location, so
+# the experiment runs wherever it is unpacked.
+SANDBOX="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_DIR="$(cd "$SANDBOX/../.." && pwd)"
 WS="$(dirname "$REPO_DIR")"
 VXEDGED="$WS/vxedge/target/debug/vxedged"
 VXEDGE="$WS/vxedge/target/debug/vxedge"
@@ -64,8 +74,8 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 # measurement window, collection. Before 2026-08-01 each runner re-implemented the sequence in
 # bash, and they drifted: governor pinning was missing from four of five, and exp-001 lost its
 # results-dir line to an edit that nothing caught until it ran.
-MANIFEST="$REPO_DIR/experiments/exp-002-ws"
-source "$REPO_DIR/scripts/lib/results_dir.sh"
+MANIFEST="$SANDBOX"
+source "$REPO_DIR/scripts/lib/results_dir.sh"   # shared: see the note at the top of this file
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002 "$QUICK" "$REPRO")"
 # The cpu governor is *pinned*, not merely recorded. Every campaign before 2026-07-31 only
 # wrote `cpu_governor` into results metadata and left whatever the host happened to be on —

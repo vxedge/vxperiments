@@ -1,0 +1,4 @@
+# Fetched by tools/fetch-parts.sh and verified against linux-probe.sha256 — 19 MB of kernel and
+# initramfs does not belong in git. The digest file beside it does, and is what makes the
+# fetched copy checkable.
+linux-probe/

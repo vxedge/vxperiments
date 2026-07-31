@@ -33,8 +33,16 @@ else
 fi
 
 echo "== runner preambles resolve their variables =="
-for f in scripts/run-exp-*.sh; do
-  name="$(basename "$f" .sh)"
+# Repo-level runners and sandboxed ones (experiments/<id>-ws/scripts/run.sh). A sandbox's
+# runner resolves its own location, so the probe is written *beside* it — writing it elsewhere
+# would test a script that thinks it lives somewhere it does not, which is how the first
+# version of this check reported a false failure on the first converted sandbox.
+for f in scripts/run-exp-*.sh experiments/*/scripts/run.sh; do
+  [[ -f "$f" ]] || continue
+  case "$f" in
+    experiments/*) name="$(basename "$(dirname "$(dirname "$f")")")" ;;
+    *) name="$(basename "$f" .sh)" ;;
+  esac
   # Cut at the daemon launch: everything before it is setup, everything after needs a daemon.
   cut="$(grep -n '"\$VXEDGED" --listen' "$f" | head -1 | cut -d: -f1)"
   if [[ -z "$cut" ]]; then
@@ -42,7 +50,7 @@ for f in scripts/run-exp-*.sh; do
     continue
   fi
 
-  probe="scripts/.check-preamble.sh"
+  probe="$(dirname "$f")/.check-preamble.sh"
   {
     # Stubs, so the preamble runs unprivileged and without built binaries. Each replaces a
     # *precondition*, never a variable the script is supposed to compute — the point is to
