@@ -1,0 +1,37 @@
+kind: experiment
+id: exp-002
+
+# H3: virtual-ECU packaging (full VM via libvirt vs microVM via raw QEMU vs container/netns)
+# measurably affects zone-to-gateway RTT. One variable — the packaging backend — over three
+# arms carrying the identical probe payload on one slice and one subnet. No competing load:
+# this measures packaging overhead in isolation.
+vehicles: [vx-h3-vehicle]
+baseline: bl-exp-002
+
+# One slice, because packaging is the variable. The QoS block matches the frozen manifest so
+# the HTB class the arms are shaped by is byte-for-byte the one the recorded numbers came from.
+network:
+  defaults:
+    bandwidth: 500000000
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 100, max_rate_mbps: 500, priority: 1 }
+
+# No `traffic_profiles`: the arms are probed sequentially on an otherwise idle topology, and
+# the probe is driven by the campaign runner rather than declared as offered load.
+
+method:
+  duration_s: 60
+  repetitions: 5
+  warmup_s: 10
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"   # vxprobe live exporter
+
+results:
+  artifact_dir: results/exp-002
+  upload: false

@@ -1,0 +1,8 @@
+# Package descriptor: identity and requirements, separate from `main.yaml` so a
+# version bump never touches experiment content.
+id: exp-002
+version: 0.1.0
+entry: main.yaml
+description: virtual-ECU packaging backend vs zone-to-gateway latency (H3)
+requires:
+  gpu: none

@@ -40,7 +40,11 @@ check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedg
 check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
-MANIFEST="$REPO_DIR/experiments/exp-002b.yaml"
+# Everything below runs from the §6.0 workspace: §6.1 manifests stopped being a
+# provisioning input on 2026-07-31, and `vxedge up`/`vxtelemetry` both read the
+# workspace directory directly. The frozen `../experiments/exp-*.yaml` files are kept as
+# provenance for the results already recorded against them, not as inputs.
+MANIFEST="$REPO_DIR/experiments/exp-002b-ws"
 source "$REPO_DIR/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002b "$QUICK" "$REPRO")"
 RUNTIME=$(mktemp -d /tmp/exp-002b.XXXXXX); SOCK="$RUNTIME/vxedge.sock"
@@ -49,7 +53,18 @@ RUNTIME=$(mktemp -d /tmp/exp-002b.XXXXXX); SOCK="$RUNTIME/vxedge.sock"
 ARMS=(container microvm-mmio libvirt-q35 q35-pci q35-vhost microvm-pci)
 declare -A ADDR=( [container]=10.101.0.11 [microvm-mmio]=10.101.0.12 [libvirt-q35]=10.101.0.13
                   [q35-pci]=10.101.0.14 [q35-vhost]=10.101.0.15 [microvm-pci]=10.101.0.16 )
-declare -A TAP=( [q35-pci]=vz3 [q35-vhost]=vz4 [microvm-pci]=vz5 )
+# Host interface names are derived from the device id (vxedge-core
+# gateway::ifnames): `vz-<id>` for the bridge access port, `vzp-<id>` for the
+# veth peer, shortened to a readable head plus a hash of the whole id when the
+# id does not fit the kernel's 15-byte limit. They are a pure function of the
+# device id, so they are stable across runs, reorderings and added devices —
+# which is what makes it safe for this script to name them at all. They
+# replaced positional `vz0`/`vz1` names on 2026-07-31. To look one up rather
+# than recompute it: `vxedge zone list` prints `port=` and `peer=` per device.
+declare -A TAP=( [q35-pci]=vz-node-q-691e     # node-q35-pci-01
+                 [q35-vhost]=vz-node-q-19a2   # node-q35-vhost-01
+                 [microvm-pci]=vz-node-m-ee41 # node-mvm-pci-01
+               )
 # Match strings verified against actual cmdlines produced by
 # vxedge-core::zones::backend: microvm/libvirt carry "vx.node=<node-id>" in
 # their kernel -append (NOT the "vx-<node-id>" runtime/pidfile name — those
@@ -59,9 +74,9 @@ declare -A MATCH=(
   [container]="node=vxprobe reflect"
   [microvm-mmio]="node=qemu-system.*node-mvm-mmio-01"
   [libvirt-q35]="node=qemu-system.*node-libvirt-01"
-  [q35-pci]="node=qemu-system.*ifname=vz3"
-  [q35-vhost]="node=qemu-system.*ifname=vz4"
-  [microvm-pci]="node=qemu-system.*ifname=vz5"
+  [q35-pci]="node=qemu-system.*ifname=vz-node-q-691e"
+  [q35-vhost]="node=qemu-system.*ifname=vz-node-q-19a2"
+  [microvm-pci]="node=qemu-system.*ifname=vz-node-m-ee41"
 )
 
 # WARM_S=10 meets the experiment-methodology skill's minimum
@@ -77,7 +92,7 @@ cleanup() {
   [[ -n "${TEL_PID:-}" ]] && kill "$TEL_PID" 2>/dev/null
   [[ -n "${SAMP_PID:-}" ]] && kill "$SAMP_PID" 2>/dev/null
   for f in "$RUNTIME"/qemu-*.pid; do [[ -f "$f" ]] && kill "$(cat "$f")" 2>/dev/null; done
-  for z in "${ZONE_OF[@]:-}"; do
+  for z in "${DEVICE_OF[@]:-}"; do
     "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "$z" >/dev/null 2>&1
   done
   "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$MANIFEST" >/dev/null 2>&1
@@ -143,12 +158,13 @@ wait_reflector() {
 # and produced 0-37% packet loss that varied wildly rep-to-rep on the same
 # arm — a measurement artifact, not a packaging effect (see run-env "isolation"
 # field, added below, for provenance on any archive predating this fix).
-declare -A ZONE_OF=( [container]=z-cont [microvm-mmio]=z-mvm-mmio [libvirt-q35]=z-libvirt )
+# One arm up at a time, addressed by device id (see run-exp-002.sh).
+declare -A DEVICE_OF=( [container]=node-cont-01 [microvm-mmio]=node-mvm-mmio-01 [libvirt-q35]=node-libvirt-01 )
 
 start_arm() {
   local arm="$1"
-  if [[ -n "${ZONE_OF[$arm]:-}" ]]; then
-    "$VXEDGE" --endpoint "unix://$SOCK" zone up --vxid "${ZONE_OF[$arm]}" >/dev/null
+  if [[ -n "${DEVICE_OF[$arm]:-}" ]]; then
+    "$VXEDGE" --endpoint "unix://$SOCK" zone up --vxid "${DEVICE_OF[$arm]}" >/dev/null
     if [[ "$arm" == "container" ]]; then
       ip netns exec vx-node-cont-01 "$VXPROBE" reflect --listen 0.0.0.0:9800 &>/dev/null &
       PIDS+=($!)
@@ -160,11 +176,11 @@ start_arm() {
 
 stop_arm() {
   local arm="$1"
-  if [[ -n "${ZONE_OF[$arm]:-}" ]]; then
+  if [[ -n "${DEVICE_OF[$arm]:-}" ]]; then
     if [[ "$arm" == "container" ]]; then
       for p in "${PIDS[@]}"; do kill "$p" 2>/dev/null || true; done; PIDS=()
     fi
-    "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "${ZONE_OF[$arm]}" >/dev/null
+    "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "${DEVICE_OF[$arm]}" >/dev/null
   else
     local f="$RUNTIME/qemu-$arm.pid"
     if [[ -f "$f" ]]; then
@@ -204,7 +220,7 @@ for rep in $(seq 1 "$REPS"); do
     env_metadata "$arm" "$rep" > "$INGEST/run-env.json"
     sleep "$WARM_S"
 
-    "$VXTELEMETRY" ingest --manifest "$MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" ingest --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --interval-s 5 --duration-s "$PROBE_S" &>/dev/null & TEL_PID=$!
     "$VXTELEMETRY" sample --match "${MATCH[$arm]}" --out-dir "$INGEST" \
       --interval-ms 500 --duration-s "$PROBE_S" &>/dev/null & SAMP_PID=$!
@@ -221,7 +237,7 @@ for rep in $(seq 1 "$REPS"); do
     wait "$TEL_PID" || echo "   $tag: WARNING vxtelemetry ingest exited non-zero — archive may be incomplete" >&2
     wait "$SAMP_PID" || echo "   $tag: WARNING vxtelemetry sample exited non-zero — archive may be incomplete" >&2
 
-    "$VXTELEMETRY" collect --manifest "$MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" collect --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --out "$RESULTS/$tag.zip" >/dev/null
     echo "   $tag: archived ($(jq -r '.rtt_us.p50' "$INGEST/probe-summary.json" 2>/dev/null || echo '?') us p50)"
     stop_arm "$arm"

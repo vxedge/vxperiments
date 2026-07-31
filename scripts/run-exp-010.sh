@@ -41,13 +41,13 @@
 #     fell back to vxprobe/vxtraffic's own 10s CLI default, which would have
 #     under-sampled tail percentiles). So the load sweep and the two-phase
 #     warmup/probe timing are both done via small manifest variants generated
-#     into $RUNTIME, not CLI flags — still fully manifest-driven, just two
-#     manifests instead of one for the two different phase durations needed
-#     (`infotainment-load` must outlive the probe's own shorter window so it's
-#     still driving load throughout, exactly like exp-001's own
+#     into $RUNTIME, not CLI flags — still fully workspace-driven, just two
+#     workspace variants instead of one for the two different phase durations
+#     needed (`infotainment-load` must outlive the probe's own shorter window
+#     so it's still driving load throughout, exactly like exp-001's own
 #     WARMUP_S+PROBE_S+4 duration on vxtraffic vs PROBE_S on vxprobe). Every
-#     archive's bundled manifest.yaml is still the canonical, unmodified
-#     experiment-defining exp-010.yaml (its sha256 stays constant across every
+#     archive bundles the canonical, unmodified exp-010-ws workspace under
+#     workspace/ (its workspace_sha256 stays constant across every
 #     rep/load, matching exp-001's own archive convention) — the swept load
 #     and phase durations live only in run-env.json's per-point metadata,
 #     same place exp-001 already records its own load value.
@@ -118,7 +118,10 @@ check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxagents" "$VXTRAFFIC" "$WS/vxagents/crates/vxtraffic"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
-CANONICAL_MANIFEST="$REPO_DIR/experiments/exp-010.yaml"
+# The §6.0 workspace is the input now: §6.1 manifests stopped being a provisioning input on
+# 2026-07-31. The frozen `../experiments/exp-010.yaml` stays as provenance for the results
+# already recorded against it.
+CANONICAL_WS="$REPO_DIR/experiments/exp-010-ws"
 source "$REPO_DIR/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-010 "$QUICK" "$REPRO")"
 RUNTIME=$(mktemp -d /tmp/exp-010.XXXXXX)
@@ -135,8 +138,8 @@ PIDS=()
 cleanup() {
   set +e
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
-  "$VXEDGE" --endpoint "unix://$SOCK" traffic down --manifest "$CANONICAL_MANIFEST" >/dev/null 2>&1
-  "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$CANONICAL_MANIFEST" >/dev/null 2>&1
+  "$VXEDGE" --endpoint "unix://$SOCK" traffic down --manifest "$CANONICAL_WS" >/dev/null 2>&1
+  "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$CANONICAL_WS" >/dev/null 2>&1
   [[ -n "${DAEMON_PID:-}" ]] && kill "$DAEMON_PID" 2>/dev/null
   echo "== restoring original cpu governor(s) =="
   restore_cpu_governors
@@ -205,15 +208,21 @@ for rep in $(seq 1 "$REPS"); do
     # Two manifest variants: same everything except experiment.duration_s
     # (and the swept bandwidth_mbps on the load variant) — see the header
     # comment for why TrafficUpRequest can't just take these as call params.
-    LOAD_MANIFEST="$RUNTIME/exp-010-load-$tag.yaml"
-    PROBE_MANIFEST="$RUNTIME/exp-010-probe-$tag.yaml"
-    sed -e "s/bandwidth_mbps: 400 /bandwidth_mbps: $load /" \
-        -e "s/duration_s: 60/duration_s: $((WARMUP_S + PROBE_S + 4))/" \
-        "$CANONICAL_MANIFEST" > "$LOAD_MANIFEST"
-    sed -e "s/duration_s: 60/duration_s: $PROBE_S/" \
-        "$CANONICAL_MANIFEST" > "$PROBE_MANIFEST"
+    # Two workspace variants: copies of the canonical one with `method.duration_s` (and the
+    # swept `bandwidth_mbps` on the load variant) patched in `main.yaml`. A workspace is a
+    # folder, so the variant is a folder — the vehicle and baseline are copied unchanged, which
+    # is what keeps the topology identical across the sweep.
+    LOAD_WS="$RUNTIME/exp-010-load-$tag"
+    PROBE_WS="$RUNTIME/exp-010-probe-$tag"
+    for variant in "$LOAD_WS" "$PROBE_WS"; do
+      rm -rf "$variant"; cp -r "$CANONICAL_WS" "$variant"; rm -rf "$variant/results"
+    done
+    sed -i -e "s/bandwidth_mbps: 400 /bandwidth_mbps: $load /" \
+           -e "s/duration_s: 60/duration_s: $((WARMUP_S + PROBE_S + 4))/" \
+           "$LOAD_WS/main.yaml"
+    sed -i -e "s/duration_s: 60/duration_s: $PROBE_S/" "$PROBE_WS/main.yaml"
 
-    "$VXEDGE" --endpoint "unix://$SOCK" up --manifest "$PROBE_MANIFEST"
+    "$VXEDGE" --endpoint "unix://$SOCK" up --manifest "$PROBE_WS"
 
     INGEST="$RUNTIME/ingest-$tag"
     mkdir -p "$INGEST"
@@ -221,7 +230,7 @@ for rep in $(seq 1 "$REPS"); do
 
     if [[ "$load" -gt 0 ]]; then
       echo "   starting infotainment-load @ ${load}mbit (runs $((WARMUP_S + PROBE_S + 4))s)"
-      "$VXEDGE" --endpoint "unix://$SOCK" traffic up --manifest "$LOAD_MANIFEST" \
+      "$VXEDGE" --endpoint "unix://$SOCK" traffic up --manifest "$LOAD_WS" \
         --profile infotainment-load
       pin_if_alive "$(cat "$RUNTIME/traffic-infotainment-load-load.pid" 2>/dev/null || true)"
     fi
@@ -229,7 +238,7 @@ for rep in $(seq 1 "$REPS"); do
     sleep "$WARMUP_S"
 
     echo "   starting adas-probe (1000pps, ${PROBE_S}s — blocks until the UE's PDU session + reflector are confirmed ready)"
-    "$VXEDGE" --endpoint "unix://$SOCK" traffic up --manifest "$PROBE_MANIFEST" \
+    "$VXEDGE" --endpoint "unix://$SOCK" traffic up --manifest "$PROBE_WS" \
       --profile adas-probe
     pin_if_alive "$(cat "$RUNTIME/traffic-adas-probe-send.pid" 2>/dev/null || true)"
 
@@ -241,15 +250,15 @@ for rep in $(seq 1 "$REPS"); do
       cp "$RUNTIME/traffic-infotainment-load-load.log" "$INGEST/traffic-summary.json"
     fi
 
-    "$VXEDGE" --endpoint "unix://$SOCK" traffic down --manifest "$PROBE_MANIFEST"
-    "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$PROBE_MANIFEST"
+    "$VXEDGE" --endpoint "unix://$SOCK" traffic down --manifest "$PROBE_WS"
+    "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$PROBE_WS"
 
     # --record-image: content-addressed identities of the images this
     # campaign actually ran (§13 reproducibility) land in each archive's
     # metadata.json. These names mirror FiveGLifecycleConfig::default() +
     # fiveg's mongo pin — the runner knows its images; vxtelemetry
     # deliberately doesn't guess (see its collect --help).
-    "$VXTELEMETRY" collect --manifest "$CANONICAL_MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" collect --workspace "$CANONICAL_WS" --ingest-dir "$INGEST" \
       --out "$RESULTS/$tag.zip" \
       --record-image vx5g-core --record-image vx5g-ran \
       --record-image docker.io/library/mongo:7 >/dev/null

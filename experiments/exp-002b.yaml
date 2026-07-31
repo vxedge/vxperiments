@@ -1,9 +1,11 @@
 # exp-002b — H3 decomposition: separate machine type, virtio transport,
 # vhost, and management layer; capture per-arm resource cost.
-# Six arms, identical payload/kernel/resources. Zone order fixes endpoint
-# indexes (vz0..vz5) — the runner depends on it. The three "mechanism" zones
-# (q35-pci / q35-vhost / mvm-pci) are never `zone up`'d: the gateway creates
-# their taps and the runner launches QEMU on them with the arm's exact flags.
+# Six arms, identical payload/kernel/resources. Each node's host interface is
+# derived from its node id (vxedge-core gateway::ifnames), so zone order fixes
+# nothing and the runner names taps by id-derived name, not by position. The
+# three "mechanism" zones (q35-pci / q35-vhost / mvm-pci) are never `zone up`'d:
+# the gateway creates their taps and the runner launches QEMU on them with the
+# arm's exact flags. Migrated to §6.0 as ../exp-002b-ws (2026-07-31).
 experiment:
   id: exp-002b
   name: packaging decomposition + resource cost
@@ -24,7 +26,7 @@ network:
       qos: { min_rate_mbps: 100, max_rate_mbps: 500, priority: 1 }
 
 zones:
-  - id: z-cont            # endpoint vz0 (veth)
+  - id: z-cont            # vz-node-c-32cc (veth)
     role: front-left
     nodes:
       - id: node-cont-01
@@ -32,7 +34,7 @@ zones:
         image: { url: local/vxprobe:host-process, kind: container }
         backend: container
         network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.11/24 }]
-  - id: z-mvm-mmio        # endpoint vz1 (tap) — platform microvm arm
+  - id: z-mvm-mmio        # vz-node-m-8a31 (tap) — platform microvm arm
     role: front-left
     nodes:
       - id: node-mvm-mmio-01
@@ -40,7 +42,7 @@ zones:
         image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
         backend: qemu-microvm
         network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.12/24 }]
-  - id: z-libvirt         # endpoint vz2 (tap) — platform libvirt arm
+  - id: z-libvirt         # vz-node-l-de44 (tap) — platform libvirt arm
     role: front-left
     nodes:
       - id: node-libvirt-01
@@ -48,7 +50,7 @@ zones:
         image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
         backend: libvirt
         network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.13/24 }]
-  - id: z-q35-pci         # endpoint vz3 (tap) — runner-launched QEMU
+  - id: z-q35-pci         # vz-node-q-691e (tap) — runner-launched QEMU
     role: front-left
     nodes:
       - id: node-q35-pci-01
@@ -56,7 +58,7 @@ zones:
         image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
         backend: qemu-microvm    # tap endpoint; never zone-up'd
         network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.14/24 }]
-  - id: z-q35-vhost       # endpoint vz4 (tap) — runner-launched QEMU
+  - id: z-q35-vhost       # vz-node-q-19a2 (tap) — runner-launched QEMU
     role: front-left
     nodes:
       - id: node-q35-vhost-01
@@ -64,7 +66,7 @@ zones:
         image: { url: ../../vxzones/images/linux-probe/bundle, kind: rtimage }
         backend: qemu-microvm
         network: [{ iface: eth0, vlan: 101, slice: adas, ip: 10.101.0.15/24 }]
-  - id: z-mvm-pci         # endpoint vz5 (tap) — runner-launched QEMU
+  - id: z-mvm-pci         # vz-node-m-ee41 (tap) — runner-launched QEMU
     role: front-left
     nodes:
       - id: node-mvm-pci-01

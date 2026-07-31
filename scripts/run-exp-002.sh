@@ -55,7 +55,11 @@ check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedg
 check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
-MANIFEST="$REPO_DIR/experiments/exp-002.yaml"
+# Everything below runs from the §6.0 workspace: §6.1 manifests stopped being a
+# provisioning input on 2026-07-31, and `vxedge up`/`vxtelemetry` both read the
+# workspace directory directly. The frozen `../experiments/exp-*.yaml` files are kept as
+# provenance for the results already recorded against them, not as inputs.
+MANIFEST="$REPO_DIR/experiments/exp-002-ws"
 source "$REPO_DIR/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002 "$QUICK" "$REPRO")"
 RUNTIME=$(mktemp -d /tmp/exp-002.XXXXXX)
@@ -63,7 +67,10 @@ SOCK="$RUNTIME/vxedge.sock"
 
 ARMS=(container microvm libvirt)
 declare -A ARM_ADDR=( [container]=10.101.0.11 [microvm]=10.101.0.12 [libvirt]=10.101.0.13 )
-declare -A ZONE_OF=( [container]=z-cont [microvm]=z-microvm [libvirt]=z-libvirt )
+# One arm up at a time, addressed by device id. `zone up --vxid` takes a zone
+# (a region) or a single device; the three arms are three packagings of one
+# region, so the device id is what selects exactly one of them.
+declare -A DEVICE_OF=( [container]=node-cont-01 [microvm]=node-microvm-01 [libvirt]=node-libvirt-01 )
 
 # WARM_S=10 meets the experiment-methodology skill's minimum
 # (max(10% of PROBE_S, 10s) = 10s at PROBE_S=60); bumped from 5 (matches the
@@ -79,7 +86,7 @@ cleanup() {
   set +e
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
   [[ -n "${TEL_PID:-}" ]] && kill "$TEL_PID" 2>/dev/null
-  for z in "${ZONE_OF[@]:-}"; do
+  for z in "${DEVICE_OF[@]:-}"; do
     "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "$z" >/dev/null 2>&1
   done
   "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$MANIFEST" >/dev/null 2>&1
@@ -128,7 +135,7 @@ wait_reflector() { # $1=addr — poll until the reflector answers (VM boot etc.)
 
 start_arm() {
   local arm="$1"
-  "$VXEDGE" --endpoint "unix://$SOCK" zone up --vxid "${ZONE_OF[$arm]}" >/dev/null
+  "$VXEDGE" --endpoint "unix://$SOCK" zone up --vxid "${DEVICE_OF[$arm]}" >/dev/null
   if [[ "$arm" == "container" ]]; then
     ip netns exec vx-node-cont-01 "$VXPROBE" reflect --listen 0.0.0.0:9800 &>/dev/null &
     PIDS+=($!)
@@ -141,7 +148,7 @@ stop_arm() {
     for p in "${PIDS[@]}"; do kill "$p" 2>/dev/null || true; done
     PIDS=()
   fi
-  "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "${ZONE_OF[$arm]}" >/dev/null
+  "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "${DEVICE_OF[$arm]}" >/dev/null
   sleep 1  # let the port fully release before the next arm claims it
 }
 
@@ -171,7 +178,7 @@ for rep in $(seq 1 "$REPS"); do
     env_metadata "$arm" "$rep" > "$INGEST/run-env.json"
     sleep "$WARM_S"
 
-    "$VXTELEMETRY" ingest --manifest "$MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" ingest --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --interval-s 5 --duration-s "$PROBE_S" &>/dev/null & TEL_PID=$!
     echo "   $tag: probing ${PROBE_S}s @ ${PROBE_PPS}pps"
     # A zero-received measurement makes vxprobe exit 1 by design (it's a
@@ -185,7 +192,7 @@ for rep in $(seq 1 "$REPS"); do
     fi
     wait "$TEL_PID" || echo "   $tag: WARNING vxtelemetry ingest exited non-zero — archive may be incomplete" >&2
 
-    "$VXTELEMETRY" collect --manifest "$MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" collect --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --out "$RESULTS/$tag.zip" >/dev/null
     echo "   $tag: archived ($(jq -r '.rtt_us.p99' "$INGEST/probe-summary.json" 2>/dev/null || echo '?') us p99)"
     stop_arm "$arm"

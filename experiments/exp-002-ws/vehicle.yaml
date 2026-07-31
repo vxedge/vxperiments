@@ -1,0 +1,40 @@
+kind: vehicle
+id: vx-h3-vehicle
+class: road
+subtype: car
+
+# The system under test is one ECU position realised three ways, so all three arms sit in the
+# same region — the packaging backend is the variable, and putting the arms in different
+# regions would make the topology differ between them as well.
+zones:
+  front-left: {}
+
+# Device ids are the frozen manifest's node ids, so the two forms stay diffable and the
+# recorded results keep naming the same things. `backend` is the experimental variable itself:
+# identical software, three ways of running it.
+devices:
+  node-cont-01:    { role: ecu, zone: front-left, backend: container }
+  node-microvm-01: { role: ecu, zone: front-left, backend: qemu-microvm }
+  node-libvirt-01: { role: ecu, zone: front-left, backend: libvirt }
+
+# One function per arm rather than one function on three devices: a function is deployed on
+# exactly one device, and H3 needs the *same behaviour* running on three of them. They are
+# three deployments of one reflector, which is what makes the arms comparable.
+functions:
+  reflector-cont:    { deployed_on: node-cont-01 }
+  reflector-microvm: { deployed_on: node-microvm-01 }
+  reflector-libvirt: { deployed_on: node-libvirt-01 }
+
+# The three arms share one VLAN and are told apart *only* by address — that is how the probe
+# reaches each arm separately, and it is why the endpoint object form exists. A bare
+# `node-cont-01:eth0` would validate and then leave three arms answering at nothing.
+links:
+  - id: arm-cont
+    endpoints: [{ node: node-cont-01, port: eth0, ip: 10.101.0.11/24 }]
+    slice: adas
+  - id: arm-microvm
+    endpoints: [{ node: node-microvm-01, port: eth0, ip: 10.101.0.12/24 }]
+    slice: adas
+  - id: arm-libvirt
+    endpoints: [{ node: node-libvirt-01, port: eth0, ip: 10.101.0.13/24 }]
+    slice: adas

@@ -5,15 +5,16 @@
 # overhead in isolation. Schema: docs/ARCHITECTURE.md §6.1.
 #
 # One node per zone (mirrors exp-002b's pattern) so the runner can bring up
-# exactly one arm's node at a time via `vxedge zone up --vxid <that zone>` —
+# exactly one arm's node at a time via `vxedge zone up --vxid <that node>` —
 # the original exp-002 grouped all three nodes under one zone, which meant
 # `zone up` always started all three backends concurrently even though only
 # one was being measured at a time. That was hardened out of exp-002b after
 # a real concurrent-VM CPU-contention bug (docs/STATUS.md "Anomaly caught
 # and fixed"); this retrofits the same fix here. Same nodes/IPs/backends as
 # before — only the zone grouping changed, which doesn't affect what's
-# measured (gateway endpoint traversal order is unchanged: cont, microvm,
-# libvirt, same as originally).
+# measured. Migrated to §6.0 as ../exp-002-ws (2026-07-31); host interface
+# names are derived from the node id, so traversal order decides nothing,
+# and `zone up --vxid` selects an arm by its node id.
 experiment:
   id: exp-002
   name: packaging backend latency comparison

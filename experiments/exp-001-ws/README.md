@@ -15,14 +15,25 @@ through this workspace. Phase-1 results reproduce at the `v0.1.0` tag regardless
 here can invalidate them.
 
 **Verified**: this workspace and the frozen manifest produce a byte-identical `GatewayPlan` and
-`TrafficPlan` — same endpoint names (`vz0`/`vzp0`, `vz1`/`vzp1`), VLANs, slices and addresses.
-That matters because `scripts/run-exp-001.sh` addresses `vzp0`/`vzp1` by name; a migration that
-renumbered them would keep validating and quietly measure the wrong interface. Checked with:
+`TrafficPlan` — same endpoint names, VLANs, slices and addresses. That matters because
+`scripts/run-exp-001.sh` addresses the veth peers by name; a migration that moved them would
+keep validating and quietly measure the wrong interface. Checked with:
 
 ```bash
-cargo run -p vxedge-core --example lower-workspace -- --plan experiments/exp-001.yaml
-cargo run -p vxedge-core --example lower-workspace -- --plan experiments/exp-001-ws
+# One planning path, so there is nothing left to diff: validating the workspace runs the same
+# cross-file checks and model invariants `up` runs.
+vxedge manifest validate --manifest experiments/exp-001-ws --json
 ```
+
+The plan-equivalence check that signed this migration off used `plan-diff`, which compared the
+§6.0 and §6.1 planning paths. Both the example and §6.1's planning path are gone (2026-07-31),
+so the result is recorded here rather than re-runnable: **IDENTICAL** — same interface names,
+vlans, slices, addresses, bundles and backends.
+
+Those names changed once, on 2026-07-31: positional `vz0`/`vzp0` became `vz-node-a-c06a`/
+`vzp-node-a-c06a`, derived from the device id so that adding or reordering a device can no
+longer renumber anything. Both forms moved together, so this workspace stayed identical to the
+manifest across the change.
 
 **Not verified**: p50/p95/p99 equivalence against the frozen campaign. That needs a full run on
 a host where the daemon can provision (root, or passwordless sudo for `ip`/`bridge`/`tc`).

@@ -57,7 +57,11 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 check_fresh_bin "$WS/vxota" "$VXOTA" "$WS/vxota/crates/vxota"
 check_fresh_bin "$WS/vxota" "$VXOTA_PROBE" "$WS/vxota/crates/vxota-probe"
 
-MANIFEST="$REPO_DIR/experiments/exp-003.yaml"
+# Everything below runs from the §6.0 workspace: §6.1 manifests stopped being a
+# provisioning input on 2026-07-31, and `vxedge up`/`vxtelemetry` both read the
+# workspace directory directly. The frozen `../experiments/exp-*.yaml` files are kept as
+# provenance for the results already recorded against them, not as inputs.
+MANIFEST="$REPO_DIR/experiments/exp-003-ws"
 source "$REPO_DIR/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-003 "$QUICK" "$REPRO")"
 RUNTIME=$(mktemp -d /tmp/exp-003.XXXXXX)
@@ -137,7 +141,7 @@ for rep in $(seq 1 "$REPS"); do
     echo "-- $tag: gateway + ota service up"
     "${VXEDGE_C[@]}" up --manifest "$MANIFEST" >/dev/null
 
-    ip addr replace 10.101.0.2/24 dev vzp0 && ip link set vzp0 up
+    ip addr replace 10.101.0.2/24 dev vzp-node-a-c06a && ip link set vzp-node-a-c06a up
     ip link add link vxup0p name vxup0p.101 type vlan id 101
     ip addr replace 10.101.0.1/24 dev vxup0p.101 && ip link set vxup0p.101 up
     ip link set vxup0p up
@@ -169,7 +173,7 @@ for rep in $(seq 1 "$REPS"); do
     echo "   warmup ${WARM_S}s ($arm)"
     sleep "$WARM_S"
 
-    "$VXTELEMETRY" ingest --manifest "$MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" ingest --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --interval-s 5 --duration-s "$PROBE_S" &>/dev/null & TEL_PID=$!
 
     echo "   probing ${PROBE_S}s @ ${PROBE_PPS}pps on adas slice ($arm)"
@@ -183,7 +187,7 @@ for rep in $(seq 1 "$REPS"); do
     for p in "${PIDS[@]}"; do kill "$p" 2>/dev/null || true; done
     PIDS=()
 
-    "$VXTELEMETRY" collect --manifest "$MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" collect --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --out "$RESULTS/$tag.zip" >/dev/null
     echo "   archived $RESULTS/$tag.zip ($(jq -r '.rtt_us.p99' "$INGEST/probe-summary.json" 2>/dev/null || echo '?') us p99)"
 

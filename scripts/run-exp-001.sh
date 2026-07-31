@@ -2,12 +2,11 @@
 # exp-001 campaign runner — ADAS slice isolation under infotainment load (H1).
 #
 # Run as root from the vxperiments repo root:
-#   sudo -E env "PATH=$PATH" ./scripts/run-exp-001.sh [--quick|--repro] [--workspace]
+#   sudo -E env "PATH=$PATH" ./scripts/run-exp-001.sh [--quick|--repro]
 #
-# --workspace: provision from the §6.0 workspace (experiments/exp-001-ws) instead of the frozen
-# §6.1 manifest, holding everything downstream identical. This is the migration equivalence
-# run — results land in results/exp-001-workspace-<date>/ and are compared against the frozen
-# campaign, which stays authoritative until they agree.
+# Provisions from the §6.0 workspace (experiments/exp-001-ws). The frozen results in
+# results/exp-001/ were produced from the §6.1 manifest and stay authoritative until a
+# campaign from the workspace reproduces them — that comparison is the point of --repro.
 #
 # --repro: full campaign written to results/exp-001-repro-<date>/ — the frozen
 #          results/exp-001/ dir is never overwritten in place (lib/results_dir.sh).
@@ -18,20 +17,20 @@
 # default: 5 repetitions x 5 load levels, 10 s warmup + 60 s measured probe
 #          window per point (1000 pps => 60k samples: p99 well-supported).
 #
-# Topology per run: vxedge up provisions vxbr0 + shaped trunk (vxup0) +
-# endpoints vz0(vlan101)/vz1(vlan103). This script adds experiment IPs:
-#   vzp0 10.101.0.2/24  <-- adas probe source
-#   vzp1 10.103.0.2/24  <-- infotainment load source
+# Topology per run: vxedge up provisions vxbr0 + shaped trunk (vxup0) + one
+# endpoint per node (node-adas-probe-01 on vlan101, node-infot-load-01 on
+# vlan103). This script adds experiment IPs:
+#   vzp-node-a-c06a 10.101.0.2/24  <-- adas probe source (node-adas-probe-01)
+#   vzp-node-i-2921 10.103.0.2/24  <-- infotainment load source (node-infot-load-01)
 #   vxup0p.101 10.101.0.1/24  <-- vxprobe reflector (across the bottleneck)
 #   vxup0p.103 10.103.0.1/24  <-- load sink address (fire-and-forget)
 set -euo pipefail
 
-QUICK=0; REPRO=0; WORKSPACE=0
+QUICK=0; REPRO=0
 for arg in "$@"; do case "$arg" in
   --quick) QUICK=1 ;;
   --repro) REPRO=1 ;;
-  --workspace) WORKSPACE=1 ;;
-  *) echo "error: unknown argument '$arg' (supported: --quick, --repro, --workspace)" >&2; exit 1 ;;
+  *) echo "error: unknown argument '$arg' (supported: --quick, --repro)" >&2; exit 1 ;;
 esac; done
 
 if [[ $(id -u) -ne 0 ]]; then
@@ -62,46 +61,24 @@ check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxagents" "$VXTRAFFIC" "$WS/vxagents/crates/vxtraffic"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
-# --workspace provisions from the §6.0 workspace instead of the frozen §6.1 manifest.
-#
-# This is the *migration equivalence* run: everything downstream of provisioning is held
-# byte-identical — same host-side vzp0/vzp1 addressing, same vxprobe/vxtraffic invocations,
-# same sweep — so the only variable is which form the gateway was provisioned from. Both forms
-# are already known to produce an identical GatewayPlan; this checks that the numbers agree too.
+# The migration equivalence question this campaign answers: the workspace and the frozen §6.1
+# manifest are already known to produce an identical GatewayPlan, and everything downstream of
+# provisioning is held byte-identical — same host-side veth-peer addressing, same
+# vxprobe/vxtraffic invocations, same sweep — so a rerun tests whether the *numbers* agree too.
 #
 # Deliberately NOT using `vxedge experiment up` here, even though it exists: that also brings
-# the zones up, which moves vzp0/vzp1 into node netns and changes the measurement path. Running
+# the zones up, which moves the veth peers into node netns and changes the measurement path. Running
 # the agents inside the zones is more faithful and is the direction of travel (TASKS.md), but it
 # is a different measurement and needs its own baseline — mixing it into an equivalence check
 # would confound the two.
-if [[ $WORKSPACE -eq 1 ]]; then
-  MANIFEST="$REPO_DIR/experiments/exp-001-ws"
-else
-  MANIFEST="$REPO_DIR/experiments/exp-001.yaml"
-fi
-source "$REPO_DIR/scripts/lib/results_dir.sh"
-RESULTS="$(resolve_results_dir "$REPO_DIR" exp-001 "$QUICK" "$REPRO")"
-# An equivalence run is not the frozen campaign and must never land on top of it — including
-# the --quick and --repro dirs, which are shared with the frozen path and would otherwise be
-# silently overwritten by a run provisioned from a different source.
-if [[ $WORKSPACE -eq 1 ]]; then
-  if [[ $QUICK -eq 1 ]]; then
-    RESULTS="$REPO_DIR/results/exp-001-workspace-quick"
-  else
-    RESULTS="$REPO_DIR/results/exp-001-workspace-$(date +%Y-%m-%d)"
-  fi
-fi
+# Everything below runs from the §6.0 workspace: §6.1 manifests stopped being a
+# provisioning input on 2026-07-31, and `vxedge up`/`vxtelemetry` both read the
+# workspace directory directly. The frozen `../experiments/exp-*.yaml` files are kept as
+# provenance for the results already recorded against them, not as inputs.
+MANIFEST="$REPO_DIR/experiments/exp-001-ws"
 
 RUNTIME=$(mktemp -d /tmp/exp-001.XXXXXX)
 
-# vxtelemetry still consumes §6.1 files and cannot read a workspace folder. `vxedged` writes the
-# manifest it actually provisioned from to <runtime-dir>/manifest.yaml — in workspace mode that
-# is the lowered document, which exists nowhere else on disk. Reading it back means the archive
-# records what genuinely ran rather than a manifest reconstructed alongside it.
-TELEMETRY_MANIFEST="$MANIFEST"
-if [[ $WORKSPACE -eq 1 ]]; then
-  TELEMETRY_MANIFEST="$RUNTIME/manifest.yaml"
-fi
 SOCK="$RUNTIME/vxedge.sock"
 
 # --- campaign profile ---------------------------------------------------------
@@ -157,8 +134,8 @@ for rep in $(seq 1 "$REPS"); do
     "$VXEDGE" --endpoint "unix://$SOCK" up --manifest "$MANIFEST" >/dev/null
 
     # Experiment IP wiring (fresh each cycle; interfaces are recreated by up).
-    ip addr replace 10.101.0.2/24 dev vzp0 && ip link set vzp0 up
-    ip addr replace 10.103.0.2/24 dev vzp1 && ip link set vzp1 up
+    ip addr replace 10.101.0.2/24 dev vzp-node-a-c06a && ip link set vzp-node-a-c06a up
+    ip addr replace 10.103.0.2/24 dev vzp-node-i-2921 && ip link set vzp-node-i-2921 up
     ip link add link vxup0p name vxup0p.101 type vlan id 101
     ip link add link vxup0p name vxup0p.103 type vlan id 103
     ip addr replace 10.101.0.1/24 dev vxup0p.101 && ip link set vxup0p.101 up
@@ -180,7 +157,7 @@ for rep in $(seq 1 "$REPS"); do
     echo "   warmup ${WARMUP_S}s under load=${load}mbit"
     sleep "$WARMUP_S"
 
-    "$VXTELEMETRY" ingest --manifest "$TELEMETRY_MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" ingest --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --interval-s 5 --duration-s "$PROBE_S" &>/dev/null & PIDS+=($!)
     TEL_PID=$!
 
@@ -194,7 +171,7 @@ for rep in $(seq 1 "$REPS"); do
     for p in "${PIDS[@]}"; do kill "$p" 2>/dev/null || true; done
     PIDS=()
 
-    "$VXTELEMETRY" collect --manifest "$TELEMETRY_MANIFEST" --ingest-dir "$INGEST" \
+    "$VXTELEMETRY" collect --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --out "$RESULTS/$tag.zip" >/dev/null
     echo "   archived $RESULTS/$tag.zip ($(jq -r '.rtt_us.p99' "$INGEST/probe-summary.json" 2>/dev/null || echo '?') us p99)"
 

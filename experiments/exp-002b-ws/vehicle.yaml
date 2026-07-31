@@ -1,0 +1,53 @@
+kind: vehicle
+id: vx-h3b-vehicle
+class: road
+subtype: car
+
+# Six realisations of one ECU position, so one region — see exp-002-ws/vehicle.yaml. Holding
+# the topology identical across arms is the whole design: everything but the packaging must be
+# the same, or the difference measured is not the difference claimed.
+zones:
+  front-left: {}
+
+# Device ids are the frozen manifest's node ids. Three of these devices are deliberately never
+# brought up by `vxedge zone up`: the gateway creates their taps and the campaign runner
+# launches QEMU on them with the arm's exact machine/transport/vhost flags, which is the only
+# way to vary those mechanisms one at a time. They are declared here because the *tap* is part
+# of the topology even when the guest on it is the runner's job.
+devices:
+  node-cont-01:      { role: ecu, zone: front-left, backend: container }
+  node-mvm-mmio-01:  { role: ecu, zone: front-left, backend: qemu-microvm }
+  node-libvirt-01:   { role: ecu, zone: front-left, backend: libvirt }
+  node-q35-pci-01:   { role: ecu, zone: front-left, backend: qemu-microvm }
+  node-q35-vhost-01: { role: ecu, zone: front-left, backend: qemu-microvm }
+  node-mvm-pci-01:   { role: ecu, zone: front-left, backend: qemu-microvm }
+
+functions:
+  reflector-cont:      { deployed_on: node-cont-01 }
+  reflector-mvm-mmio:  { deployed_on: node-mvm-mmio-01 }
+  reflector-libvirt:   { deployed_on: node-libvirt-01 }
+  reflector-q35-pci:   { deployed_on: node-q35-pci-01 }
+  reflector-q35-vhost: { deployed_on: node-q35-vhost-01 }
+  reflector-mvm-pci:   { deployed_on: node-mvm-pci-01 }
+
+# Six arms, one VLAN, one subnet: the address is what tells them apart, and the probe reaches
+# each arm by its own.
+links:
+  - id: arm-cont
+    endpoints: [{ node: node-cont-01, port: eth0, ip: 10.101.0.11/24 }]
+    slice: adas
+  - id: arm-mvm-mmio
+    endpoints: [{ node: node-mvm-mmio-01, port: eth0, ip: 10.101.0.12/24 }]
+    slice: adas
+  - id: arm-libvirt
+    endpoints: [{ node: node-libvirt-01, port: eth0, ip: 10.101.0.13/24 }]
+    slice: adas
+  - id: arm-q35-pci
+    endpoints: [{ node: node-q35-pci-01, port: eth0, ip: 10.101.0.14/24 }]
+    slice: adas
+  - id: arm-q35-vhost
+    endpoints: [{ node: node-q35-vhost-01, port: eth0, ip: 10.101.0.15/24 }]
+    slice: adas
+  - id: arm-mvm-pci
+    endpoints: [{ node: node-mvm-pci-01, port: eth0, ip: 10.101.0.16/24 }]
+    slice: adas

@@ -1,0 +1,16 @@
+kind: baseline
+id: bl-exp-002b
+
+# Identical payload on every arm — the same guest bundle for the five VM arms and vxprobe as a
+# host process for the container arm. If the software differed between arms, the decomposition
+# would be measuring software, not mechanism.
+parts:
+  - ref: local/vxprobe:host-process
+    target_ids: reflector-cont
+  - ref: ../../../vxzones/images/linux-probe/bundle
+    target_ids:
+      - reflector-mvm-mmio
+      - reflector-libvirt
+      - reflector-q35-pci
+      - reflector-q35-vhost
+      - reflector-mvm-pci

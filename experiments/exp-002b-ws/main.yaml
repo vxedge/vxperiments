@@ -1,0 +1,32 @@
+kind: experiment
+id: exp-002b
+
+# H3 decomposition. exp-002 shows *that* packaging costs latency; this separates the effect
+# into its parts — machine type (microvm vs q35) at fixed virtio-pci transport, transport
+# (MMIO vs PCI) at fixed microvm machine, vhost-net on/off at fixed q35+pci, and management
+# (raw QEMU vs libvirt) at fixed q35+pci — and records each arm's CPU/RSS cost.
+vehicles: [vx-h3b-vehicle]
+baseline: bl-exp-002b
+
+network:
+  defaults:
+    bandwidth: 500000000
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 100, max_rate_mbps: 500, priority: 1 }
+
+method:
+  duration_s: 60
+  repetitions: 5
+  warmup_s: 10
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"   # vxprobe live exporter
+
+results:
+  artifact_dir: results/exp-002b
+  upload: false

@@ -41,6 +41,18 @@ def json_lenient(raw: bytes):
     if start < 0:
         raise ValueError("no JSON object found")
     return json.loads(text[start:])
+def input_sha(meta):
+    """Checksum of what the run provisioned from.
+
+    Archives written before 2026-07-31 carry `manifest_sha256` (a hash of the §6.1 manifest);
+    later ones carry `workspace_sha256` (a hash of every file of the §6.0 workspace). Both
+    answer the same question — did every repetition run from the same input — so analysis
+    accepts either and refuses only when an archive carries neither.
+    """
+    for key in ("workspace_sha256", "manifest_sha256"):
+        if key in meta:
+            return meta[key]
+    raise SystemExit("archive metadata.json has no workspace_sha256 or manifest_sha256")
 
 
 def load_runs(results_dir: Path):
@@ -59,7 +71,7 @@ def load_runs(results_dir: Path):
                 "load_mbps": int(m.group(2)),
                 "probe": probe,
                 "env": env,
-                "manifest_sha256": meta["manifest_sha256"],
+                "input_sha256": input_sha(meta),
                 "archive": path.name,
             }
         )
@@ -108,9 +120,9 @@ def main():
     if not runs:
         sys.exit(f"no rep*-load*.zip archives in {results_dir}")
 
-    shas = {r["manifest_sha256"] for r in runs}
+    shas = {r["input_sha256"] for r in runs}
     if len(shas) != 1:
-        sys.exit(f"REFUSING: archives span {len(shas)} manifest checksums — not one experiment")
+        sys.exit(f"REFUSING: archives span {len(shas)} input checksums — not one experiment")
     quick = any(r["env"].get("quick_profile") for r in runs)
 
     by_load = defaultdict(list)
@@ -147,7 +159,7 @@ def main():
     lines = [
         "# exp-010 — H2 real S-NSSAI slicing vs static VLAN mapping (snssai arm)",
         "",
-        f"- runs: {len(runs)} archives, manifest sha256 `{next(iter(shas))[:12]}…`",
+        f"- runs: {len(runs)} archives, input sha256 `{next(iter(shas))[:12]}…`",
         f"- probe: {env['probe_pps']} pps x {env['probe_window_s']} s per point, "
         f"warmup {env['warmup_s']} s discarded before probing",
         f"- host: kernel {env['kernel']}, PREEMPT_RT={env['preempt_rt']}, "

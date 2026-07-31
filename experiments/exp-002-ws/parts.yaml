@@ -1,0 +1,12 @@
+kind: baseline
+id: bl-exp-002
+
+# The H3 control: one payload, three packagings. The container arm runs vxprobe as a host
+# process (`local/…` names nothing in a registry, so there is nothing to pin); the two VM arms
+# boot the *same* guest bundle, so any difference between them is the packaging and not the
+# software.
+parts:
+  - ref: local/vxprobe:host-process
+    target_ids: reflector-cont
+  - ref: ../../../vxzones/images/linux-probe/bundle
+    target_ids: [reflector-microvm, reflector-libvirt]

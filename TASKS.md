@@ -75,7 +75,9 @@
       `--quick` mode + analyzer, chained, ~5 min total, single PASS/FAIL summary. Keeps
       the H1/H3/H4 pipelines verifiably alive after any change; full campaigns and
       `--repro` reruns stay deliberate/manual (idle host, methodology skill)
-- [ ] CI: manifest-validation on every PR (`vxedge manifest validate` over experiments/ and
+- [ ] CI: workspace-validation on every PR (`vxedge manifest validate --manifest <ws-dir>` over
+      every `experiments/*-ws/`; the frozen `experiments/*.yaml` get a §6.1 shape check only and
+      are provenance, not inputs) over experiments/ and
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
       (§13 on-demand reproduction; needs KVM-capable runner) — phase 2
@@ -266,7 +268,7 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 
 - [x] **`exp-001` → workspace form** (2026-07-30, `experiments/exp-001-ws/`) — **structurally
       equivalent**: both forms produce a byte-identical `GatewayPlan` and `TrafficPlan` (same
-      endpoint names `vz0`/`vzp0`, `vz1`/`vzp1`, vlans, slices, addresses). That is the check
+      endpoint names, vlans, slices, addresses). That is the check
       that matters rather than a YAML diff — the forms legitimately differ in ids and defaults
       while planning identically, and `run-exp-001.sh` addresses `vzp0`/`vzp1` by name, so a
       renumbering would keep validating and quietly measure the wrong interface. Locked in by a
@@ -278,14 +280,14 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
       variable, so exp-002 was blocked too); `local/vxprobe:host-process` was rejected as an
       unpinned published ref though it names no artifact; and `vxedged` sudo-ed even when
       already root, which is how the campaign scripts run it. All fixed in `vxedge`.
-  - [ ] **Numerical equivalence** — `./scripts/run-exp-001.sh --workspace` provisions from the
-        workspace and holds everything downstream byte-identical (same host-side `vzp0`/`vzp1`
-        addressing, same agent invocations, same sweep), so the only variable is which form the
-        gateway came from. Results land in `results/exp-001-workspace-<date>/`. Until p50/p95/p99
-        agree with the frozen campaign, `experiments/exp-001.yaml` stays authoritative.
+  - [ ] **Numerical equivalence** — `./scripts/run-exp-001.sh --repro` now provisions from the
+        workspace (the only form there is since 2026-07-31) and holds everything downstream
+        identical, so the only variable is which form the gateway came from. Until p50/p95/p99
+        agree with the frozen campaign, the recorded `results/exp-001/` stays authoritative.
+        This is part of docs/TASKS.md item 7 and needs a provisioning-capable host.
   - [ ] **Faithful measurement: run the agents inside the zones** — the direction of travel, and
         the reason `--workspace` deliberately does *not* use `vxedge experiment up`. The frozen
-        campaign treats the host-side veth peers (`vzp0`/`vzp1`) as if they were the ECUs;
+        campaign treats the host-side veth peers as if they were the ECUs;
         `experiment up` actually brings the zones up, which moves those peers into node netns and
         renames them `eth0`. Running vxprobe/vxtraffic inside the zone netns measures the path an
         ECU really takes — across the zone boundary — instead of a host process pretending to be
@@ -293,36 +295,42 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
         mixed into the equivalence check above: do that first, then re-baseline here.
         Touches `run-exp-001.sh` (agents via `ip netns exec vx-<node-id>`), and the same change
         applies to exp-003. Blocked on nothing.
-- [ ] **`exp-003` → workspace form.**
-- [ ] **`exp-010` → workspace form.** Exercises `mode: s-nssai` lowering, which nothing has
-      covered yet — the VLAN path is the only one with a live consumer today.
-- [ ] **`exp-002`/`exp-002b` → workspace form** — **BLOCKED 2026-07-31 on two §6.0 gaps**, found
-      by attempting it. Both are schema gaps in `vxedge`, not problems with these experiments.
+- [x] **`exp-003` → workspace form** (2026-07-30, `experiments/exp-003-ws/`).
+- [x] **`exp-010` → workspace form** (2026-07-30, `experiments/exp-010-ws/`) — the only
+      `mode: s-nssai` coverage there is; its `FiveGPlan` matches the frozen manifest's session
+      for session (SUPIs, UE subnets, tun devices).
+- [x] **`exp-002`/`exp-002b` → workspace form** (2026-07-31, `experiments/exp-002-ws/`,
+      `exp-002b-ws/`) — both produce plans identical to the manifests they replace: same
+      interface names, vlans, slices, addresses, bundles and backends, across all three and all
+      six arms.
 
-      1. **§6.0 cannot express a node address.** exp-002's three arms are distinguished by IP
-         (`10.101.0.11/.12/.13` on one shared vlan) — that is how the probe reaches each arm
-         separately. §6.1 carries it as `network[].ip`; §6.0's link endpoints are bare strings
-         (`node-cont-01:eth0`) with nowhere to put one. The model already has `Endpoint.ip_cidr`
-         waiting; the schema needs an object form for a link endpoint.
+      They were blocked on three §6.0 gaps, all closed in `vxedge` first (see that repo's
+      TASKS.md): link endpoints had nowhere to put the address that is the *only* thing telling
+      exp-002's arms apart; interface names were positional, so the two schema paths ordered the
+      arms differently and would have measured libvirt while reporting microvm; and a part's
+      kind was derived from the device's backend, so a mis-pointed H3 arm was unrepresentable
+      rather than rejected. Migrating them also found a VM's guest bundle to be unreachable in
+      §6.0 at all (the zone planner looked software up by the wrong id), and `zone up --vxid`
+      unable to select a single arm — the isolation contract exp-002b's first campaign was
+      invalidated for lacking.
 
-      2. **§6.0 loses declaration order, and for exp-002 that is not cosmetic.** Devices live in
-         a map, so traversal is sorted id. exp-002 declares `cont, microvm, libvirt` and sorts to
-         `cont, libvirt, microvm`, so `vzp1`/`vzp2` would swap and `run-exp-002.sh` — which
-         addresses them by name — would measure libvirt while reporting microvm. The §6.1 adapter
-         already preserves declaration order via `device_order`; a §6.0 workspace has no way to
-         state one.
-
-         Renaming the arms so sorted order happens to match is **not** a fix: it makes
-         correctness depend on a coincidence in id spelling, and the next experiment re-breaks it.
-
-      Neither blocks the other migrations, which is why exp-001/003/010 are done. Both want
-      solving in `vxedge` first; see that repo's TASKS.md.
+      Device ids are the frozen manifests' node ids, so the two forms stay diffable and the
+      recorded results keep naming the same things. Each workspace's README records what its
+      migration needed.
 - [ ] **Campaign scripts shrink to method.** Sweeps, repetitions, warmup and collection stay —
       that is the experiment design and belongs here. Provisioning moves to `experiment up`.
 - [ ] **Author `exp-011` as a workspace now**, declaring `requires: {gpu: tier2}` in its `.vxp`.
       It validates, commits, and refuses to start until a Tier 2 host exists — so the workspace
       is ready the day the GPU decision resolves and blocks nothing in the meantime.
-- [ ] Retire the hand-authored §6.1 manifests once the equivalence runs above pass.
+- [x] **Runners read workspaces** (2026-07-31) — every `run-exp-*.sh` provisions from the
+      `-ws` directory and passes it to `vxtelemetry --workspace`; §6.1 manifests stopped being a
+      provisioning input, and pointing a tool at one now says so and names the fix. exp-010's
+      per-point sweep copies the workspace and patches `main.yaml` rather than sed-ing one file.
+      Interface names in the runners changed once, deliberately, from positional `vz0`/`vzp0` to
+      id-derived (`ARCHITECTURE.md` §6.0.5).
+- [ ] Retire the hand-authored §6.1 manifests. They are already unrunnable; they stay in
+      `experiments/` as provenance for the results recorded against them, and go when nothing
+      cites them.
 
 ## Phase 3
 
