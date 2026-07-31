@@ -44,6 +44,11 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 # provisioning input on 2026-07-31, and `vxedge up`/`vxtelemetry` both read the
 # workspace directory directly. The frozen `../experiments/exp-*.yaml` files are kept as
 # provenance for the results already recorded against them, not as inputs.
+# Provisioning is the daemon's: `experiment up` runs the stages in dependency order and
+# `experiment down` reverses them. What stays in this script is *method* — repetitions, warmup,
+# measurement window, collection. Before 2026-08-01 each runner re-implemented the sequence in
+# bash, and they drifted: governor pinning was missing from four of five, and exp-001 lost its
+# results-dir line to an edit that nothing caught until it ran.
 MANIFEST="$REPO_DIR/experiments/exp-002b-ws"
 source "$REPO_DIR/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002b "$QUICK" "$REPRO")"
@@ -104,7 +109,7 @@ cleanup() {
   for z in "${DEVICE_OF[@]:-}"; do
     "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid "$z" >/dev/null 2>&1
   done
-  "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$MANIFEST" >/dev/null 2>&1
+  "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment down --stage gateway >/dev/null 2>&1
   [[ -n "${DAEMON_PID:-}" ]] && kill "$DAEMON_PID" 2>/dev/null
   ip link del vxup0p.101 2>/dev/null
 }
@@ -214,7 +219,10 @@ DAEMON_PID=$!; sleep 1
 
 for rep in $(seq 1 "$REPS"); do
   echo "-- rep $rep: gateway up"
-  "$VXEDGE" --endpoint "unix://$SOCK" up --manifest "$MANIFEST" >/dev/null
+  # `--stage gateway`: the arms come up one at a time below, which is this experiment's
+  # isolation contract. Staging all zones here would start every packaging backend at once —
+  # the concurrent-guest CPU contention that invalidated exp-002b's first campaign.
+  "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment up --stage gateway >/dev/null
   ip link add link vxup0p name vxup0p.101 type vlan id 101
   ip addr add 10.101.0.1/24 dev vxup0p.101
   ip link set vxup0p up && ip link set vxup0p.101 up
@@ -253,7 +261,7 @@ for rep in $(seq 1 "$REPS"); do
   done
 
   ip link del vxup0p.101 2>/dev/null || true
-  "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$MANIFEST" >/dev/null
+  "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment down --stage gateway >/dev/null
 done
 
 [[ -n "${SUDO_UID:-}" ]] && chown -R "$SUDO_UID:${SUDO_GID:-$SUDO_UID}" "$RESULTS"

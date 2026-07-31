@@ -66,15 +66,20 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 # provisioning is held byte-identical — same host-side veth-peer addressing, same
 # vxprobe/vxtraffic invocations, same sweep — so a rerun tests whether the *numbers* agree too.
 #
-# Deliberately NOT using `vxedge experiment up` here, even though it exists: that also brings
-# the zones up, which moves the veth peers into node netns and changes the measurement path. Running
-# the agents inside the zones is more faithful and is the direction of travel (TASKS.md), but it
-# is a different measurement and needs its own baseline — mixing it into an equivalence check
-# would confound the two.
+# `experiment up --stage gateway`, not the full `up`: staging the zones would move the veth
+# peers into node netns and change the measurement path. Running the agents inside the zones is
+# more faithful and is the direction of travel (TASKS.md), but it is a different measurement and
+# needs its own baseline — mixing it into an equivalence check would confound the two. Staging
+# is what makes that choice expressible to the daemon rather than a reason to bypass it.
 # Everything below runs from the §6.0 workspace: §6.1 manifests stopped being a
 # provisioning input on 2026-07-31, and `vxedge up`/`vxtelemetry` both read the
 # workspace directory directly. The frozen `../experiments/exp-*.yaml` files are kept as
 # provenance for the results already recorded against them, not as inputs.
+# Provisioning is the daemon's: `experiment up` runs the stages in dependency order and
+# `experiment down` reverses them. What stays in this script is *method* — repetitions, warmup,
+# measurement window, collection. Before 2026-08-01 each runner re-implemented the sequence in
+# bash, and they drifted: governor pinning was missing from four of five, and exp-001 lost its
+# results-dir line to an edit that nothing caught until it ran.
 MANIFEST="$REPO_DIR/experiments/exp-001-ws"
 source "$REPO_DIR/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-001 "$QUICK" "$REPRO")"
@@ -103,7 +108,7 @@ cleanup() {
   set +e
   restore_cpu_governors
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
-  "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$MANIFEST" >/dev/null 2>&1
+  "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment down --stage gateway >/dev/null 2>&1
   [[ -n "${DAEMON_PID:-}" ]] && kill "$DAEMON_PID" 2>/dev/null
   ip link del vxup0p.101 2>/dev/null; ip link del vxup0p.103 2>/dev/null
 }
@@ -142,7 +147,9 @@ for rep in $(seq 1 "$REPS"); do
   for load in "${LOADS_MBPS[@]}"; do
     tag="rep${rep}-load${load}"
     echo "-- $tag: gateway up"
-    "$VXEDGE" --endpoint "unix://$SOCK" up --manifest "$MANIFEST" >/dev/null
+    # `--stage gateway` on purpose: this campaign measures on the host-side veth peers, so
+    # starting the zones would move them into node netns and change the measurement path.
+    "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment up --stage gateway >/dev/null
 
     # Experiment IP wiring (fresh each cycle; interfaces are recreated by up).
     ip addr replace 10.101.0.2/24 dev vzp-node-a-c06a && ip link set vzp-node-a-c06a up
@@ -188,7 +195,7 @@ for rep in $(seq 1 "$REPS"); do
 
     ip link del vxup0p.101 2>/dev/null || true
     ip link del vxup0p.103 2>/dev/null || true
-    "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$MANIFEST" >/dev/null
+    "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment down --stage gateway >/dev/null
   done
 done
 

@@ -139,7 +139,7 @@ cleanup() {
   set +e
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
   "$VXEDGE" --endpoint "unix://$SOCK" traffic down --manifest "$CANONICAL_WS" >/dev/null 2>&1
-  "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$CANONICAL_WS" >/dev/null 2>&1
+  "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$CANONICAL_WS" experiment down --stage gateway >/dev/null 2>&1
   [[ -n "${DAEMON_PID:-}" ]] && kill "$DAEMON_PID" 2>/dev/null
   echo "== restoring original cpu governor(s) =="
   restore_cpu_governors
@@ -222,7 +222,9 @@ for rep in $(seq 1 "$REPS"); do
            "$LOAD_WS/main.yaml"
     sed -i -e "s/duration_s: 60/duration_s: $PROBE_S/" "$PROBE_WS/main.yaml"
 
-    "$VXEDGE" --endpoint "unix://$SOCK" up --manifest "$PROBE_WS"
+    # Gateway only: this campaign drives its own traffic profiles per point, and exp-010's
+    # nodes are UE pods the 5G stage brings up rather than zones.
+    "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$PROBE_WS" experiment up --stage gateway
 
     INGEST="$RUNTIME/ingest-$tag"
     mkdir -p "$INGEST"
@@ -251,7 +253,7 @@ for rep in $(seq 1 "$REPS"); do
     fi
 
     "$VXEDGE" --endpoint "unix://$SOCK" traffic down --manifest "$PROBE_WS"
-    "$VXEDGE" --endpoint "unix://$SOCK" down --manifest "$PROBE_WS"
+    "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$PROBE_WS" experiment down --stage gateway
 
     # --record-image: content-addressed identities of the images this
     # campaign actually ran (§13 reproducibility) land in each archive's
