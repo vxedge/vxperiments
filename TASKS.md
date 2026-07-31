@@ -332,6 +332,40 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
       `experiments/` as provenance for the results recorded against them, and go when nothing
       cites them.
 
+## Found by the 2026-07-31 workspace campaign
+
+- [x] **CPU governor is pinned, not just recorded** — `run-exp-001/002/002b/003.sh` now call
+      `pin_cpu_governor_performance` from `scripts/lib/host_pinning.sh` and restore it in their
+      cleanup traps, as `run-exp-010.sh` already did. Every earlier campaign only *wrote*
+      `cpu_governor` into results metadata and ran on whatever the host happened to be set to.
+      That is how the first workspace-path rerun of exp-001 came out 10–20 µs higher at every
+      load point: the host had moved to `powersave` since July, and nothing noticed.
+
+- [ ] **exp-001's frozen directory holds the *repro-check* archives, not the original
+      campaign's.** `results/exp-001/exp-001-summary.md` records the 2026-07-10 campaign
+      (load-0 p99 **77.3 µs**, the figure `PUBLICATION.md` and `STATUS.md` cite), but the `.zip`s
+      beside it are the 2026-07-13 second-campaign check (**70.6 µs**), whose own summary is
+      committed as `exp-001-repro-check-2026-07-13.md`. Both records are correct and internally
+      consistent; they describe different runs, and the original's archives were overwritten in
+      place before `lib/results_dir.sh` existed to prevent exactly that.
+
+      Consequence: `python3 notebooks/analyze_exp001.py results/exp-001` silently reports the
+      *repro* numbers and **rewrites `exp-001-summary.md` with them** — the frozen record is one
+      stray analysis run away from being replaced. Two things to decide: whether the published
+      H1 baseline should be restated from surviving archives, and whether the analyzer should
+      refuse to overwrite a summary whose recorded run doesn't match the archives it just read.
+      Do not "fix" the summary by regenerating it: that would silently restate a published
+      number.
+
+- [ ] **exp-001 workspace-path equivalence is still open, and this run does not settle it.**
+      2026-07-31 (workspace, kernel 7.0.0-28, powersave) gives load-0 p99 85.1 µs / load-600
+      77.6 µs against the repro check's 70.6 / 67.0. Two host variables moved — governor and
+      kernel — so the difference is not attributable to the schema path. The governor half is
+      fixed above; the kernel cannot be un-upgraded, so a strict comparison against July's
+      numbers is no longer available on this host. What the run *did* establish: the workspace
+      path provisions and measures end to end, 25/25 archives, zero loss at every load level,
+      and H1 holds at 0.91x (threshold 2.0x).
+
 ## Phase 3
 
 - [ ] `vehicles/vx-vehicle-01.yaml` — full OEM-representative composition (six zones, QNX +

@@ -62,6 +62,14 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 MANIFEST="$REPO_DIR/experiments/exp-002-ws"
 source "$REPO_DIR/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002 "$QUICK" "$REPRO")"
+# The cpu governor is *pinned*, not merely recorded. Every campaign before 2026-07-31 only
+# wrote `cpu_governor` into results metadata and left whatever the host happened to be on —
+# which is how exp-001's first workspace-path rerun came out ~10-20us higher at every load
+# point than the frozen campaign: that host had moved from `performance` to `powersave`, and
+# nothing in the script noticed. exp-010 already pinned it (scripts/lib/host_pinning.sh);
+# this is the same call, so a rerun is comparable to the campaign it is being compared with.
+source "$REPO_DIR/scripts/lib/host_pinning.sh"
+pin_cpu_governor_performance
 RUNTIME=$(mktemp -d /tmp/exp-002.XXXXXX)
 SOCK="$RUNTIME/vxedge.sock"
 
@@ -84,6 +92,7 @@ fi
 PIDS=()
 cleanup() {
   set +e
+  restore_cpu_governors
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
   [[ -n "${TEL_PID:-}" ]] && kill "$TEL_PID" 2>/dev/null
   for z in "${DEVICE_OF[@]:-}"; do
