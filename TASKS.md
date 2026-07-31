@@ -75,9 +75,22 @@
       `--quick` mode + analyzer, chained, ~5 min total, single PASS/FAIL summary. Keeps
       the H1/H3/H4 pipelines verifiably alive after any change; full campaigns and
       `--repro` reruns stay deliberate/manual (idle host, methodology skill)
-- [ ] CI: workspace-validation on every PR (`vxedge manifest validate --manifest <ws-dir>` over
-      every `experiments/*-ws/`; the frozen `experiments/*.yaml` get a §6.1 shape check only and
-      are provenance, not inputs) over experiments/ and
+- [x] **CI** (2026-08-01, `.github/workflows/ci.yml` — this repo had none). Two jobs:
+      `runners` (no secrets, always runnable) runs `scripts/lib/check-runners.sh` — shellcheck
+      *including SC2154* plus each runner's preamble executed under `set -u`; and `workspaces`
+      validates every `experiments/*-ws/` through `vxedge manifest validate` and asserts the
+      retired §6.1 manifests are still *refused*, so a day when they parse is a day something
+      resurrected the old schema.
+
+      The preamble check exists for a real regression: an edit removed the two lines resolving
+      `$RESULTS` from `run-exp-001.sh`, `bash -n` passed it, and the campaign died on the first
+      run after a sudo prompt and a build. Verified by re-introducing that exact deletion — the
+      check fails, `bash -n` still passes.
+
+      `workspaces` needs a `VXEDGE_CROSS_REPO_TOKEN` secret (vxedge is a separate private repo;
+      `GITHUB_TOKEN` cannot check it out). Until it is provisioned the job fails at checkout
+      rather than skipping — the same choice, for the same reason, as vxmodels'
+      `pipeline-regression`. Still open: workspace-validation over experiments/ and
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
       (§13 on-demand reproduction; needs KVM-capable runner) — phase 2

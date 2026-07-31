@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Everything checkable without the vxedge binaries. Fast, no secrets, always runnable.
+  runners:
+    name: campaign runners + notebooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Static checks
+        # shellcheck *including* SC2154 (referenced but never assigned), plus each runner's
+        # preamble executed under `set -u`. Both exist for a real regression: on 2026-07-31 an
+        # edit removed the two lines resolving `$RESULTS` from run-exp-001.sh, `bash -n` passed
+        # it, and the campaign died on the first real run after a sudo prompt and a build. The
+        # preamble check is the stronger half — it runs the script, so it also catches a
+        # variable assigned only in a branch that never executes.
+        run: ./scripts/lib/check-runners.sh
+
+  # Every experiment workspace must satisfy the same checks `vxedge experiment up` runs before
+  # provisioning: cross-file joins *and* model invariants. A workspace that validates only on
+  # the author's laptop is not a workspace anyone else can run.
+  workspaces:
+    name: workspace validation (cross-repo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: vxperiments
+      # vxedge is a separate private repo, so this needs a PAT with read access to it —
+      # `secrets.GITHUB_TOKEN` only covers the repository it runs in. Until the secret is
+      # provisioned this job fails at checkout rather than silently skipping, which is the
+      # same choice vxmodels' pipeline-regression job made and for the same reason: a gate that
+      # quietly does nothing is worse than one that is visibly red.
+      - uses: actions/checkout@v4
+        with:
+          repository: vxedge/vxedge
+          token: ${{ secrets.VXEDGE_CROSS_REPO_TOKEN }}
+          path: vxedge
+      - name: Install protoc
+        # vxedge-api's build.rs (tonic-prost-build) needs it; matches vxedge's own CI step.
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: vxedge
+      - name: Build vxedge-cli
+        working-directory: vxedge
+        run: cargo build --release -p vxedge-cli
+      - name: Validate every workspace
+        working-directory: vxperiments
+        run: |
+          set -euo pipefail
+          VXEDGE=../vxedge/target/release/vxedge
+          for ws in experiments/*-ws; do
+            echo "== $ws"
+            "$VXEDGE" manifest validate --manifest "$ws" --json | tee /tmp/result.json
+            jq -e '.valid == true and .kind == "workspace"' /tmp/result.json > /dev/null
+          done
+          # The retired §6.1 manifests are provenance, not inputs: they must NOT validate as
+          # workspaces, and a day when they do means something resurrected the old schema.
+          for m in experiments/retired-6.1/*.yaml; do
+            if "$VXEDGE" manifest validate --manifest "$m" >/dev/null 2>&1; then
+              echo "error: $m validated — §6.1 is supposed to be unreadable" >&2
+              exit 1
+            fi
+          done
+          echo "== retired §6.1 manifests correctly refused"
