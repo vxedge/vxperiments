@@ -334,6 +334,29 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 
 ## Found by the 2026-07-31 workspace campaign
 
+- [ ] **The first measured arm's tail is biased high under `--quick`, in every campaign.**
+      Three quick runs, three inflated first-arm p99s with medians unaffected:
+
+      | campaign | first arm | its p99 | later arms | its p50 |
+      |---|---|---:|---:|---:|
+      | exp-001 | load0 | 301.6 | 82.2 | normal |
+      | exp-002 | container | 441.1 (frozen: 89.9) | 181 / 127 | 57.7 (frozen 54.3) |
+      | exp-003 | baseline | 297.0 | 86.1 | 49.5 |
+
+      Positional, not arm-specific — exp-003's first arm is `baseline`, not a container. A few
+      very slow packets at the start of the first probe (page faults, ARP, veth/netns warm-up,
+      CPU frequency ramp before the pinned governor settles) barely move a median over 5000
+      samples but dominate the top 50. The full profiles do **not** show it: frozen container
+      p99 is 89.9 and exp-001 `--repro` load-0 p99 was 85.1, so the 10 s warmup absorbs it and
+      the quick profile's 2–3 s does not.
+
+      So a quick run is not merely under-sampled — its first arm's tail is *biased*. The
+      experiment-methodology skill already rules quick numbers unreportable; this is why, and it
+      is worth stating because the next person to eyeball a quick p99 will think something
+      broke. **Not silently fixed**: lengthening the quick warmup changes what the profile
+      measures, and the honest options (a throwaway priming probe before the measured window, a
+      longer warmup, or just a louder caveat) are a methodology decision, not a script tweak.
+
 - [x] **CPU governor is pinned, not just recorded** — `run-exp-001/002/002b/003.sh` now call
       `pin_cpu_governor_performance` from `scripts/lib/host_pinning.sh` and restore it in their
       cleanup traps, as `run-exp-010.sh` already did. Every earlier campaign only *wrote*
