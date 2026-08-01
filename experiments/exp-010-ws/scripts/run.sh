@@ -4,7 +4,7 @@
 # same-day rerun needed).
 #
 # Run as your normal user (NOT under sudo) from the vxperiments repo root:
-#   ./scripts/run-exp-010.sh [--quick|--repro]
+#   ./scripts/run.sh [--quick|--repro]
 #
 # **Do not run this script itself under `sudo`** — unlike run-exp-001.sh
 # (pure VLAN/HTB, no podman involved), this campaign brings up the real 5G
@@ -87,7 +87,10 @@ fi
 sudo -v
 
 # --- locations (meta-workspace layout: repos side by side) -------------------
-REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# This sandbox, and the meta-workspace it sits in. Resolved from this script's own location, so
+# the experiment runs wherever it is unpacked.
+SANDBOX="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_DIR="$(cd "$SANDBOX/../.." && pwd)"
 WS="$(dirname "$REPO_DIR")"
 
 # --- host-confound mitigation, not a mechanism change -------------------------
@@ -99,7 +102,7 @@ WS="$(dirname "$REPO_DIR")"
 # never mattered enough to fix before. Shared with
 # scripts/calibrate-exp-010-noise-floor.sh so both use the identical
 # mitigation, not two copies that can drift apart.
-source "$REPO_DIR/scripts/lib/host_pinning.sh"
+source "$SANDBOX/scripts/lib/host_pinning.sh"
 pin_cpu_governor_performance
 reserve_measurement_cores
 VXEDGED="$WS/vxedge/target/debug/vxedged"
@@ -111,7 +114,7 @@ for bin in "$VXEDGED" "$VXEDGE" "$VXPROBE" "$VXTRAFFIC" "$VXTELEMETRY"; do
   [[ -x "$bin" ]] || { echo "error: missing $bin — cargo build (--release for vxagents) each repo first" >&2; exit 1; }
 done
 
-source "$REPO_DIR/scripts/lib/freshness.sh"
+source "$SANDBOX/scripts/lib/freshness.sh"
 check_fresh_bin "$WS/vxedge" "$VXEDGED" "$WS/vxedge/crates/vxedged" "$WS/vxedge/proto"
 check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedge/proto"
 check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
@@ -121,8 +124,8 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 # The §6.0 workspace is the input now: §6.1 manifests stopped being a provisioning input on
 # 2026-07-31. The frozen `../experiments/retired-6.1/exp-010.yaml` stays as provenance for the results
 # already recorded against it.
-CANONICAL_WS="$REPO_DIR/experiments/exp-010-ws"
-source "$REPO_DIR/scripts/lib/results_dir.sh"
+CANONICAL_WS="$SANDBOX"
+source "$SANDBOX/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-010 "$QUICK" "$REPRO")"
 RUNTIME=$(mktemp -d /tmp/exp-010.XXXXXX)
 SOCK="$RUNTIME/vxedge.sock"

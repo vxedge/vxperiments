@@ -85,6 +85,28 @@ for f in scripts/run-exp-*.sh experiments/*/scripts/run.sh; do
   fi
 done
 
+# Each sandbox vendors scripts/lib/*.sh so it is zip-portable — the owner decision of
+# 2026-08-01, with the host concerns moving into vxedge core/API later. Vendoring means five
+# copies, and five copies drift: that is exactly how four of five runners ended up without
+# governor pinning. scripts/lib/ stays the canonical copy and this asserts the vendored ones
+# are byte-identical to it, so drift is a failed check rather than a campaign that quietly
+# measured under a different governor.
+echo "== vendored libs match the canonical copy =="
+for vendored in experiments/*/scripts/lib/*.sh; do
+  [[ -f "$vendored" ]] || continue
+  canonical="scripts/lib/$(basename "$vendored")"
+  if [[ ! -f "$canonical" ]]; then
+    printf '  %-46s no canonical copy at %s\n' "$vendored" "$canonical"
+    fail=1
+  elif cmp -s "$vendored" "$canonical"; then
+    printf '  %-46s ok\n' "$vendored"
+  else
+    printf '  %-46s DRIFTED from %s\n' "$vendored" "$canonical"
+    diff -u "$canonical" "$vendored" | head -20
+    fail=1
+  fi
+done
+
 echo "== analysis notebooks compile =="
 for nb in notebooks/*.py; do
   if python3 -m py_compile "$nb" 2>/dev/null; then

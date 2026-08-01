@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # exp-002b campaign runner — H3 decomposition + per-arm resource cost.
-#   sudo -E env "PATH=$PATH" ./scripts/run-exp-002b.sh [--quick|--repro]
+#   sudo -E env "PATH=$PATH" ./scripts/run.sh [--quick|--repro]
 # --repro: full campaign to results/exp-002b-repro-<date>/ — the frozen
 #          results/exp-002b/ dir is never overwritten in place (lib/results_dir.sh).
 # Arms (identical payload/kernel/1vCPU/128MiB):
@@ -22,7 +22,11 @@ for arg in "$@"; do case "$arg" in
 esac; done
 [[ $(id -u) -eq 0 ]] || { echo "error: needs root — sudo -E env \"PATH=\$PATH\" $0" >&2; exit 1; }
 
-REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"; WS="$(dirname "$REPO_DIR")"
+# This sandbox, and the meta-workspace it sits in. Resolved from this script's own location, so
+# the experiment runs wherever it is unpacked.
+SANDBOX="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_DIR="$(cd "$SANDBOX/../.." && pwd)"
+WS="$(dirname "$REPO_DIR")"
 VXEDGED="$WS/vxedge/target/debug/vxedged"; VXEDGE="$WS/vxedge/target/debug/vxedge"
 VXPROBE="$WS/vxagents/target/debug/vxprobe"; VXTELEMETRY="$WS/vxtelemetry/target/debug/vxtelemetry"
 BUNDLE="$WS/vxzones/images/linux-probe/bundle"
@@ -34,7 +38,7 @@ done
   exit 1
 }
 
-source "$REPO_DIR/scripts/lib/freshness.sh"
+source "$SANDBOX/scripts/lib/freshness.sh"
 check_fresh_bin "$WS/vxedge" "$VXEDGED" "$WS/vxedge/crates/vxedged" "$WS/vxedge/proto"
 check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedge/proto"
 check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
@@ -49,8 +53,8 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 # measurement window, collection. Before 2026-08-01 each runner re-implemented the sequence in
 # bash, and they drifted: governor pinning was missing from four of five, and exp-001 lost its
 # results-dir line to an edit that nothing caught until it ran.
-MANIFEST="$REPO_DIR/experiments/exp-002b-ws"
-source "$REPO_DIR/scripts/lib/results_dir.sh"
+MANIFEST="$SANDBOX"
+source "$SANDBOX/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002b "$QUICK" "$REPRO")"
 # The cpu governor is *pinned*, not merely recorded. Every campaign before 2026-07-31 only
 # wrote `cpu_governor` into results metadata and left whatever the host happened to be on —
@@ -58,7 +62,7 @@ RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002b "$QUICK" "$REPRO")"
 # point than the frozen campaign: that host had moved from `performance` to `powersave`, and
 # nothing in the script noticed. exp-010 already pinned it (scripts/lib/host_pinning.sh);
 # this is the same call, so a rerun is comparable to the campaign it is being compared with.
-source "$REPO_DIR/scripts/lib/host_pinning.sh"
+source "$SANDBOX/scripts/lib/host_pinning.sh"
 pin_cpu_governor_performance
 RUNTIME=$(mktemp -d /tmp/exp-002b.XXXXXX); SOCK="$RUNTIME/vxedge.sock"
 

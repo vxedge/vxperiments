@@ -2,7 +2,7 @@
 # exp-001 campaign runner — ADAS slice isolation under infotainment load (H1).
 #
 # Run as root from the vxperiments repo root:
-#   sudo -E env "PATH=$PATH" ./scripts/run-exp-001.sh [--quick|--repro]
+#   sudo -E env "PATH=$PATH" ./scripts/run.sh [--quick|--repro]
 #
 # Provisions from the §6.0 workspace (experiments/exp-001-ws). The frozen results in
 # results/exp-001/ were produced from the §6.1 manifest and stay authoritative until a
@@ -39,7 +39,10 @@ if [[ $(id -u) -ne 0 ]]; then
 fi
 
 # --- locations (meta-workspace layout: repos side by side) -------------------
-REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# This sandbox, and the meta-workspace it sits in. Resolved from this script's own location, so
+# the experiment runs wherever it is unpacked.
+SANDBOX="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_DIR="$(cd "$SANDBOX/../.." && pwd)"
 WS="$(dirname "$REPO_DIR")"
 VXEDGED="$WS/vxedge/target/debug/vxedged"
 VXEDGE="$WS/vxedge/target/debug/vxedge"
@@ -54,7 +57,7 @@ done
 # not whole-repo — see scripts/lib/freshness.sh) newer than the binary means
 # someone edited code without rebuilding — refuse rather than measure with
 # stale code.
-source "$REPO_DIR/scripts/lib/freshness.sh"
+source "$SANDBOX/scripts/lib/freshness.sh"
 check_fresh_bin "$WS/vxedge" "$VXEDGED" "$WS/vxedge/crates/vxedged" "$WS/vxedge/proto"
 check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedge/proto"
 check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
@@ -80,8 +83,8 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 # measurement window, collection. Before 2026-08-01 each runner re-implemented the sequence in
 # bash, and they drifted: governor pinning was missing from four of five, and exp-001 lost its
 # results-dir line to an edit that nothing caught until it ran.
-MANIFEST="$REPO_DIR/experiments/exp-001-ws"
-source "$REPO_DIR/scripts/lib/results_dir.sh"
+MANIFEST="$SANDBOX"
+source "$SANDBOX/scripts/lib/results_dir.sh"
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-001 "$QUICK" "$REPRO")"
 # The cpu governor is *pinned*, not merely recorded. Every campaign before 2026-07-31 only
 # wrote `cpu_governor` into results metadata and left whatever the host happened to be on —
@@ -89,7 +92,7 @@ RESULTS="$(resolve_results_dir "$REPO_DIR" exp-001 "$QUICK" "$REPRO")"
 # point than the frozen campaign: that host had moved from `performance` to `powersave`, and
 # nothing in the script noticed. exp-010 already pinned it (scripts/lib/host_pinning.sh);
 # this is the same call, so a rerun is comparable to the campaign it is being compared with.
-source "$REPO_DIR/scripts/lib/host_pinning.sh"
+source "$SANDBOX/scripts/lib/host_pinning.sh"
 pin_cpu_governor_performance
 
 RUNTIME=$(mktemp -d /tmp/exp-001.XXXXXX)

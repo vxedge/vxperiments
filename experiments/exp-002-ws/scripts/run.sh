@@ -59,7 +59,7 @@ done
   exit 1
 }
 
-source "$REPO_DIR/scripts/lib/freshness.sh"
+source "$SANDBOX/scripts/lib/freshness.sh"
 check_fresh_bin "$WS/vxedge" "$VXEDGED" "$WS/vxedge/crates/vxedged" "$WS/vxedge/proto"
 check_fresh_bin "$WS/vxedge" "$VXEDGE" "$WS/vxedge/crates/vxedge-cli" "$WS/vxedge/proto"
 check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
@@ -75,7 +75,7 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 # bash, and they drifted: governor pinning was missing from four of five, and exp-001 lost its
 # results-dir line to an edit that nothing caught until it ran.
 MANIFEST="$SANDBOX"
-source "$REPO_DIR/scripts/lib/results_dir.sh"   # shared: see the note at the top of this file
+source "$SANDBOX/scripts/lib/results_dir.sh"   # shared: see the note at the top of this file
 RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002 "$QUICK" "$REPRO")"
 # The cpu governor is *pinned*, not merely recorded. Every campaign before 2026-07-31 only
 # wrote `cpu_governor` into results metadata and left whatever the host happened to be on —
@@ -83,7 +83,7 @@ RESULTS="$(resolve_results_dir "$REPO_DIR" exp-002 "$QUICK" "$REPRO")"
 # point than the frozen campaign: that host had moved from `performance` to `powersave`, and
 # nothing in the script noticed. exp-010 already pinned it (scripts/lib/host_pinning.sh);
 # this is the same call, so a rerun is comparable to the campaign it is being compared with.
-source "$REPO_DIR/scripts/lib/host_pinning.sh"
+source "$SANDBOX/scripts/lib/host_pinning.sh"
 pin_cpu_governor_performance
 RUNTIME=$(mktemp -d /tmp/exp-002.XXXXXX)
 SOCK="$RUNTIME/vxedge.sock"

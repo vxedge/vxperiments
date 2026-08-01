@@ -330,8 +330,20 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
       Device ids are the frozen manifests' node ids, so the two forms stay diffable and the
       recorded results keep naming the same things. Each workspace's README records what its
       migration needed.
-- [ ] **Campaign scripts shrink to method.** Sweeps, repetitions, warmup and collection stay —
-      that is the experiment design and belongs here. Provisioning moves to `experiment up`.
+- [x] **Campaign scripts shrink to method** (2026-08-01). Provisioning is `vxedge experiment up`
+      with `--stage`, which is what the staging work in `vxedge` exists for; what stays in a
+      runner is sweeps, repetitions, warmup and collection.
+- [x] **Every experiment is a sandbox** (2026-08-01). Each of the five owns its `.vxp`,
+      documents, `scripts/run.sh`, `parts/`, `assets/`, `tools/` and `results/`, and nothing
+      reaches outside its own folder — exp-002/002b's guest bundle is fetched into `parts/` by
+      `tools/fetch-parts.sh` and verified against committed digests instead of being read from
+      `../../../vxzones/`.
+
+      `scripts/lib/*.sh` is **vendored** into each sandbox (owner decision) so the folder is
+      zip-portable, with the host concerns moving into vxedge core/API later. Five copies drift
+      — that is precisely how four of five runners ended up without governor pinning — so
+      `scripts/lib/` stays canonical and `check-runners.sh` asserts every vendored copy is
+      byte-identical to it. Verified by making one drift on purpose: the check fails.
 - [ ] **Author `exp-011` as a workspace now**, declaring `requires: {gpu: tier2}` in its `.vxp`.
       It validates, commits, and refuses to start until a Tier 2 host exists — so the workspace
       is ready the day the GPU decision resolves and blocks nothing in the meantime.

@@ -1,5 +1,19 @@
 # exp-002b (workspace form)
 
+## This is a sandbox
+
+Everything the experiment needs is in this folder: its documents, its campaign
+(`scripts/run.sh`), its loadables (`parts/`), its analysis helpers (`tools/`), and its results.
+`scripts/lib/` is vendored so the folder is zip-portable; `../../scripts/lib/` stays the
+canonical copy and CI asserts the two are byte-identical, so vendoring cannot drift silently.
+
+```bash
+cd experiments/exp-002b-ws
+./tools/fetch-parts.sh                                   # once: populate + verify parts/
+sudo -E env "PATH=$PATH" ./scripts/run.sh --quick        # pipeline validation, NOT reportable
+sudo -E env "PATH=$PATH" ./scripts/run.sh --repro        # the campaign
+```
+
 The §6.0 workspace that replaces `../retired-6.1/exp-002b.yaml` (H3 decomposition: machine type, virtio
 transport, vhost, management layer, plus per-arm resource cost). Run it from **inside this
 directory**:
