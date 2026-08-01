@@ -1,0 +1,44 @@
+kind: experiment
+id: exp-014
+
+# Harness topology as an experimental variable: does a star wiring harness (every zone gets its
+# own direct run to the backbone) hold flat latency regardless of physical position, while a
+# daisy-chained harness (zones wired in series) accumulates delay/jitter with hop count? Six
+# devices, one vehicle, one slice — the campaign runner probes each of the six sequentially
+# under an otherwise idle topology, so the only declared variable across arms is which harness
+# each position is wired with (`vehicle.yaml`'s per-link `impairments`/`harness`), not offered
+# load, not packaging, not QoS. "Identical load" means every arm sees the same (absent)
+# contention, which is what makes a measured difference attributable to the harness alone.
+vehicles: [vx-h-harness-vehicle]
+baseline: bl-exp-014
+
+# One slice for all six devices: topology is the variable under test, not slice QoS. The rate
+# ceiling here is deliberately generous relative to six lightweight probe streams — the per-link
+# `impairments.rate_mbps: 100` on each device's own access port is the PHY cap that matters
+# (100BASE-T1), not this slice's aggregate ceiling.
+network:
+  defaults:
+    bandwidth: 1000000000
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 50, max_rate_mbps: 600, priority: 1 }
+
+# No `traffic_profiles`: like exp-002, the six arms are probed sequentially on an otherwise idle
+# topology by the campaign runner rather than declared as offered load — there is nothing here
+# for a background flow to compete with, which is the point.
+
+method:
+  duration_s: 60
+  repetitions: 5
+  warmup_s: 10
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      - "127.0.0.1:9801"   # vxprobe live exporter
+
+results:
+  artifact_dir: results/exp-014
+  upload: false

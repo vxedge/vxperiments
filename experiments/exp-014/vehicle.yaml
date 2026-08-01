@@ -1,0 +1,108 @@
+kind: vehicle
+id: vx-h-harness-vehicle
+class: road
+subtype: car
+
+# Three physical positions, each wired two ways, so the comparison holds position (and
+# therefore real radial distance to the backbone) constant and varies only how it is harnessed.
+# Reusing the fixed zonal vocabulary (ARCHITECTURE.md §3) rather than inventing per-experiment
+# zone names.
+zones:
+  front-left: {}
+  front-right: {}
+  rear-left: {}
+
+# Six devices, one function each: at every position, a `star-*` device (its own direct home-run
+# to the backbone) sits beside a `chain-*` device (reached through a daisy chain instead). Same
+# role everywhere — a zone-controller aggregates its zone's traffic onto the backbone regardless
+# of how its own harness segment is wired; only the harness differs, expressed below purely
+# through `impairments`/`harness` on each device's link, never through `role` or `backend`.
+devices:
+  star-fl:  { role: zone-controller, zone: front-left,  backend: container }
+  star-fr:  { role: zone-controller, zone: front-right, backend: container }
+  star-rl:  { role: zone-controller, zone: rear-left,   backend: container }
+  chain-fl: { role: zone-controller, zone: front-left,  backend: container }
+  chain-fr: { role: zone-controller, zone: front-right, backend: container }
+  chain-rl: { role: zone-controller, zone: rear-left,   backend: container }
+
+functions:
+  probe-star-fl:  { deployed_on: star-fl }
+  probe-star-fr:  { deployed_on: star-fr }
+  probe-star-rl:  { deployed_on: star-rl }
+  probe-chain-fl: { deployed_on: chain-fl }
+  probe-chain-fr: { deployed_on: chain-fr }
+  probe-chain-rl: { deployed_on: chain-rl }
+
+# The comparison this experiment exists to make. Every link binds the same slice — topology is
+# the only declared variable — and each carries `impairments` (netem, the measured half) plus
+# `harness` (declarative length/weight, the harness-reduction half). Base unit is one 100BASE-T1
+# hop: 30us delay / 5us jitter, a round, stated assumption covering PHY encode/decode plus
+# modest store-and-forward for a short automotive frame — propagation itself is ~5ns/m and
+# negligible at these lengths, so it is not what this number is standing in for. This is not a
+# datasheet constant; the interesting result is whether latency/jitter grow with hop count as
+# this model predicts, not the absolute figure. The star arm's own p50 (uniform 1-hop cost at
+# every position) is this campaign's noise floor for that comparison — analogous to exp-010's
+# dedicated calibration run, but here the reference condition is already in the design rather
+# than needing a separate zero-stimulus pass, since "no accumulation" is exactly what star means.
+#
+# Fidelity note, stated because it is a real simplification (testbed-quality: known gaps are
+# stated where users will see them): `apply` provisions one flat bridge — there is no backend
+# that forwards through an intermediate switch device — so a `chain-*` device's own access port
+# carries the CUMULATIVE impairment a packet from that position would accrue crossing every
+# upstream segment, rather than three separate links each forwarding through the last.
+# `harness.length_m` on the same link records only its own LOCAL segment (the wire between it
+# and the previous position), so summing it across the three chain links reconstructs the
+# topology's real total harness length — the number the harness-reduction half of this
+# comparison reports (`notebooks/analyze_exp014.py`).
+#
+# Interface names derive from device id alone (`gateway::ifnames`): star-fl/fr/rl and
+# chain-fl/fr/rl all fit the budget unshortened (`vz-star-fl`, `vzp-chain-rl`, …), which is why
+# `scripts/run.sh` addresses them by name directly rather than looking them up.
+#
+# Each endpoint pins its own address (the object form, exactly like exp-002's arms) rather than
+# leaving it to the runner: `zone up --vxid <device>` then assigns it automatically when the
+# veth peer moves into the device's own netns, which is what makes measuring genuinely *inside*
+# that netns possible — addressing the peer from the host's default netns instead (exp-001's own
+# convention) would put prober and reflector in the same namespace, and a disposable-netns check
+# during this experiment's own authoring found that Linux's local routing table then delivers
+# between them via loopback, never touching this link's netem at all (`docs/TASKS.md`, "Do not
+# lose these"). All six share one /24 with the reflector; namespace isolation is what makes
+# that safe here, unlike addressing host-side veth peers directly in one shared namespace.
+links:
+  # Star: every position gets its own direct run, so hop count is always one regardless of
+  # physical position — the property under test, held identical across all three star arms.
+  - id: seg-star-fl
+    endpoints: [{ node: star-fl, port: eth0, ip: 10.114.0.11/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 30, jitter_us: 5, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 4.0, weight_g: 100 }
+  - id: seg-star-fr
+    endpoints: [{ node: star-fr, port: eth0, ip: 10.114.0.12/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 30, jitter_us: 5, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 4.0, weight_g: 100 }
+  - id: seg-star-rl
+    endpoints: [{ node: star-rl, port: eth0, ip: 10.114.0.13/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 30, jitter_us: 5, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 4.0, weight_g: 100 }
+
+  # Daisy chain: front-left is nearest the backbone (1 hop), front-right is next (2 hops),
+  # rear-left is farthest (3 hops) — a plausible single wiring path around the vehicle, the
+  # shape a real daisy-chain harness actually takes. Delay/jitter accumulate with hop count;
+  # each link's own harness length is its local segment only (see the fidelity note above).
+  - id: seg-chain-fl
+    endpoints: [{ node: chain-fl, port: eth0, ip: 10.114.0.21/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 30, jitter_us: 5, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 1.5, weight_g: 37.5 }
+  - id: seg-chain-fr
+    endpoints: [{ node: chain-fr, port: eth0, ip: 10.114.0.22/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 60, jitter_us: 10, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 1.5, weight_g: 37.5 }
+  - id: seg-chain-rl
+    endpoints: [{ node: chain-rl, port: eth0, ip: 10.114.0.23/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 90, jitter_us: 15, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 1.5, weight_g: 37.5 }

@@ -1,0 +1,8 @@
+# Package descriptor: identity and requirements, separate from `main.yaml` so a
+# version bump never touches experiment content.
+id: exp-014
+version: 0.1.0
+entry: main.yaml
+description: harness topology as a variable — star vs daisy-chained zones under identical load
+requires:
+  gpu: none

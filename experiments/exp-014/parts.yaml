@@ -1,0 +1,11 @@
+kind: baseline
+id: bl-exp-014
+
+# All six positions run the identical vxprobe sender — topology is the only variable, so the
+# payload must be provably identical across every arm, matching H1/H3's own convention. A
+# `local/…` ref names nothing in a registry: these devices are never zoned up (`scripts/run.sh`
+# addresses their host-side veth peers directly, exactly like exp-001's adas-probe/infot-load
+# nodes), so there is no image to pull or bundle to boot, only a binary already on the host.
+parts:
+  - ref: local/vxprobe:host-process
+    target_ids: [probe-star-fl, probe-star-fr, probe-star-rl, probe-chain-fl, probe-chain-fr, probe-chain-rl]
