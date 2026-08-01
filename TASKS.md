@@ -261,7 +261,28 @@
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
 - [ ] `exp-014` — harness topology as variable: star vs daisy-chained zones under identical
-      load (per-link `impairments`, BASE-T1 emulation)
+      load (per-link `impairments`, BASE-T1 emulation). **Authored 2026-08-01**
+      (`experiments/exp-014/`), not yet run: six devices at three positions
+      (front-left/front-right/rear-left), each wired two ways — a star arm (uniform
+      one-hop-always harness) and a chain arm (1/2/3 hops, cumulative). Plans clean
+      (`experiment validate` + a live dry-run of `experiment up --stage gateway`, which
+      reaches real planning and fails only at the privileged `ip` step, confirming
+      `GatewayPlan::from_model` accepts every declared impairment/harness value).
+      `notebooks/analyze_exp014.py` reconstructs each topology's total harness
+      length/weight from the archives' own declared fields (never from `vehicle.yaml`
+      directly) and verdicts on whether chain p50 grows monotonically with hop count
+      beyond the star arms' own spread (which doubles as the noise floor, since "no
+      accumulation" is what star means by design — no separate calibration pass
+      needed). `check-runners.sh` green (shellcheck, vendored-lib-drift, preamble
+      resolution, notebook compile all pass).
+      **Built the faithful way from the start**: every device is really zoned up
+      (`zone up --vxid`) and probed via `ip netns exec`, unlike exp-001/exp-002's
+      host-side-veth-peer convention — see the escalated finding under exp-001's
+      "Faithful measurement" item just above, which this experiment's own authoring
+      surfaced. The analyzer refuses any archive whose `run-env.json` doesn't record
+      cross-netns measurement, so a regression to the same-netns pattern fails loudly
+      rather than silently producing numbers that never crossed the harness.
+      Needs a provisioning-capable host to actually run (`--quick` then `--repro`).
 - [ ] Determinism-controls ablation: PREEMPT_RT / pinning / VPP on-off matrix
 
 ## Workspace migration (decided 2026-07-30 — §6.0 becomes the only authored schema)
@@ -308,6 +329,29 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
         mixed into the equivalence check above: do that first, then re-baseline here.
         Touches `run-exp-001.sh` (agents via `ip netns exec vx-<node-id>`), and the same change
         applies to exp-003. Blocked on nothing.
+        **Escalated 2026-08-01, while authoring exp-014**: this may not be an optional
+        faithfulness upgrade. `run-exp-001.sh`/`run-exp-002.sh` run the probe sender and the
+        far-side reflector in the *same* network namespace (the host's default netns — neither
+        script moves anything into a zone), addressed as if they were two different hosts. A
+        disposable-netns repro of that exact shape (bridge, access-port veth, VLAN-tagged uplink
+        peer, netem on the access port, plain UDP/ICMP between the two "local-looking"
+        addresses) showed the kernel's `local` routing table resolving the destination to `dev
+        lo` (`ip route get` confirmed it) and delivering via loopback: sub-millisecond RTT
+        against a 200ms netem, and `tcpdump` on the access port captured **zero** packets — the
+        traffic never reached the bridge, let alone the HTB tree or VLAN trunk. This is a kernel
+        FIB behavior general to any unbound socket in a shared netns (confirmed with plain
+        `ping`, not vxprobe-specific), not something tied to this host.
+        **What is and isn't established**: the *mechanism* is verified in isolation. Whether the
+        literal `run-exp-001.sh`/`run-exp-002.sh` scripts hit it on a real campaign — and
+        whether that means the frozen H1/H3 numbers measured loopback delivery rather than the
+        shaped bridge path — is **not yet verified against the real scripts** and is deliberately
+        left open rather than asserted. Given `v0.1.0` is already tagged on a phase-1 gate that
+        cites these numbers, this needs a direct, careful check (repeat the tcpdump-on-the-
+        access-port test against an actual `run-exp-001.sh` run) before anything about H1/H3's
+        validity is concluded either way. Full account of the isolated repro: `docs/STATUS.md`.
+        exp-014 (harness topology, authored the same day) is built the faithful way from the
+        start — `zone up` for real, agents via `ip netns exec` — specifically to not carry this
+        risk into a new experiment.
 - [x] **`exp-003` → workspace form** (2026-07-30, `experiments/exp-003-ws/`).
 - [x] **`exp-010` → workspace form** (2026-07-30, `experiments/exp-010-ws/`) — the only
       `mode: s-nssai` coverage there is; its `FiveGPlan` matches the frozen manifest's session
