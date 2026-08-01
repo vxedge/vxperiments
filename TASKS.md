@@ -268,7 +268,9 @@
       server + carla-ros-bridge as real published parts, plus the `ARCHITECTURE.md` §6
       schema gaining a structured `parts:` list (Track D dimension 1) so this experiment's
       manifest can reference them — same zero-code blocker as before, now with a named
-      dependency chain instead of an open-ended "vxcompute needs code"
+      dependency chain instead of an open-ended "vxcompute needs code" (tracked at the top
+      level as `docs/TASKS.md` item #25 — GPU-gated, distinct from the four GPU-free
+      experiments in that board's item #17)
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
 - [ ] `exp-014` — harness topology as variable: star vs daisy-chained zones under identical
@@ -388,6 +390,16 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 - [x] **Campaign scripts shrink to method** (2026-08-01). Provisioning is `vxedge experiment up`
       with `--stage`, which is what the staging work in `vxedge` exists for; what stays in a
       runner is sweeps, repetitions, warmup and collection.
+- [ ] **exp-001-ws/exp-002-ws runners hand-roll VLAN wiring after `experiment up --stage
+      gateway`** — noted 2026-08-01, not a defect. Both runners still add VLAN subinterfaces +
+      IPs via bare `ip addr`/`ip link add ... type vlan` after the staged gateway call, to give
+      the probe/reflector host-side measurement points. `exp-010-ws`'s runner has none of
+      this — it's the clean exemplar; the gap is the other two haven't been brought up to that
+      pattern. Documented and correctness-tested as-is: doesn't affect whether "campaign
+      provisioning → staged experiment up" (above, done) is true for the gateway-provisioning
+      core, only whether it's uniform across every runner for the full provisioning path. Low
+      priority, not on the top-level board — tracked here so it isn't mistaken for a defect by
+      an external read of these runners.
 - [x] **Every experiment is a sandbox** (2026-08-01). Each of the five owns its `.vxp`,
       documents, `scripts/run.sh`, `parts/`, `assets/`, `tools/` and `results/`, and nothing
       reaches outside its own folder — exp-002/002b's guest bundle is fetched into `parts/` by
@@ -401,7 +413,9 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
       byte-identical to it. Verified by making one drift on purpose: the check fails.
 - [ ] **Author `exp-011` as a workspace now**, declaring `requires: {gpu: tier2}` in its `.vxp`.
       It validates, commits, and refuses to start until a Tier 2 host exists — so the workspace
-      is ready the day the GPU decision resolves and blocks nothing in the meantime.
+      is ready the day the GPU decision resolves and blocks nothing in the meantime. Confirmed
+      2026-08-01: no `exp-011`/`exp-011-ws` directory exists anywhere in this repo yet (see the
+      phase-2 bullet above for the top-level cross-reference).
 - [x] **Runners read workspaces** (2026-07-31) — every `run-exp-*.sh` provisions from the
       `-ws` directory and passes it to `vxtelemetry --workspace`; §6.1 manifests stopped being a
       provisioning input, and pointing a tool at one now says so and names the fix. exp-010's
