@@ -94,6 +94,17 @@
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
       (§13 on-demand reproduction; needs KVM-capable runner) — phase 2
+- [ ] **exp-001/exp-002 measurement-locality investigation** (`docs/TASKS.md` #24). Found
+      2026-08-01 while authoring exp-014, escalated under exp-001's "Faithful measurement" item
+      below rather than left as a side note, because of what it could mean for a `v0.1.0`-tagged
+      gate result: a disposable-netns repro of exp-001/exp-002's own addressing pattern (prober
+      and reflector in the same default netns) showed Linux delivering traffic between them via
+      loopback, never crossing the bridge/netem at all. **Not started**: instrument or `tcpdump`
+      an actual `run-exp-001.sh`/`run-exp-002.sh` run to see whether the real campaigns hit the
+      same shortcut. If they do, the faithful-measurement fix already tracked below (`zone up` +
+      `ip netns exec`, the same approach exp-014 uses from the start) is very likely also the
+      resolution — but confirming the problem exists in the real scripts comes first, so the fix
+      is verified against the actual failure rather than assumed to be one.
 
 ## Phase 2
 
