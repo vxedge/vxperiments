@@ -23,6 +23,8 @@ import statistics
 import sys
 import zipfile
 from collections import defaultdict
+
+from cold_start import caveat as cold_start_caveat
 from pathlib import Path
 
 ARCHIVE_RE = re.compile(r"rep(\d+)-(baseline|ota-burst)\.zip$")
@@ -243,7 +245,8 @@ def main():
         f"- caveats: shared-host gateway; {profile_note}; v1 OTA transport binds a plain host "
         "address (no manifest slice/WireGuard yet) — this measures host-level CPU/scheduling "
         "contention between the OTA workload and the adas probe, not gateway-QoS-enforced "
-        "network contention",
+        "network contention"
+        + (f"; {_cold}" if (_cold := cold_start_caveat([(r["arm"], r["p50_us"], r["p99_us"]) for r in rows], quick)) else ""),
     ]
     required_by_arm = {r["arm"]: r["required_completeness_pct"] for r in rows}
     optional_by_arm = {r["arm"]: r["optional_completeness_pct"] for r in rows}

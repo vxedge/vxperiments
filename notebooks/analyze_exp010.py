@@ -23,6 +23,8 @@ import statistics
 import sys
 import zipfile
 from collections import defaultdict
+
+from cold_start import caveat as cold_start_caveat
 from pathlib import Path
 
 ARCHIVE_RE = re.compile(r"rep(\d+)-load(\d+)\.zip$")
@@ -165,7 +167,8 @@ def main():
         f"- host: kernel {env['kernel']}, PREEMPT_RT={env['preempt_rt']}, "
         f"governor={env['cpu_governor']}, timestamping: {env['timestamping']}",
         f"- caveats: shared-host gateway; {profile_note}; "
-        f"{env.get('prometheus_live_metrics_note', '')}",
+        f"{env.get('prometheus_live_metrics_note', '')}"
+        + (f"; {_cold}" if (_cold := cold_start_caveat([(r["load_mbps"], r["p50_us"], r["p99_us"]) for r in rows], quick)) else ""),
         "",
         "## snssai arm",
         "",

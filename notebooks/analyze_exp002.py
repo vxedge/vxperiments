@@ -16,6 +16,8 @@ import statistics
 import sys
 import zipfile
 from collections import defaultdict
+
+from cold_start import caveat as cold_start_caveat
 from pathlib import Path
 
 ARCHIVE_RE = re.compile(r"rep(\d+)-([a-z]+)\.zip$")
@@ -161,7 +163,8 @@ def main():
         f"- probe: {env['probe_pps']} pps x {env['probe_window_s']} s per arm, idle topology",
         f"- host: kernel {env['kernel']}, PREEMPT_RT={env['preempt_rt']}, KVM={env.get('kvm')}, "
         f"governor={env['cpu_governor']}, timestamping: {env['timestamping']}",
-        f"- caveats: shared-host gateway; {profile_note}",
+        f"- caveats: shared-host gateway; {profile_note}"
+        + (f"; {_cold}" if (_cold := cold_start_caveat([(r['arm'], r["p50_us"], r["p99_us"]) for r in rows], quick)) else ""),
         "",
         "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | Δp50 vs container | Δp99 vs container | max loss % (lost/sent) |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",

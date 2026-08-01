@@ -21,6 +21,8 @@ import statistics
 import sys
 import zipfile
 from collections import defaultdict
+
+from cold_start import caveat as cold_start_caveat
 from pathlib import Path
 
 ARCHIVE_RE = re.compile(r"rep(\d+)-([a-z0-9-]+)\.zip$")
@@ -197,7 +199,8 @@ def main():
         f"timeout {env.get('probe_timeout_ms', 'unknown (script default ~1000)')} ms, idle topology",
         f"- host: kernel {env['kernel']}, KVM={env.get('kvm')}, governor={env['cpu_governor']}",
         f"- caveats: shared-host gateway; {profile_note}; resource sampling requires the arm's "
-        "process to be matched by cmdline regex — 'cpu/rss: n/a' means no sample matched",
+        "process to be matched by cmdline regex — 'cpu/rss: n/a' means no sample matched"
+        + (f"; {_cold}" if (_cold := cold_start_caveat([(r["arm"], r["p50_us"], r["p99_us"]) for r in rows], quick)) else ""),
         "",
         "| arm | reps | min samples | p50 µs (IQR) | p95 µs (IQR) | p99 µs (IQR) | max loss % (lost/sent) | cpu % (mean) | rss MB (mean) |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
