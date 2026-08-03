@@ -7,11 +7,15 @@
 - [x] `exp-001` — ADAS slice isolation (H1). Full campaign run 2026-07-10 (5 reps x 5 loads,
       60k samples/point, governor=performance): **H1 HOLDS — adas p99 0.93x baseline under
       600 mbit offered overload, zero loss**; load delivery verified (600.0 mbit, 0 errors);
-      frozen summary committed (results/exp-001/exp-001-summary.md). **Under re-verification
-      as of 2026-08-03**: confirmed this campaign's probe traffic travelled over loopback, never
-      through the gateway's bridge/VLAN/HTB path — see the "Faithful measurement" item below
-      and `docs/TASKS.md` #28. Not retracted, but not to be cited as a validated H1 mechanism
-      until the fix + re-run lands.
+      frozen summary committed (results/exp-001/exp-001-summary.md). **Confirmed 2026-08-03 to
+      have measured loopback delivery, never the gateway's bridge/VLAN/HTB path** — see the
+      "Faithful measurement" item below and `docs/TASKS.md` #28. **Re-run the same day under
+      the fix** (`results/exp-001-repro-2026-08-03/`, 25 archives, zero loss): **H1 still
+      HOLDS — p99 81.9µs at 600mbit vs 89.6µs baseline, 0.91x**, a slightly better ratio than
+      the original's 0.93x, at a higher absolute floor (~89.6µs vs ~77.3µs) exactly as expected
+      once traffic genuinely crosses the veth/bridge path. Not yet promoted over the frozen
+      summary above — held until exp-003/H4's re-run is confirmed too, so both get one erratum
+      pass, not two.
 - [x] `exp-002` — virtualization packaging (H3). Full campaign 2026-07-11 (5 reps x 3 arms,
       60k samples/arm), **superseded 2026-07-13 by a re-run under the single-arm isolation
       fix** (see "hardening" item below): current frozen numbers are p50 container 54.3 µs,
