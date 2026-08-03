@@ -1,13 +1,17 @@
 # TASKS.md — vxedge/vxperiments
 
-## Phase 1 (gate-defining — **PASSED 2026-07-13**: exp-001/exp-002-exp-002b/exp-003 deliver the H1/H3/H4 numbers)
+## Phase 1 (gate-defining — **PASSED 2026-07-13, PENDING RE-VERIFICATION FOR H1/H4 (2026-08-03)**: exp-001/exp-002-exp-002b/exp-003 deliver the H1/H3/H4 numbers — H1/H4 confirmed measured over loopback, not the real gateway path; fix + re-run tracked as `docs/TASKS.md` #28. H3 confirmed clean, unaffected)
 
 - [x] Repo layout: `experiments/`, `notebooks/`, `results/README.md` (`vehicles/` with the
       phase-3 vehicle manifest)
 - [x] `exp-001` — ADAS slice isolation (H1). Full campaign run 2026-07-10 (5 reps x 5 loads,
       60k samples/point, governor=performance): **H1 HOLDS — adas p99 0.93x baseline under
       600 mbit offered overload, zero loss**; load delivery verified (600.0 mbit, 0 errors);
-      frozen summary committed (results/exp-001/exp-001-summary.md)
+      frozen summary committed (results/exp-001/exp-001-summary.md). **Under re-verification
+      as of 2026-08-03**: confirmed this campaign's probe traffic travelled over loopback, never
+      through the gateway's bridge/VLAN/HTB path — see the "Faithful measurement" item below
+      and `docs/TASKS.md` #28. Not retracted, but not to be cited as a validated H1 mechanism
+      until the fix + re-run lands.
 - [x] `exp-002` — virtualization packaging (H3). Full campaign 2026-07-11 (5 reps x 3 arms,
       60k samples/arm), **superseded 2026-07-13 by a re-run under the single-arm isolation
       fix** (see "hardening" item below): current frozen numbers are p50 container 54.3 µs,
@@ -20,7 +24,10 @@
       original concurrent-arm design's background container+microvm processes measurably
       inflated libvirt's latency specifically — H3's conclusion doesn't change, but the
       libvirt magnitude does, and the isolated number is the one to cite going forward.
-      Frozen summary updated in place
+      Frozen summary updated in place. **Confirmed clean 2026-08-03**: unlike exp-001/exp-003,
+      this runner's reflector already runs inside a real zone netns or VM guest, not a bare
+      host process on a same-netns address — checked live, 5000 packets (2500+2500) crossed
+      the access port exactly as expected. No fix needed; H3's numbers stand as measured.
 - [x] `exp-003` — OTA co-location (H4). Full campaign 2026-07-13 (5 reps x 2 arms, 1000 pps
       x 60s, zero loss both arms): **H4 HOLDS — adas p50 45.8µs under a sustained OTA
       delivery burst vs 47.2µs baseline** (Δ -1.4µs, within IQR; p95/p99 likewise
@@ -36,8 +43,12 @@
       aggregate telemetry completeness — root-caused to the OTA burst driver's exporter
       having nothing listening during that arm (a manifest scrape-target gap, not real
       data loss; the adas-relevant target was 100% complete every rep) — explained in the
-      analyzer output, no re-run needed. **This closes the phase-1 gate** (H1+H3+H4 all
-      delivered).
+      analyzer output, no re-run needed. **This closed the phase-1 gate at the time** (H1+H3+H4
+      all delivered). **Under re-verification as of 2026-08-03**: this runner uses the identical
+      bare-host addressing as exp-001 and was confirmed to share its loopback-measurement
+      defect — see the "Faithful measurement" item under exp-001 above and `docs/TASKS.md` #28.
+      Not retracted, but not to be cited as a validated H4 mechanism until the fix + re-run
+      lands.
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
 - [x] `exp-001` reproducibility check (2026-07-13): full second campaign, same manifest
       sha256 (`e51721c1a5a0…`), 25 archives, zero loss. **Reproducible**: 14 of 15
@@ -94,17 +105,18 @@
       vehicles/) — phase 2, once the CLI subcommand exists
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
       (§13 on-demand reproduction; needs KVM-capable runner) — phase 2
-- [ ] **exp-001/exp-002 measurement-locality investigation** (`docs/TASKS.md` #24). Found
-      2026-08-01 while authoring exp-014, escalated under exp-001's "Faithful measurement" item
-      below rather than left as a side note, because of what it could mean for a `v0.1.0`-tagged
-      gate result: a disposable-netns repro of exp-001/exp-002's own addressing pattern (prober
-      and reflector in the same default netns) showed Linux delivering traffic between them via
-      loopback, never crossing the bridge/netem at all. **Not started**: instrument or `tcpdump`
-      an actual `run-exp-001.sh`/`run-exp-002.sh` run to see whether the real campaigns hit the
-      same shortcut. If they do, the faithful-measurement fix already tracked below (`zone up` +
-      `ip netns exec`, the same approach exp-014 uses from the start) is very likely also the
-      resolution — but confirming the problem exists in the real scripts comes first, so the fix
-      is verified against the actual failure rather than assumed to be one.
+- [x] **exp-001/exp-002/exp-003 measurement-locality investigation** (`docs/TASKS.md` #24,
+      done 2026-08-03; fix tracked as `docs/TASKS.md` #28). Confirmed live against each
+      experiment's own real script, not disposable repros: **exp-001 (H1) and exp-003 (H4) are
+      both broken** — bare-host addressing on both probe and reflector, `ip route get` reports
+      `dev lo`, a real 2500/2500-clean exchange produced zero `udp:9800` packets on the access
+      port in both. **exp-002/exp-002b (H3) are confirmed clean** — the reflector already runs
+      inside a real zone netns (`ip netns exec vx-node-cont-01`, container arm) or an actual VM
+      guest (microvm/libvirt arms), so `ip route get` resolves via the real interface and 5000
+      packets (2500+2500) crossed the access port exactly as expected. No fix needed for H3.
+      The fix for H1/H4 (real netns isolation for both ends, following exp-002's own already-
+      correct pattern, one shared `scripts/lib/` helper for exp-001-ws and exp-003-ws) is
+      tracked at the top level as `docs/TASKS.md` #28 — not duplicated here.
 
 ## Phase 2
 
@@ -354,17 +366,20 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
         traffic never reached the bridge, let alone the HTB tree or VLAN trunk. This is a kernel
         FIB behavior general to any unbound socket in a shared netns (confirmed with plain
         `ping`, not vxprobe-specific), not something tied to this host.
-        **What is and isn't established**: the *mechanism* is verified in isolation. Whether the
-        literal `run-exp-001.sh`/`run-exp-002.sh` scripts hit it on a real campaign — and
-        whether that means the frozen H1/H3 numbers measured loopback delivery rather than the
-        shaped bridge path — is **not yet verified against the real scripts** and is deliberately
-        left open rather than asserted. Given `v0.1.0` is already tagged on a phase-1 gate that
-        cites these numbers, this needs a direct, careful check (repeat the tcpdump-on-the-
-        access-port test against an actual `run-exp-001.sh` run) before anything about H1/H3's
-        validity is concluded either way. Full account of the isolated repro: `docs/STATUS.md`.
-        exp-014 (harness topology, authored the same day) is built the faithful way from the
-        start — `zone up` for real, agents via `ip netns exec` — specifically to not carry this
-        risk into a new experiment.
+        **CONFIRMED 2026-08-03 against real campaign scripts, not just the isolated repro**:
+        `run-exp-001.sh` genuinely hits this shortcut (`ip route get` → `dev lo`; a real
+        2500/2500-clean exchange produced zero `udp:9800` packets on the access port). **The
+        frozen H1 (and, checked the same way, H4/exp-003 — identical bare-host code) numbers
+        measured loopback delivery, not the shaped bridge path.** `run-exp-002.sh`, by contrast,
+        turned out to already run its reflector inside a real zone netns (`ip netns exec
+        vx-node-cont-01`) or a real VM guest, so it does **not** carry this defect — H3's numbers
+        stand as measured; this checklist item's fix is needed for H1/H4 only, not H3. This
+        item — running the agents inside the zones — **is the fix**, now confirmed necessary for
+        correctness rather than optional faithfulness. Tracked at the top level, with the full
+        phased plan, as `docs/TASKS.md` #28. Full evidence chain: `docs/TASKS.md` #24 (closed)
+        and `docs/STATUS.md`. exp-014 (harness topology, authored 2026-08-01) is built the
+        faithful way from the start — `zone up` for real, agents via `ip netns exec` —
+        specifically so it never carried this risk.
 - [x] **`exp-003` → workspace form** (2026-07-30, `experiments/exp-003-ws/`).
 - [x] **`exp-010` → workspace form** (2026-07-30, `experiments/exp-010-ws/`) — the only
       `mode: s-nssai` coverage there is; its `FiveGPlan` matches the frozen manifest's session
