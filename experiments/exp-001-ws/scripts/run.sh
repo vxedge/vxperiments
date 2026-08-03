@@ -5,8 +5,12 @@
 #   sudo -E env "PATH=$PATH" ./scripts/run.sh [--quick|--repro]
 #
 # Provisions from the §6.0 workspace (experiments/exp-001-ws). The frozen results in
-# results/exp-001/ were produced from the §6.1 manifest and stay authoritative until a
-# campaign from the workspace reproduces them — that comparison is the point of --repro.
+# results/exp-001/ (both the original §6.1-manifest campaign and its --repro rerun) are
+# UNDER RE-VERIFICATION as of 2026-08-03 (docs/TASKS.md #24/#28): both measured the probe
+# exchange over loopback, never through the bridge/HTB path — see the topology note below
+# for the fix. Neither is authoritative until a campaign from this corrected script produces
+# a new baseline; the numerical-equivalence question --repro originally existed to answer is
+# secondary to that until then.
 #
 # --repro: full campaign written to results/exp-001-repro-<date>/ — the frozen
 #          results/exp-001/ dir is never overwritten in place (lib/results_dir.sh).
@@ -17,13 +21,17 @@
 # default: 5 repetitions x 5 load levels, 10 s warmup + 60 s measured probe
 #          window per point (1000 pps => 60k samples: p99 well-supported).
 #
-# Topology per run: vxedge up provisions vxbr0 + shaped trunk (vxup0) + one
-# endpoint per node (node-adas-probe-01 on vlan101, node-infot-load-01 on
-# vlan103). This script adds experiment IPs:
-#   vzp-node-a-c06a 10.101.0.2/24  <-- adas probe source (node-adas-probe-01)
-#   vzp-node-i-2921 10.103.0.2/24  <-- infotainment load source (node-infot-load-01)
-#   vxup0p.101 10.101.0.1/24  <-- vxprobe reflector (across the bottleneck)
-#   vxup0p.103 10.103.0.1/24  <-- load sink address (fire-and-forget)
+# Topology per run (fixed 2026-08-03, docs/TASKS.md #28): vxedge up provisions vxbr0 +
+# shaped trunk (vxup0); `zone up` brings each device up for real, moving its veth into its
+# own netns (renamed eth0, addressed from vehicle.yaml's pinned IP) rather than leaving a
+# host-side veth peer in the daemon's own netns. The far side (vxup0p, the trunk's own peer)
+# is untouched — it was already correctly separated; the bug was that the sender's address
+# used to live in the same netns as the far side's, so the kernel's `local` routing table
+# delivered every RTT sample over loopback instead:
+#   node-adas-probe-01 (netns vx-node-adas-probe-01) 10.101.0.2/24  <-- adas probe source
+#   node-infot-load-01 (netns vx-node-infot-load-01) 10.103.0.2/24  <-- infotainment load source
+#   vxup0p.101 10.101.0.1/24  <-- vxprobe reflector (across the bottleneck, host default netns)
+#   vxup0p.103 10.103.0.1/24  <-- load sink address (fire-and-forget, host default netns)
 set -euo pipefail
 
 QUICK=0; REPRO=0
@@ -111,6 +119,8 @@ cleanup() {
   set +e
   restore_cpu_governors
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
+  "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid node-adas-probe-01 >/dev/null 2>&1
+  "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid node-infot-load-01 >/dev/null 2>&1
   "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment down --stage gateway >/dev/null 2>&1
   [[ -n "${DAEMON_PID:-}" ]] && kill "$DAEMON_PID" 2>/dev/null
   ip link del vxup0p.101 2>/dev/null; ip link del vxup0p.103 2>/dev/null
@@ -149,14 +159,20 @@ sleep 1
 for rep in $(seq 1 "$REPS"); do
   for load in "${LOADS_MBPS[@]}"; do
     tag="rep${rep}-load${load}"
-    echo "-- $tag: gateway up"
-    # `--stage gateway` on purpose: this campaign measures on the host-side veth peers, so
-    # starting the zones would move them into node netns and change the measurement path.
+    echo "-- $tag: gateway + zones up"
     "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment up --stage gateway >/dev/null
+    # Real zone bring-up (docs/TASKS.md #28 fix — replaces the host-side veth-peer hand-roll
+    # this campaign used before 2026-08-03). Each device's veth moves into its own netns,
+    # renamed eth0, addressed from vehicle.yaml's pinned IP — see that file's own comment for
+    # why this matters: the old form put both the sender and the reflector in the host's
+    # default netns, so the kernel's `local` routing table delivered every RTT sample over
+    # loopback, never through the bridge/HTB path this experiment claims to measure.
+    "$VXEDGE" --endpoint "unix://$SOCK" zone up --vxid node-adas-probe-01 >/dev/null
+    "$VXEDGE" --endpoint "unix://$SOCK" zone up --vxid node-infot-load-01 >/dev/null
 
-    # Experiment IP wiring (fresh each cycle; interfaces are recreated by up).
-    ip addr replace 10.101.0.2/24 dev vzp-node-a-c06a && ip link set vzp-node-a-c06a up
-    ip addr replace 10.103.0.2/24 dev vzp-node-i-2921 && ip link set vzp-node-i-2921 up
+    # Far side: unchanged by the #28 fix. vxup0p is the gateway's own uplink peer — the
+    # far side of the shaped trunk, already correctly separated from the zones now that
+    # they're real netns rather than host-side veth peers, not something that needed to move.
     ip link add link vxup0p name vxup0p.101 type vlan id 101
     ip link add link vxup0p name vxup0p.103 type vlan id 103
     ip addr replace 10.101.0.1/24 dev vxup0p.101 && ip link set vxup0p.101 up
@@ -171,7 +187,7 @@ for rep in $(seq 1 "$REPS"); do
     sleep 0.5
 
     if [[ "$load" -gt 0 ]]; then
-      "$VXTRAFFIC" --target 10.103.0.1:9900 --bandwidth-mbps "$load" \
+      ip netns exec vx-node-infot-load-01 "$VXTRAFFIC" --target 10.103.0.1:9900 --bandwidth-mbps "$load" \
         --duration-s $((WARMUP_S + PROBE_S + 4)) > "$INGEST/traffic-summary.json" & PIDS+=($!)
       TRAFFIC_PID=$!
     fi
@@ -182,9 +198,9 @@ for rep in $(seq 1 "$REPS"); do
       --interval-s 5 --duration-s "$PROBE_S" &>/dev/null & PIDS+=($!)
     TEL_PID=$!
 
-    echo "   probing ${PROBE_S}s @ ${PROBE_PPS}pps on adas slice"
-    "$VXPROBE" send --target 10.101.0.1:9800 --pps "$PROBE_PPS" \
-      --duration-s "$PROBE_S" --metrics 127.0.0.1:9801 \
+    echo "   probing ${PROBE_S}s @ ${PROBE_PPS}pps on adas slice (agent inside node-adas-probe-01's own netns)"
+    ip netns exec vx-node-adas-probe-01 "$VXPROBE" send --target 10.101.0.1:9800 --pps "$PROBE_PPS" \
+      --duration-s "$PROBE_S" --metrics 10.101.0.2:9801 \
       > "$INGEST/probe-summary.json"
 
     wait "$TEL_PID" 2>/dev/null || true
@@ -198,6 +214,8 @@ for rep in $(seq 1 "$REPS"); do
 
     ip link del vxup0p.101 2>/dev/null || true
     ip link del vxup0p.103 2>/dev/null || true
+    "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid node-adas-probe-01 >/dev/null
+    "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid node-infot-load-01 >/dev/null
     "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment down --stage gateway >/dev/null
   done
 done

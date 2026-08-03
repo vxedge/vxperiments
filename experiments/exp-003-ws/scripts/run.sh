@@ -19,6 +19,14 @@
 # adas slice/QoS/probe parameters as exp-001, so this campaign's baseline is
 # directly comparable to exp-001's load=0 point, and ota-burst to exp-001's
 # heaviest infotainment-load point.
+#
+# Frozen results/exp-003/ is UNDER RE-VERIFICATION as of 2026-08-03 (docs/TASKS.md #24/#28):
+# it shared exp-001's measurement-locality bug (probe sender and reflector both addressed in
+# the host's default netns, so the kernel's `local` routing table delivered every RTT sample
+# over loopback). Fixed the same way: `zone up` brings node-adas-probe-01 up for real, moving
+# its veth into its own netns (renamed eth0, addressed from car1.yaml's pinned IP) instead of
+# a host-side veth peer. The reflector (vxup0p.101, host default netns) is unchanged — it was
+# already correctly separated; only the sender needed to move.
 set -euo pipefail
 
 QUICK=0; REPRO=0
@@ -110,6 +118,7 @@ cleanup() {
   set +e
   restore_cpu_governors
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
+  "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid node-adas-probe-01 >/dev/null 2>&1
   "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment down >/dev/null 2>&1
   [[ -n "${DAEMON_PID:-}" ]] && kill "$DAEMON_PID" 2>/dev/null
   ip link del vxup0p.101 2>/dev/null
@@ -154,12 +163,16 @@ VXEDGE_C=("$VXEDGE" --endpoint "unix://$SOCK")
 for rep in $(seq 1 "$REPS"); do
   for arm in "${ARMS[@]}"; do
     tag="rep${rep}-${arm}"
-    echo "-- $tag: gateway + ota service up"
+    echo "-- $tag: gateway + ota service + zone up"
     # Gateway and the ota service in one call, in dependency order — the sequence this script
     # used to spell out itself.
     "${VXEDGE_C[@]}" --chdir "$MANIFEST" experiment up --stage gateway --stage services >/dev/null
+    # Real zone bring-up (docs/TASKS.md #28 fix — replaces the host-side veth-peer hand-roll
+    # this campaign used before 2026-08-03, shared with exp-001's identical defect). Moves the
+    # device's veth into its own netns, renamed eth0, addressed from car1.yaml's pinned IP.
+    "${VXEDGE_C[@]}" zone up --vxid node-adas-probe-01 >/dev/null
 
-    ip addr replace 10.101.0.2/24 dev vzp-node-a-c06a && ip link set vzp-node-a-c06a up
+    # Far side: unchanged by the #28 fix — vxup0p was already correctly separated.
     ip link add link vxup0p name vxup0p.101 type vlan id 101
     ip addr replace 10.101.0.1/24 dev vxup0p.101 && ip link set vxup0p.101 up
     ip link set vxup0p up
@@ -176,7 +189,9 @@ for rep in $(seq 1 "$REPS"); do
       # Runs for the whole warmup+probe window, killed at the end like the
       # reflector above — not time-bounded itself (vxota-probe has no
       # --duration-s), so a large --repeat plus explicit teardown is the
-      # same pattern exp-001 uses for its interfering-load generator.
+      # same pattern exp-001 uses for its interfering-load generator. Stays a bare host
+      # process — it targets the OTA server (also host-side), unrelated to the
+      # probe/reflector addressing this fix corrects.
       # Its own final JSON summary won't survive being killed mid-loop;
       # the manifest's telemetry.prometheus.scrape_targets already lists
       # its live exporter (127.0.0.1:9902), so vxtelemetry's periodic
@@ -193,9 +208,9 @@ for rep in $(seq 1 "$REPS"); do
     "$VXTELEMETRY" ingest --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --interval-s 5 --duration-s "$PROBE_S" &>/dev/null & TEL_PID=$!
 
-    echo "   probing ${PROBE_S}s @ ${PROBE_PPS}pps on adas slice ($arm)"
-    if ! "$VXPROBE" send --target 10.101.0.1:9800 --pps "$PROBE_PPS" \
-      --duration-s "$PROBE_S" --timeout-ms "$PROBE_TIMEOUT_MS" --metrics 127.0.0.1:9801 \
+    echo "   probing ${PROBE_S}s @ ${PROBE_PPS}pps on adas slice ($arm, agent inside node-adas-probe-01's own netns)"
+    if ! ip netns exec vx-node-adas-probe-01 "$VXPROBE" send --target 10.101.0.1:9800 --pps "$PROBE_PPS" \
+      --duration-s "$PROBE_S" --timeout-ms "$PROBE_TIMEOUT_MS" --metrics 10.101.0.2:9801 \
       2>/dev/null > "$INGEST/probe-summary.json"; then
       echo "   $tag: WARNING vxprobe reported zero received probes — measurement failed" >&2
     fi
@@ -209,6 +224,7 @@ for rep in $(seq 1 "$REPS"); do
     echo "   archived $RESULTS/$tag.zip ($(jq -r '.rtt_us.p99' "$INGEST/probe-summary.json" 2>/dev/null || echo '?') us p99)"
 
     ip link del vxup0p.101 2>/dev/null || true
+    "${VXEDGE_C[@]}" zone down --vxid node-adas-probe-01 >/dev/null
     # Services then gateway, in reverse dependency order — one call, the daemon's job.
     "${VXEDGE_C[@]}" --chdir "$MANIFEST" experiment down >/dev/null
   done

@@ -22,6 +22,11 @@ functions:
   adas-probe:   { deployed_on: node-adas-probe-01 }
   infot-load:   { deployed_on: node-infot-load-01 }
 
+# Pinned IPs (2026-08-03, docs/TASKS.md #28): `zone up` assigns these to each device's real
+# `eth0` inside its own netns, so `scripts/run.sh` no longer has to inject them onto a host-side
+# veth peer by hand. That hand-rolled form was the measurement-locality bug (#24) — the sender's
+# address and the reflector's both lived in the host's default netns, so the kernel's `local`
+# routing table delivered every RTT sample over loopback, never through the bridge/HTB path.
 links:
-  - { id: trunk-adas,  endpoints: [node-adas-probe-01:eth0], slice: adas }
-  - { id: trunk-infot, endpoints: [node-infot-load-01:eth0], slice: infotainment }
+  - { id: trunk-adas,  endpoints: [{ node: node-adas-probe-01, port: eth0, ip: 10.101.0.2/24 }], slice: adas }
+  - { id: trunk-infot, endpoints: [{ node: node-infot-load-01, port: eth0, ip: 10.103.0.2/24 }], slice: infotainment }

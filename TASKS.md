@@ -380,6 +380,16 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
         and `docs/STATUS.md`. exp-014 (harness topology, authored 2026-08-01) is built the
         faithful way from the start — `zone up` for real, agents via `ip netns exec` —
         specifically so it never carried this risk.
+        **Implemented 2026-08-03, not yet live-verified — box stays unchecked until it is.**
+        `vehicle.yaml`/`car1.yaml` gained pinned endpoint IPs so `zone up` assigns them; both
+        `main.yaml`s' scrape targets moved off `127.0.0.1` to the zone's real address; both
+        `run.sh`s now call `zone up`/`zone down` for real and run `vxprobe`/`vxtraffic` via
+        `ip netns exec vx-<device>`. The far-side reflector (`vxup0p.*`) is untouched — reading
+        `GatewayPlan`/provisioning code confirmed the per-slice HTB class applies only to the
+        trunk device, keyed by VLAN tag, so `vxup0p`'s existing placement was already correct;
+        only the sender's netns was wrong. Locally validated without sudo (`vxedge manifest
+        validate`, `bash -n`, `scripts/lib/check-runners.sh`, all clean) but never run — that
+        needs sudo and is the next thing to do at the host, not assumed to work from this.
 - [x] **`exp-003` → workspace form** (2026-07-30, `experiments/exp-003-ws/`).
 - [x] **`exp-010` → workspace form** (2026-07-30, `experiments/exp-010-ws/`) — the only
       `mode: s-nssai` coverage there is; its `FiveGPlan` matches the frozen manifest's session
