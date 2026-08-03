@@ -1,6 +1,6 @@
 # TASKS.md — vxedge/vxperiments
 
-## Phase 1 (gate-defining — **PASSED 2026-07-13, PENDING RE-VERIFICATION FOR H1/H4 (2026-08-03)**: exp-001/exp-002-exp-002b/exp-003 deliver the H1/H3/H4 numbers — H1/H4 confirmed measured over loopback, not the real gateway path; fix + re-run tracked as `docs/TASKS.md` #28. H3 confirmed clean, unaffected)
+## Phase 1 (gate-defining — **PASSED 2026-07-13, RE-VERIFIED 2026-08-03**: exp-001/exp-002-exp-002b/exp-003 deliver the H1/H3/H4 numbers — H1/H4 were confirmed measured over loopback, not the real gateway path; fixed, re-run, and promoted over the original frozen summaries (`docs/TASKS.md` #28). H3 confirmed clean throughout, unaffected)
 
 - [x] Repo layout: `experiments/`, `notebooks/`, `results/README.md` (`vehicles/` with the
       phase-3 vehicle manifest)
@@ -13,9 +13,13 @@
       the fix** (`results/exp-001-repro-2026-08-03/`, 25 archives, zero loss): **H1 still
       HOLDS — p99 81.9µs at 600mbit vs 89.6µs baseline, 0.91x**, a slightly better ratio than
       the original's 0.93x, at a higher absolute floor (~89.6µs vs ~77.3µs) exactly as expected
-      once traffic genuinely crosses the veth/bridge path. Not yet promoted over the frozen
-      summary above — held until exp-003/H4's re-run is confirmed too, so both get one erratum
-      pass, not two.
+      once traffic genuinely crosses the veth/bridge path. **Promoted 2026-08-03**: the frozen
+      `exp-001-summary.{md,csv}` above, and the raw archives in `results/exp-001/`, now
+      describe this corrected campaign (input sha `2666fbf561ae…`) — the original
+      loopback-measured campaign's summary is superseded, not deleted (recoverable via git
+      history). This also resolved a separate stale-archive mismatch in the same directory
+      (2026-07-13 repro-check zips had been left sitting alongside a summary describing the
+      2026-07-10 campaign) — the promotion made summary and archives agree again.
 - [x] `exp-002` — virtualization packaging (H3). Full campaign 2026-07-11 (5 reps x 3 arms,
       60k samples/arm), **superseded 2026-07-13 by a re-run under the single-arm isolation
       fix** (see "hardening" item below): current frozen numbers are p50 container 54.3 µs,
@@ -48,11 +52,18 @@
       having nothing listening during that arm (a manifest scrape-target gap, not real
       data loss; the adas-relevant target was 100% complete every rep) — explained in the
       analyzer output, no re-run needed. **This closed the phase-1 gate at the time** (H1+H3+H4
-      all delivered). **Under re-verification as of 2026-08-03**: this runner uses the identical
-      bare-host addressing as exp-001 and was confirmed to share its loopback-measurement
-      defect — see the "Faithful measurement" item under exp-001 above and `docs/TASKS.md` #28.
-      Not retracted, but not to be cited as a validated H4 mechanism until the fix + re-run
-      lands.
+      all delivered). **2026-08-03: confirmed to share exp-001's loopback-measurement defect**
+      (identical bare-host addressing) — see the "Faithful measurement" item under exp-001
+      above and `docs/TASKS.md` #28. **Fixed and re-run the same day**: H4 still HOLDS — p50
+      52.2µs baseline vs 51.9µs under OTA burst (Δ -0.3µs), 361 successful deliveries, zero
+      failures — same conclusion as the original, at a higher absolute floor (~52.2µs vs the
+      original's ~47.2µs), exactly as expected once traffic genuinely crosses the veth/bridge
+      path. **Promoted**: the frozen `exp-003-summary.{md,csv}` above, and the raw archives
+      in `results/exp-003/`, now describe this corrected campaign (input sha
+      `1efebdef615f…`) — the original loopback-measured campaign's summary is superseded, not
+      deleted (recoverable via git history), and the same stale-archive mismatch this
+      directory had (2026-07-13 repro-check zips vs. a summary describing 2026-07-13's own
+      original campaign) is resolved the same way.
 - [ ] Baseline notebook: parse collect archives → percentile tables + isolation charts + CSV
 - [x] `exp-001` reproducibility check (2026-07-13): full second campaign, same manifest
       sha256 (`e51721c1a5a0…`), 25 archives, zero loss. **Reproducible**: 14 of 15
@@ -396,8 +407,9 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
         `zone_traffic_reaches_the_access_port_not_loopback` — live-run
         (`sudo -E env "PATH=$PATH" cargo test -p vxedge-core --test gateway_netns --
         --ignored --nocapture`): 3 passed, 0 failed, alongside the two pre-existing gateway
-        tests. What's left is running the real campaigns (`docs/TASKS.md` #28 steps 4-5), not
-        this item.
+        tests. **`docs/TASKS.md` #28 fully closed 2026-08-03**: both real campaigns re-run
+        under the fix (H1 and H4 both hold) and promoted over the original frozen summaries —
+        see the `exp-001`/`exp-003` entries above for the corrected numbers.
 - [x] **`exp-003` → workspace form** (2026-07-30, `experiments/exp-003-ws/`).
 - [x] **`exp-010` → workspace form** (2026-07-30, `experiments/exp-010-ws/`) — the only
       `mode: s-nssai` coverage there is; its `FiveGPlan` matches the frozen manifest's session
