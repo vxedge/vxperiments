@@ -16,6 +16,15 @@
 #
 # The second is the stronger one: it runs the real script, so it catches a variable that is
 # assigned in a branch that never executes, which shellcheck cannot know about.
+#
+# A preamble probe that reaches a runner's own `error: missing $bin — cargo build first`
+# (or similar) is not a failure of this check: it means every variable read up to that point
+# resolved cleanly under `set -u`, and this job's own contract (`ci.yml`'s `runners` job) is
+# "everything checkable without the vxedge binaries" — a fresh checkout has neither those nor
+# the other built artifacts some runners also gate on. Only bash's own "unbound variable" (a
+# raw `set -u` violation) or anything unrecognized counts as a real failure — found live
+# 2026-08-04 when this distinction didn't exist yet and every runner FAILED in CI for
+# something no CI checkout can ever have.
 set -uo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -79,6 +88,23 @@ for f in scripts/run-exp-*.sh experiments/*/scripts/run.sh; do
   rm -f "$probe"
   if grep -q '^RESULTS=' <<<"$out"; then
     printf '  %-16s ok  %s\n' "$name" "$(grep -o 'RESULTS=.*' <<<"$out" | head -1)"
+  elif grep -qE ': line [0-9]+: [A-Za-z_][A-Za-z0-9_]*: unbound variable' <<<"$out"; then
+    # The exact bug class this check exists to catch (see the file header) — bash's own
+    # message for a `set -u` violation, distinct from any of the runner's own `error: ...`
+    # precondition messages below.
+    printf '  %-16s FAILED\n%s\n' "$name" "$out"
+    fail=1
+  elif grep -q '^error: ' <<<"$out"; then
+    # A controlled exit from one of the runner's own precondition gates (missing binary,
+    # missing guest bundle, etc.) — every runner's is `echo "error: ..." >&2; exit 1`, never
+    # a bare `exit`. If any variable read before this point were unbound, `set -u` would have
+    # crashed first with its own "unbound variable" message instead, caught above — so
+    # reaching a *named* precondition failure means everything up to it resolved cleanly.
+    # This is expected, not a bug: this job's own contract (`ci.yml`'s `runners` job) is
+    # "everything checkable without the vxedge binaries," and a fresh checkout has neither
+    # the binaries nor the built artifacts (guest bundles, etc.) some runners also need.
+    printf '  %-16s ok  (stopped at a real precondition this job does not build: %s)\n' \
+      "$name" "$(grep -o 'error:.*' <<<"$out" | head -1)"
   else
     printf '  %-16s FAILED\n%s\n' "$name" "$out"
     fail=1
