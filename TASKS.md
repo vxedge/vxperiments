@@ -113,13 +113,31 @@
       run after a sudo prompt and a build. Verified by re-introducing that exact deletion — the
       check fails, `bash -n` still passes.
 
-      `workspaces` needs a `VXEDGE_CROSS_REPO_TOKEN` secret (vxedge is a separate private repo;
-      `GITHUB_TOKEN` cannot check it out). Until it is provisioned the job fails at checkout
+      `workspaces` needed a `VXEDGE_CROSS_REPO_TOKEN` secret (vxedge is a separate private repo;
+      `GITHUB_TOKEN` cannot check it out). Until it was provisioned the job failed at checkout
       rather than skipping — the same choice, for the same reason, as vxmodels'
-      `pipeline-regression`. Still open: workspace-validation over experiments/ and
-      vehicles/) — phase 2, once the CLI subcommand exists
+      `pipeline-regression`. **Secret set and job live-verified 2026-08-04**
+      (`docs/TASKS.md` #18): re-ran the most recent `main` push's CI, `workspace validation
+      (cross-repo)` now completes successfully (2m13s) instead of failing at checkout. Still
+      open: workspace-validation over experiments/ and vehicles/) — phase 2, once the CLI
+      subcommand exists.
+- [x] **`runners` job bug found and fixed, 2026-08-04** (`docs/TASKS.md` #18, discovered
+      while verifying the secret fix above): the same re-run showed `runners` had been failing
+      on every push since at least 2026-08-01 — every runner's own binary-existence precondition
+      (`[[ -x "$bin" ]] || { echo "error: missing $bin..."; exit 1; }`) hard-exits before the
+      preamble probe ever reaches its own `RESULTS=`/`MANIFEST=` assertion, and this job never
+      builds those binaries at all, contradicting its own header comment ("everything checkable
+      without the vxedge binaries"). Fixed in `check-runners.sh`: the probe's output is now
+      classified three ways — bash's own "unbound variable" message (a real `set -u` bug, still
+      fails the check) vs. a runner's own `error: ...` precondition message (now treated as an
+      expected stopping point, not a bug — reaching a *named* precondition proves everything
+      read up to it resolved cleanly) vs. anything unrecognized (still fails, conservative
+      default). Verified two ways: binaries' executable bits stripped temporarily
+      (trap-guarded restore) to simulate the CI condition — all 6 runners now report "ok",
+      exit 0; and the exact 2026-07-31 incident this check exists to catch was temporarily
+      reintroduced (commented out, then `git checkout`-restored) — still correctly fails.
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
-      (§13 on-demand reproduction; needs KVM-capable runner) — phase 2
+      (§13 on-demand reproduction; needs KVM-capable runner) — phase 2, not started
 - [x] **exp-001/exp-002/exp-003 measurement-locality investigation** (`docs/TASKS.md` #24,
       done 2026-08-03; fix tracked as `docs/TASKS.md` #28). Confirmed live against each
       experiment's own real script, not disposable repros: **exp-001 (H1) and exp-003 (H4) are
