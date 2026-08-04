@@ -113,11 +113,25 @@ else
 fi
 PROBE_TIMEOUT_MS=1000
 
+# OTA process resource footprint (§12 compute metrics; vxtelemetry/TASKS.md — the sampler
+# vxtelemetry::sample was built for exp-002b and reused here, docs/TASKS.md #23). Two labels,
+# sampled together: ota-server runs the whole time in both arms (idle in baseline, actively
+# serving the burst artifact in ota-burst); ota-probe only exists in ota-burst, so it simply
+# never appears in baseline's resource-summary.json — not a bug, the expected shape (see
+# analyze_exp003.py). Match strings verified against the actual cmdlines each process runs
+# with: the ota service backend spawns `<vxota-bin> serve --artifacts-dir ... --listen ...`
+# (vxedge-core::services::OtaBackend::command); this script spawns `$VXOTA_PROBE fetch
+# --server ... --target burst-artifact ...` directly above. Both substrings are safe against
+# each other: "vxota serve" (a space) can't match "vxota-probe" (a hyphen) or vice versa.
+RESOURCE_MATCH=(--match "ota-server=vxota serve" --match "ota-probe=vxota-probe fetch")
+
 PIDS=()
 cleanup() {
   set +e
   restore_cpu_governors
   for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null; done
+  [[ -n "${TEL_PID:-}" ]] && kill "$TEL_PID" 2>/dev/null
+  [[ -n "${SAMP_PID:-}" ]] && kill "$SAMP_PID" 2>/dev/null
   "$VXEDGE" --endpoint "unix://$SOCK" zone down --vxid node-adas-probe-01 >/dev/null 2>&1
   "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment down >/dev/null 2>&1
   [[ -n "${DAEMON_PID:-}" ]] && kill "$DAEMON_PID" 2>/dev/null
@@ -207,8 +221,10 @@ for rep in $(seq 1 "$REPS"); do
 
     "$VXTELEMETRY" ingest --workspace "$MANIFEST" --ingest-dir "$INGEST" \
       --interval-s 5 --duration-s "$PROBE_S" &>/dev/null & TEL_PID=$!
+    "$VXTELEMETRY" sample "${RESOURCE_MATCH[@]}" --out-dir "$INGEST" \
+      --interval-ms 500 --duration-s "$PROBE_S" &>/dev/null & SAMP_PID=$!
 
-    echo "   probing ${PROBE_S}s @ ${PROBE_PPS}pps on adas slice ($arm, agent inside node-adas-probe-01's own netns)"
+    echo "   probing ${PROBE_S}s @ ${PROBE_PPS}pps on adas slice ($arm, agent inside node-adas-probe-01's own netns) (+resource sampling)"
     if ! ip netns exec vx-node-adas-probe-01 "$VXPROBE" send --target 10.101.0.1:9800 --pps "$PROBE_PPS" \
       --duration-s "$PROBE_S" --timeout-ms "$PROBE_TIMEOUT_MS" --metrics 10.101.0.2:9801 \
       2>/dev/null > "$INGEST/probe-summary.json"; then
@@ -216,6 +232,7 @@ for rep in $(seq 1 "$REPS"); do
     fi
 
     wait "$TEL_PID" || echo "   $tag: WARNING vxtelemetry ingest exited non-zero — archive may be incomplete" >&2
+    wait "$SAMP_PID" || echo "   $tag: WARNING vxtelemetry sample exited non-zero — archive may be incomplete" >&2
     for p in "${PIDS[@]}"; do kill "$p" 2>/dev/null || true; done
     PIDS=()
 

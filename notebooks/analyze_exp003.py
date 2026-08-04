@@ -143,6 +143,13 @@ def main():
                     ota = None
             stats_name = "ingest/ingest-stats.json"
             stats = json_lenient(z.read(stats_name)) if stats_name in names else None
+            resource_name = "ingest/resource-summary.json"
+            resource = None
+            if resource_name in names:
+                try:
+                    resource = json_lenient(z.read(resource_name))
+                except (ValueError, KeyError):
+                    resource = None
             runs.append(
                 {
                     "rep": int(m.group(1)),
@@ -151,6 +158,7 @@ def main():
                     "env": json_lenient(z.read("ingest/run-env.json")),
                     "ota": ota,
                     "stats": stats,
+                    "resource": resource,
                     "sha": input_sha(json_lenient(z.read("metadata.json"))),
                 }
             )
@@ -224,11 +232,43 @@ def main():
 
     by_arm_row = {r["arm"]: r for r in rows}
 
+    # OTA process resource footprint (§12 compute metrics): the ota-server process runs in
+    # both arms (idle in baseline, actively serving the burst artifact in ota-burst); the
+    # ota-probe fetcher only exists in ota-burst. A (arm, label) pair with zero matched
+    # samples across every rep simply never appears here — vxtelemetry::sample only ever
+    # writes a label into resource-summary.json if it actually matched a process — which is
+    # the expected, not-a-bug shape for ota-probe never showing up under baseline.
+    resource_agg = defaultdict(lambda: {"cpu": [], "rss": [], "samples": []})
+    for r in runs:
+        res = r["resource"] or {}
+        for label, node in res.items():
+            key = (r["arm"], label)
+            resource_agg[key]["cpu"].append(node["cpu_pct_mean"])
+            resource_agg[key]["rss"].append(node["rss_mb_mean"])
+            resource_agg[key]["samples"].append(node["samples"])
+    resource_rows = []
+    for arm in [a for a in ARM_ORDER if a in by_arm] + sorted(set(by_arm) - set(ARM_ORDER)):
+        for label in sorted({lbl for (a, lbl) in resource_agg if a == arm}):
+            vals = resource_agg[(arm, label)]
+            resource_rows.append(
+                {
+                    "arm": arm,
+                    "label": label,
+                    "reps_matched": len(vals["cpu"]),
+                    "cpu_pct_mean": round(statistics.median(vals["cpu"]), 2),
+                    "rss_mb_mean": round(statistics.median(vals["rss"]), 1),
+                }
+            )
     out_dir.mkdir(parents=True, exist_ok=True)
     with (out_dir / "exp-003-summary.csv").open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         w.writeheader()
         w.writerows(rows)
+    if resource_rows:
+        with (out_dir / "exp-003-resource.csv").open("w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(resource_rows[0].keys()))
+            w.writeheader()
+            w.writerows(resource_rows)
 
     env = runs[0]["env"]
     profile_note = (
@@ -287,6 +327,24 @@ def main():
             f"| {ota_dev} | {ota_lat} |"
         )
 
+    lines += ["", "## OTA process resource footprint", ""]
+    if resource_rows:
+        lines += [
+            "| arm | process | reps matched | cpu % (mean) | rss MB (mean) |",
+            "|---|---|---:|---:|---:|",
+        ]
+        for rr in resource_rows:
+            lines.append(
+                f"| {rr['arm']} | {rr['label']} | {rr['reps_matched']}/{by_arm_row[rr['arm']]['reps']} "
+                f"| {rr['cpu_pct_mean']} | {rr['rss_mb_mean']} |"
+            )
+    else:
+        lines.append(
+            "_n/a — no `ingest/resource-summary.json` in these archives (older campaign, "
+            "predating the resource sampler's exp-003 wiring) or no process matched the "
+            "cmdline regex in any rep._"
+        )
+
     if anomalies:
         lines += ["", "## ⚠️ Loss anomalies (per-repetition, exceeds "
                   f"{LOSS_WARN_PCT}%) — latency stats for these arms are unreliable", ""]
@@ -330,7 +388,10 @@ def main():
 
     (out_dir / "exp-003-summary.md").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
-    print(f"\nwrote {out_dir}/exp-003-summary.csv and {out_dir}/exp-003-summary.md")
+    wrote = f"{out_dir}/exp-003-summary.csv and {out_dir}/exp-003-summary.md"
+    if resource_rows:
+        wrote += f", {out_dir}/exp-003-resource.csv"
+    print(f"\nwrote {wrote}")
 
 
 if __name__ == "__main__":
