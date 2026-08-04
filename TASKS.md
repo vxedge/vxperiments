@@ -137,7 +137,12 @@
       exit 0; and the exact 2026-07-31 incident this check exists to catch was temporarily
       reintroduced (commented out, then `git checkout`-restored) — still correctly fails.
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
-      (§13 on-demand reproduction; needs KVM-capable runner) — phase 2, not started
+      (§13 on-demand reproduction; needs KVM-capable runner). **Split out of top-level #18 and
+      moved to phase 3, 2026-08-04** (`docs/TASKS.md` #34, full reasoning there) — needs a
+      privileged runner (CAP_NET_ADMIN + KVM) GitHub-hosted runners don't provide as configured
+      today, plus a real design decision (self-hosted runner, cost/timeout budget, the
+      reproducibility tolerance threshold), none of it scriptable in a single pass. Not phase 2
+      work: phase 2 doesn't need it and it was never gating anything there. Not started.
 - [x] **exp-001/exp-002/exp-003 measurement-locality investigation** (`docs/TASKS.md` #24,
       done 2026-08-03; fix tracked as `docs/TASKS.md` #28). Confirmed live against each
       experiment's own real script, not disposable repros: **exp-001 (H1) and exp-003 (H4) are
