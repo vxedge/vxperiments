@@ -91,7 +91,7 @@ pin_cpu_governor_performance
 RUNTIME=$(mktemp -d /tmp/exp-003.XXXXXX)
 SOCK="$RUNTIME/vxedge.sock"
 
-# --- OTA store prep (once, idempotent — mirrors vxzones' pre-built bundle
+# --- OTA store prep (once, idempotent — mirrors vxparts' pre-built guest-bundle
 # convention: not part of the per-repetition fresh up/down cycle). The
 # private key lives OUTSIDE the store: `vxota serve` publishes the whole
 # artifacts_dir over HTTP. -----------------------------------------------

@@ -50,12 +50,12 @@ VXEDGED="$WS/vxedge/target/debug/vxedged"
 VXEDGE="$WS/vxedge/target/debug/vxedge"
 VXPROBE="$WS/vxagents/target/debug/vxprobe"
 VXTELEMETRY="$WS/vxtelemetry/target/debug/vxtelemetry"
-BUNDLE="$WS/vxzones/images/linux-probe/bundle"
+BUNDLE="$WS/vxparts/parts/zone/linux/stack/probe-bundle/bundle"
 for bin in "$VXEDGED" "$VXEDGE" "$VXPROBE" "$VXTELEMETRY"; do
   [[ -x "$bin" ]] || { echo "error: missing $bin — cargo build each repo first" >&2; exit 1; }
 done
 [[ -f "$BUNDLE/vmlinuz" && -f "$BUNDLE/initrd.img" && -f "$BUNDLE/meta.json" ]] || {
-  echo "error: bundle incomplete (need vmlinuz, initrd.img, meta.json) — vxzones/scripts/build-guest-bundle.sh" >&2
+  echo "error: bundle incomplete (need vmlinuz, initrd.img, meta.json) — vxparts/parts/zone/linux/stack/probe-bundle/build.sh" >&2
   exit 1
 }
 
