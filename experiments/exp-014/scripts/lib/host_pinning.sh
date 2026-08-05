@@ -74,8 +74,18 @@ reserve_measurement_cores() {
 # Best-effort taskset of $1 (a pid) onto $MEAS_CORES. Safe to call with an
 # empty/missing pid (e.g. `pin_if_alive "$(cat maybe-missing.pid 2>/dev/null || true)"`)
 # or before reserve_measurement_cores has run (MEAS_CORES unset -> no-op).
+#
+# The `|| true` is on the taskset call itself, not just this function's trailing `return 0` --
+# under `set -e`, a failing command on the right-hand side of `&&` still aborts the whole
+# script immediately, so `return 0` below never gets a chance to run. Found live 2026-08-05,
+# closing docs/TASKS.md #14's exp-010 run: `taskset -pc` on a process holding an elevated file
+# capability (e.g. `vxedged` after `setcap cap_net_admin+ep`, needed once the rtnetlink port
+# made the daemon's own process require it) is refused by the kernel for a same-UID,
+# non-privileged caller — confirmed directly (`taskset: ... Operation not permitted`), not
+# assumed. That is exactly the case this function's own contract ("best-effort, safe to call
+# always") says it should tolerate, and previously didn't.
 pin_if_alive() {
-  [[ -n "${MEAS_CORES:-}" && -n "${1:-}" ]] && taskset -pc "$MEAS_CORES" "$1" >/dev/null 2>&1
+  [[ -n "${MEAS_CORES:-}" && -n "${1:-}" ]] && { taskset -pc "$MEAS_CORES" "$1" >/dev/null 2>&1 || true; }
   return 0
 }
 

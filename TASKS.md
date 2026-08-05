@@ -194,6 +194,13 @@
       isolation-refusal path. **Re-run done 2026-07-13**: 15 archives, zero loss, H3 still
       holds; libvirt's number moved measurably (see the `exp-002` entry above for the
       numbers and reading) — frozen summary updated in place.
+- [x] **exp-002/exp-002b `--repro` re-run 2026-08-05** (`docs/TASKS.md` #14, full account
+      there): both reproduce clean — 15 + 30 archives, zero loss, medians within IQR of the
+      frozen campaigns. H3 still holds (container 52.2µs / microvm 108.2µs / libvirt 69.7µs
+      p50); exp-002b's decomposition still attributes the gap the same way (virtio transport
+      dominant, vhost-net matters, management layer matters, machine type doesn't); resource
+      cost reproduces near-exactly (container 4.3%/7.2MB vs frozen 4.3%/7.3MB). exp-010's own
+      `--repro` in the same session found a real gap instead — see `docs/TASKS.md` #14.
 - [x] `check_fresh()` whole-repo false-positive fixed (2026-07-13): extracted
       `scripts/lib/freshness.sh`'s `check_fresh_bin()`, shared by all four run-exp-*.sh
       scripts, which walks each crate's *actual* local path dependencies (parsed from its
@@ -311,6 +318,14 @@
       `results/exp-010/` (this final HOLDS campaign, now canonical).
       `vxmodels/models/requirements/verification.sysml`'s `Exp010RealSlicingVerification`
       updated with the full trajectory (`verify h2`).
+      **`--repro` re-run 2026-08-05** (`docs/TASKS.md` #14, full account there — two real bugs
+      found and fixed along the way: `vxedged` needing `setcap cap_net_admin+ep` after the
+      rtnetlink port, then `pin_if_alive`'s own `taskset` call being refused against a
+      setcap'd process): 25 archives, zero loss, full sample support. H2 still holds — p99
+      growth idle→600mbit 0.95x on snssai vs 0.91x on the frozen vlan arm (exp-001,
+      post-#28), both inside tolerance. Absolute latency floor is far higher on the real
+      S-NSSAI arm (p99 ≈260–335µs vs ≈82–90µs) — expected, real PDU sessions/GTP-U/RAN
+      processing vs a bare VLAN tag, and orthogonal to the isolation question H2 asks.
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice. The
       other, still-open half of phase 2's gate (`docs/TASKS.md`) — H2's vlan-vs-s-nssai
       half HOLDS (2026-07-18). **Re-scoped 2026-07-26** (`docs/TASKS.md` Track P/D): blocked
@@ -323,9 +338,9 @@
       experiments in that board's item #17)
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
-- [ ] `exp-014` — harness topology as variable: star vs daisy-chained zones under identical
+- [x] `exp-014` — harness topology as variable: star vs daisy-chained zones under identical
       load (per-link `impairments`, BASE-T1 emulation). **Authored 2026-08-01**
-      (`experiments/exp-014/`), not yet run: six devices at three positions
+      (`experiments/exp-014/`); six devices at three positions
       (front-left/front-right/rear-left), each wired two ways — a star arm (uniform
       one-hop-always harness) and a chain arm (1/2/3 hops, cumulative). Plans clean
       (`experiment validate` + a live dry-run of `experiment up --stage gateway`, which
@@ -345,7 +360,71 @@
       surfaced. The analyzer refuses any archive whose `run-env.json` doesn't record
       cross-netns measurement, so a regression to the same-netns pattern fails loudly
       rather than silently producing numbers that never crossed the harness.
-      Needs a provisioning-capable host to actually run (`--quick` then `--repro`).
+      **`--repro` run 2026-08-05**: 30 archives (5 reps x 6 arms), full 60000-sample support
+      per arm, zero-ish loss (max 0.0083%, 5/60000). **Harness-topology effect HOLDS**: chain
+      p50 grows monotonically with hop count — 141.8µs (hop 1) → 204.7µs (hop 2) → 262.7µs
+      (hop 3) — well beyond the star arms' own 1.1µs p50 spread (this campaign's noise floor,
+      by design — see vehicle.yaml). Declared-harness accounting: 62.5% less length/weight
+      for the chain wiring at these three positions (12m/300g star vs 4.5m/112.5g chain) —
+      illustrative for this 3-node comparison, not a validated whole-vehicle claim.
+- [x] `exp-005` — cold-start / first-packet latency after zone boot. **Authored and validated
+      2026-08-05** (`experiments/exp-005/`): one device, one slice, no offered load, no
+      comparison arm — `scripts/run.sh` fires two `vxprobe send` calls back to back on the same
+      freshly-zoned netns per repetition: a small (~60-sample) zero-warmup "cold" burst the
+      instant `zone up` returns, then a full 60s/1000pps "steady" window as that same
+      repetition's own baseline, so the comparison never crosses host-state or time-of-day. 20
+      repetitions by default. The cold phase's own `n` is, by design, below tail-percentile
+      support (the point — a large window is what diluted this into invisibility as an
+      incidental artifact in exp-001/002/003's own first arms; see `notebooks/cold_start.py`),
+      so only `max`/`p50` are reportable from it, never `p99`; `analyze_exp005.py` reports the
+      *distribution* of `(cold.max / steady.p50)` across repetitions instead, reusing
+      `cold_start.py`'s own `RATIO_MULTIPLE` as the blowout threshold rather than inventing a
+      second magic number. Plans clean (`experiment validate --json`; a live unprivileged
+      dry-run of `experiment up --stage gateway` reaches real planning —
+      `GatewayPlan::from_model` accepts the manifest, `manifest_sha256` computed, job
+      dispatched — and fails only at the privileged netlink step, exp-014's own verification
+      pattern). `check-runners.sh` green (shellcheck, vendored-lib-drift, preamble resolution,
+      notebook compile).
+      **`--repro` run 2026-08-05**: 20 archives, full 60000-sample steady windows. **Cold-start
+      effect confirmed on 20/20 repetitions** (median cold `max`/steady `p50` ratio 8.64x, IQR
+      1.69 — well past the 2.0x blowout threshold every time). Stronger finding than the
+      original incidental sightings: the cold burst's own *typical* packet (`p50`), not just
+      its `max`, runs ~4.19x steady-state — the transient (ARP, page faults, CPU frequency
+      ramp) measurably persists across most of the ~3s burst, not just the first packet or
+      two. A cosmetic float-formatting bug and a missing data-driven interpretation of that
+      p50 ratio, both found while reading this result, fixed in `analyze_exp005.py` the same
+      session.
+- [ ] `exp-004` — freedom from interference (compute counterpart of exp-001): RTOS timing cell
+      vs noisy neighbor under KVM static partitioning (rung 0). **Investigated 2026-08-05,
+      found blocked on a real prerequisite, not just unauthored**: the isolation mechanism
+      exists (`model::Device.pinned_cpus` → `taskset`/`<cputune>` in `zones/backend.rs`, wired
+      for `qemu-microvm`/`libvirt`, confirmed by reading the backend code), but there is no
+      compute-domain timing/jitter probe to measure the RTOS cell's own scheduling jitter under
+      contention — `vxagents` has only `vxprobe` (network RTT) and `vxtraffic`; grepped for
+      `cyclictest`/`timing`/`jitter` agent work and found none, and `vxagents/TASKS.md` doesn't
+      list one either. This is new `vxagents` engineering (a cyclictest-like periodic-task
+      agent reporting scheduling jitter, analogous to what `vxprobe` does for network RTT), not
+      manifest authoring — tracked here as the actual blocker rather than silently attempted as
+      a YAML-only task. Rerun per hypervisor ladder rung (Xen dom0less, QNX Hypervisor) stays
+      phase 4 regardless (`docs/ARCHITECTURE.md` §9's ladder).
+- [ ] `exp-012` — HTB vs TSN (taprio/gPTP) slice isolation comparison on identical topology.
+      **Investigated 2026-08-05, found blocked on a real prerequisite**: `ARCHITECTURE.md` line
+      753 states plainly the TSN gateway variant itself is "phase 3", and a grep across
+      `vxedge-core` confirms zero `taprio`/`gPTP`/TSN implementation anywhere — the mechanism
+      this experiment exists to compare against HTB doesn't exist yet. This directly
+      contradicts `docs/TASKS.md`'s own phase-2 "GPU-free experiments" classification of
+      exp-012 (its 2026-08-01 re-scope note) — recorded there as a real inconsistency needing
+      an owner call (re-scope exp-012 to phase 3 alongside its dependency, or split an
+      HTB-only baseline arm that's authorable now from a TSN arm added once phase 3 delivers
+      it), not silently resolved either way.
+- [ ] `exp-020` — V2X: two vehicle instances + RSU node, V2V/V2I flows over a dedicated slice.
+      **Confirmed still blocked 2026-08-05**: not actionable until phase-2 completes and
+      CARLA's single-vehicle closed loop lands (CARLA itself is GPU-gated, phase 3 per the
+      2026-08-01 re-scope) — authoring a manifest now would have no traffic source to drive
+      it. Candidate traffic source for V2V specifically once unblocked (not a required
+      dependency): Waymax (https://github.com/waymo-research/waymax) — JAX-based, GPU-light
+      multi-agent simulator, cheaper than N full CARLA instances for N simulated vehicles.
+      Mirrored in `docs/TASKS.md` phase 3's V2X groundwork item.
 - [ ] Determinism-controls ablation: PREEMPT_RT / pinning / VPP on-off matrix
 
 ## Workspace migration (decided 2026-07-30 — §6.0 becomes the only authored schema)
@@ -555,15 +634,12 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 
 - [ ] `vehicles/vx-vehicle-01.yaml` — full OEM-representative composition (six zones, QNX +
       AAOS guests, CAN edges, Kuksa signal plane, CARLA world)
-- [ ] `exp-004` — freedom from interference (compute counterpart of exp-001): RTOS timing
-      cell vs noisy neighbor under KVM static partitioning (rung 0); rerun per hypervisor
-      ladder rung (Xen dom0less, QNX Hypervisor — phase 4)
-- [ ] `exp-012` — HTB vs TSN (taprio/gPTP) slice isolation comparison on identical topology
-- [ ] `exp-020` — V2X: two vehicle instances + RSU node, V2V/V2I flows over a dedicated slice.
-      Candidate traffic source for V2V specifically (not a required dependency, not
-      actionable until phase-2 completes and CARLA's single-vehicle closed loop lands):
-      Waymax (https://github.com/waymo-research/waymax) — JAX-based, GPU-light multi-agent
-      simulator, cheaper than N full CARLA instances for N simulated vehicles. Mirrored in
-      `docs/TASKS.md` phase 3's V2X groundwork item
+- [ ] `exp-004`/`exp-012`/`exp-020` — moved to Phase 2 above (`docs/TASKS.md`'s 2026-08-01
+      re-scope classifies all three as "GPU-free experiments," item #17); this line is a
+      pointer, not a second copy, so the record can't drift into two disagreeing entries the
+      way it briefly did until 2026-08-05 (`vxperiments/TASKS.md` still listed them here only,
+      never mirrored up into Phase 2 when the re-scope happened — caught while investigating
+      why they were still unauthored). exp-004's rung-1/rung-2 hypervisor-ladder reruns (Xen
+      dom0less, QNX Hypervisor) stay genuinely phase 4 regardless of where rung 0 lives.
 - [ ] End-to-end vehicle demo experiment referencing vx-vehicle-01
 - [ ] Paper dataset freeze: tag manifests + digests used in submitted figures

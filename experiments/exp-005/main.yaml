@@ -1,0 +1,66 @@
+kind: experiment
+id: exp-005
+
+# Cold start: three earlier campaigns (exp-001, exp-002, exp-003 — see
+# `../../notebooks/cold_start.py`) each showed their first-measured arm with a p99 three to
+# five times the others' and a normal p50 — a blown tail from a handful of very slow packets
+# right after provisioning (page faults, ARP, veth/netns warm-up, the CPU frequency ramp
+# before the pinned governor settles), diluted to invisibility once enough steady-state
+# samples pile in behind it. That was always incidental: none of those experiments were built
+# to measure it, only to notice it. This one is. One device, no slice contention, no offered
+# load — the only thing varied across repetitions is time since `zone up` returned, which
+# `scripts/run.sh` isolates into two probe calls per repetition rather than one:
+#
+#   - a short, low-rate "cold" burst fired the instant `zone up` returns (WARM_S=0 — the
+#     opposite of every other campaign's discarded warmup, because the warmup IS the
+#     measurement here), small enough (~60 samples) that a slow first packet dominates its
+#     `max` instead of being averaged away;
+#   - immediately after, on the same now-ARP-resolved, now-stable netns, a full 60 s / 1000 pps
+#     "steady" window (60 000 samples — real tail-percentile support) as this repetition's own
+#     baseline, so the comparison never crosses host-state or time-of-day.
+#
+# The cold burst's own sample count (~60) is below tail-percentile support by design (this is
+# the point cold_start.py itself makes: a large window dilutes the phenomenon back out) — its
+# `p99` must never be reported. Its `max` and `p50` are the reportable figures, always stated
+# next to n. The repetition axis is what carries statistical weight: `analyze_exp005.py` reports
+# the distribution of (cold.max / steady.p50) across repetitions, not any single repetition's
+# own percentiles.
+vehicles: [vx-cold-start-vehicle]
+baseline: bl-exp-005
+
+# One slice, generous and unimpaired: the phenomenon under test is intrinsic to zone
+# provisioning, not induced by slice contention or a shaped link — an impairment or a tight
+# ceiling here would just add its own noise on top of the thing being measured.
+network:
+  defaults:
+    bandwidth: 1000000000
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+      qos: { min_rate_mbps: 100, max_rate_mbps: 900, priority: 1 }
+
+# No `traffic_profiles`: like exp-002/exp-014, this is a single-arm probe against an otherwise
+# idle topology, not an offered-load sweep — there is nothing here for a background flow to
+# compete with, and introducing one would confound the transient under test with contention.
+
+# Declarative method knobs; `scripts/run.sh` owns the actual two-phase timing (cold burst
+# pps/duration are campaign-specific and have no field in this schema, so they live in the
+# script next to REPS/WARM_S, matching exp-014's precedent). `warmup_s: 0` here is the
+# experiment's defining property, not an oversight — see the header comment.
+method:
+  duration_s: 60
+  repetitions: 20
+  warmup_s: 0
+
+telemetry:
+  prometheus:
+    scrape_targets:
+      # vxprobe's live exporter, opened inside node-cold-probe-01's own netns during the
+      # steady phase only — the cold burst is too short (~3 s) for a 5 s scrape interval to
+      # say anything, so vxtelemetry ingest runs for the steady phase alone.
+      - "127.0.0.1:9801"
+
+results:
+  artifact_dir: results/exp-005
+  upload: false

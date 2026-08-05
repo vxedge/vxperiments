@@ -1,0 +1,26 @@
+kind: vehicle
+id: vx-cold-start-vehicle
+class: road
+subtype: car
+
+# One zone, one device: the phenomenon under test (zone-boot transient) is intrinsic to a
+# single device's own provisioning, not a comparison across positions or topologies, so the
+# smallest vehicle that can express it is the right one — one step smaller than exp-001's own
+# two-zone minimum, because this has no second arm to isolate against.
+zones:
+  front-left: {}
+
+devices:
+  node-cold-probe-01: { role: zone-controller, zone: front-left, backend: container }
+
+functions:
+  cold-probe: { deployed_on: node-cold-probe-01 }
+
+# Pinned address (docs/TASKS.md #28 pattern): `zone up` assigns this to the device's real eth0
+# inside its own netns. Prober lives in that netns, reflector in the host's default netns
+# (`scripts/run.sh`) — different FIB domains, so there is no same-netns loopback shortcut for
+# the kernel to take, exactly the fix #28 needed for H1/H4 and the pattern exp-014 also follows.
+links:
+  - id: trunk-cold
+    endpoints: [{ node: node-cold-probe-01, port: eth0, ip: 10.115.0.2/24 }]
+    slice: adas

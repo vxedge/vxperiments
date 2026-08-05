@@ -1,0 +1,10 @@
+kind: baseline
+id: bl-exp-005
+
+# Local ref, matching exp-001/exp-014: `scripts/run.sh` execs the already-built vxprobe binary
+# directly inside the device's own netns (`ip netns exec vx-node-cold-probe-01 vxprobe ...`),
+# not a container image, so there is nothing to pull. A local ref needs no digest — it is
+# content-hashed into the results archive instead.
+parts:
+  - ref: local/vxprobe:host-process
+    target_ids: cold-probe

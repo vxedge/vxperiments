@@ -121,6 +121,18 @@ check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxagents" "$VXTRAFFIC" "$WS/vxagents/crates/vxtraffic"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
+# Native rtnetlink port (2026-08-04, docs/TASKS.md #16): bridge/veth/VLAN/address/route
+# creation now happens in vxedged's own in-process syscalls, so the daemon process itself
+# needs CAP_NET_ADMIN for `experiment up --stage gateway` to succeed -- setcap genuinely works
+# for this portion (no child process involved, so the fork+exec capability-propagation problem
+# that still blocks it for tc/nft/wg below doesn't apply here; docs/TESTBED-SETUP.md corrected
+# 2026-08-05). Has to be redone after every rebuild, which is why this lives here rather than
+# being a one-time host setup step -- the freshness checks above just confirmed this is the
+# binary about to run, so capping it now caps the right one. Found live 2026-08-05: without
+# this, `experiment up` fails instantly with "insufficient privileges for netlink operation
+# `ensure_bridge`" -- the `sudo -v` cached above already covers the password prompt this needs.
+sudo setcap cap_net_admin+ep "$VXEDGED"
+
 # The §6.0 workspace is the input now: §6.1 manifests stopped being a provisioning input on
 # 2026-07-31. The frozen `../experiments/retired-6.1/exp-010.yaml` stays as provenance for the results
 # already recorded against it.
