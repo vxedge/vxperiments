@@ -1,0 +1,12 @@
+kind: baseline
+id: bl-vx-vehicle-01
+
+# The real, published vxparts guest bundle (vxparts/TASKS.md's own first end-to-end
+# proof-of-concept: "built -> pushed -> pulled fresh from the registry -> booted the pulled
+# artifact under qemu-microvm", 2026-07-26) -- the same one vxedge/crates/vxedge-core's
+# registry_fetch_boot.rs test proves the fetch-then-boot path against. Digest re-verified live
+# via `oras resolve` before writing this file, not copied from memory.
+parts:
+  - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0
+    digest: sha256:33c9c8d8625bd5c6d1f4d3d0c561fdaa930e057fcd1fb24fb3badb402f25429d
+    target_ids: fn-a

@@ -1,0 +1,23 @@
+kind: vehicle
+id: vx-vehicle-01
+class: road
+subtype: car
+
+# First real vehicle-up target (docs/TASKS.md's phase-3 gate: `vehicle up` boots vx-vehicle-01
+# end to end). One device is enough to prove the whole chain — gateway, VLAN attachment,
+# qemu-microvm boot from a real published vxparts guest bundle — without waiting on a
+# production-representative guest image (AAOS/QNX/Zephyr, still unbuilt). Grow this file device
+# by device as those land, rather than standing up a second vehicle later.
+zones:
+  front-left: {}
+
+devices:
+  node-a: { role: ecu, zone: front-left, backend: qemu-microvm }
+
+functions:
+  fn-a: { deployed_on: node-a }
+
+links:
+  - id: link-a
+    endpoints: [{ node: node-a, port: eth0, ip: 10.101.0.11/24 }]
+    slice: adas
