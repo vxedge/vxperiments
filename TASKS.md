@@ -643,3 +643,6 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
       dom0less, QNX Hypervisor) stay genuinely phase 4 regardless of where rung 0 lives.
 - [ ] End-to-end vehicle demo experiment referencing vx-vehicle-01
 - [ ] Paper dataset freeze: tag manifests + digests used in submitted figures
+- [ ] Repo cleanup and restructure to follow a catalogue of vxedge OEM-engineer SDV research
+      experiments flow. Mirrored from `docs/TASKS.md`'s Phase 3 board — scope/target structure
+      not yet fleshed out, tracked here so it isn't a surprise when phase-3 work starts.
