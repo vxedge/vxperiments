@@ -9,7 +9,7 @@
 # conditions the real campaign uses — purely to answer: how much does p99
 # move session to session with nothing intentionally varied? That's the
 # floor any specific load-level's deviation needs to clear before it's
-# worth calling a real effect rather than noise (docs/STATUS.md, "H2's
+# worth calling a real effect rather than noise (docs/RESULTS.md, "H2's
 # real campaign" entry — the 250mbit point in the qos-fix rerun stood out
 # against a background this script did not yet exist to characterize).
 #

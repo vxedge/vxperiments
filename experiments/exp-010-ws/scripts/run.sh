@@ -32,7 +32,7 @@
 # real 5G core + UE pods, `vxedge traffic up --profile <id>` drives real
 # `vxprobe`/`vxtraffic` processes against the UE's live PDU-session address
 # (crates/vxedge-core/src/traffic/, live-verified end to end 2026-07-17,
-# docs/STATUS.md "TrafficService live end to end").
+# docs/RESULTS.md "TrafficService live end to end").
 #
 # Two real constraints this script works around, not hacks:
 #  1. TrafficUpRequest has no per-call rate/duration override — `bandwidth_mbps`
@@ -58,7 +58,7 @@
 #     the aggregate JSON same as analyze_exp001.py does.
 #
 # Host-confound mitigation (added 2026-07-18, first campaign where it's
-# load-bearing rather than polish — see docs/STATUS.md): pins the cpu
+# load-bearing rather than polish — see docs/RESULTS.md): pins the cpu
 # governor to `performance` for the run's duration (restored on exit) and
 # taskset's vxedged + the host-side vxprobe/vxtraffic processes to a
 # reserved core range, away from the ~13 containers this campaign's own 5G
@@ -121,7 +121,7 @@ check_fresh_bin "$WS/vxagents" "$VXPROBE" "$WS/vxagents/crates/vxprobe"
 check_fresh_bin "$WS/vxagents" "$VXTRAFFIC" "$WS/vxagents/crates/vxtraffic"
 check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 
-# Native rtnetlink port (2026-08-04, docs/TASKS.md #16): bridge/veth/VLAN/address/route
+# Native rtnetlink port (2026-08-04, docs/ROADMAP.md): bridge/veth/VLAN/address/route
 # creation now happens in vxedged's own in-process syscalls, so the daemon process itself
 # needs CAP_NET_ADMIN for `experiment up --stage gateway` to succeed -- setcap genuinely works
 # for this portion (no child process involved, so the fork+exec capability-propagation problem
@@ -209,7 +209,7 @@ for rep in $(seq 1 "$REPS"); do
   # one. Shuffling breaks that confound apart: if an anomaly follows a
   # specific load value regardless of when it runs, it's the mechanism; if
   # it follows a fixed position in the sequence regardless of load, it's
-  # the host. docs/STATUS.md's "H2's real campaign" entry is the finding
+  # the host. docs/RESULTS.md's "H2's real campaign" entry is the finding
   # that made this worth doing — a reproducible bump at 250mbit that didn't
   # fit a monotonic-under-load story.
   mapfile -t REP_LOADS < <(printf '%s\n' "${LOADS_MBPS[@]}" | shuf)

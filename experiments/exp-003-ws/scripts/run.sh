@@ -20,7 +20,7 @@
 # directly comparable to exp-001's load=0 point, and ota-burst to exp-001's
 # heaviest infotainment-load point.
 #
-# Frozen results/exp-003/ is UNDER RE-VERIFICATION as of 2026-08-03 (docs/TASKS.md #24/#28):
+# Frozen results/exp-003/ is UNDER RE-VERIFICATION as of 2026-08-03 (docs/ROADMAP.md#28):
 # it shared exp-001's measurement-locality bug (probe sender and reflector both addressed in
 # the host's default netns, so the kernel's `local` routing table delivered every RTT sample
 # over loopback). Fixed the same way: `zone up` brings node-adas-probe-01 up for real, moving
@@ -114,7 +114,7 @@ fi
 PROBE_TIMEOUT_MS=1000
 
 # OTA process resource footprint (§12 compute metrics; vxtelemetry/TASKS.md — the sampler
-# vxtelemetry::sample was built for exp-002b and reused here, docs/TASKS.md #23). Two labels,
+# vxtelemetry::sample was built for exp-002b and reused here, docs/ROADMAP.md). Two labels,
 # sampled together: ota-server runs the whole time in both arms (idle in baseline, actively
 # serving the burst artifact in ota-burst); ota-probe only exists in ota-burst, so it simply
 # never appears in baseline's resource-summary.json — not a bug, the expected shape (see
@@ -181,7 +181,7 @@ for rep in $(seq 1 "$REPS"); do
     # Gateway and the ota service in one call, in dependency order — the sequence this script
     # used to spell out itself.
     "${VXEDGE_C[@]}" --chdir "$MANIFEST" experiment up --stage gateway --stage services >/dev/null
-    # Real zone bring-up (docs/TASKS.md #28 fix — replaces the host-side veth-peer hand-roll
+    # Real zone bring-up (docs/ROADMAP.md fix — replaces the host-side veth-peer hand-roll
     # this campaign used before 2026-08-03, shared with exp-001's identical defect). Moves the
     # device's veth into its own netns, renamed eth0, addressed from car1.yaml's pinned IP.
     "${VXEDGE_C[@]}" zone up --vxid node-adas-probe-01 >/dev/null

@@ -71,7 +71,7 @@ producing numbers that never crossed the harness under test.
 verified in isolation; whether their literal campaigns hit it on a real run — and therefore
 whether H1/H3's frozen numbers measured the shaped bridge path or loopback delivery — is
 deliberately left open rather than asserted here. Tracked in `vxperiments/TASKS.md` (exp-001's
-"Faithful measurement" item) and `docs/TASKS.md` ("Do not lose these").
+"Faithful measurement" item) and `docs/ROADMAP.md` ("Do not lose these").
 
 ## Layout
 

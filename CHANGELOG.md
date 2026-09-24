@@ -12,6 +12,10 @@ than a repo tag.
 ## [Unreleased]
 
 ### Added
+
+- Open-source release preparation: `LICENSE` (Apache-2.0), `NOTICE`, rewritten `README.md`.
+
+### Added
 - `scripts/run-smoke.sh` (2026-07-14): every experiment's `--quick` pipeline + analyzer,
   chained, ~4 min, single PASS/FAIL summary; rejects unknown args; hands quick dirs back
   to the invoking user. First two owner-run executions: SMOKE PASS both.
@@ -63,7 +67,7 @@ than a repo tag.
 ## [0.1.0] - 2026-07-13
 
 **Phase-1 gate passed**: H1, H3, and H4 all have reproducible numbers. Repos stay
-private for now — see `docs/STATUS.md` for the public-visibility punch list.
+private at this release.
 
 ### Added
 - `exp-001` (H1, slice isolation): full campaign 2026-07-10, 5 reps x 5 loads, 60k

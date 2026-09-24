@@ -6,7 +6,7 @@
 #
 # Provisions from the §6.0 workspace (experiments/exp-001-ws). The frozen results in
 # results/exp-001/ (both the original §6.1-manifest campaign and its --repro rerun) are
-# UNDER RE-VERIFICATION as of 2026-08-03 (docs/TASKS.md #24/#28): both measured the probe
+# UNDER RE-VERIFICATION as of 2026-08-03 (docs/ROADMAP.md#28): both measured the probe
 # exchange over loopback, never through the bridge/HTB path — see the topology note below
 # for the fix. Neither is authoritative until a campaign from this corrected script produces
 # a new baseline; the numerical-equivalence question --repro originally existed to answer is
@@ -21,7 +21,7 @@
 # default: 5 repetitions x 5 load levels, 10 s warmup + 60 s measured probe
 #          window per point (1000 pps => 60k samples: p99 well-supported).
 #
-# Topology per run (fixed 2026-08-03, docs/TASKS.md #28): vxedge up provisions vxbr0 +
+# Topology per run (fixed 2026-08-03, docs/ROADMAP.md): vxedge up provisions vxbr0 +
 # shaped trunk (vxup0); `zone up` brings each device up for real, moving its veth into its
 # own netns (renamed eth0, addressed from vehicle.yaml's pinned IP) rather than leaving a
 # host-side veth peer in the daemon's own netns. The far side (vxup0p, the trunk's own peer)
@@ -161,7 +161,7 @@ for rep in $(seq 1 "$REPS"); do
     tag="rep${rep}-load${load}"
     echo "-- $tag: gateway + zones up"
     "$VXEDGE" --endpoint "unix://$SOCK" --chdir "$MANIFEST" experiment up --stage gateway >/dev/null
-    # Real zone bring-up (docs/TASKS.md #28 fix — replaces the host-side veth-peer hand-roll
+    # Real zone bring-up (docs/ROADMAP.md fix — replaces the host-side veth-peer hand-roll
     # this campaign used before 2026-08-03). Each device's veth moves into its own netns,
     # renamed eth0, addressed from vehicle.yaml's pinned IP — see that file's own comment for
     # why this matters: the old form put both the sender and the reflector in the host's

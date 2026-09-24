@@ -111,7 +111,7 @@ def main():
             f"REFUSING: repetition(s) {not_cross_netns} do not record cross-netns measurement "
             "-- these may have been probed with sender and reflector in the same network "
             "namespace, which delivers via loopback without ever crossing the access port "
-            "(docs/TASKS.md #28). Re-run with the current scripts/run.sh."
+            "(docs/ROADMAP.md). Re-run with the current scripts/run.sh."
         )
     if any(r["steady"]["received"] == 0 for r in runs):
         sys.exit("REFUSING: at least one repetition's steady window received zero probes")

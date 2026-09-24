@@ -18,7 +18,7 @@
 # disposable-netns repro — `ip route get` resolved to `dev lo`, and tcpdump on the access port
 # saw nothing). Putting the prober in the device's own netns and the reflector in the host's
 # default netns puts them in different FIB domains, so there is no shortcut to take. See
-# `docs/TASKS.md` ("Do not lose these") for the finding and its open follow-up against
+# `docs/ROADMAP.md` ("Do not lose these") for the finding and its open follow-up against
 # exp-001/exp-002 themselves.
 #
 # --repro: full campaign written to results/exp-014-repro-<date>/ — a first successful campaign
@@ -158,7 +158,7 @@ env_metadata() { # $1=arm $2=rep -> json on stdout
   "loadavg_at_start": "$(cut -d' ' -f1-3 /proc/loadavg)",
   "timestamping": "userspace-monotonic (SO_TIMESTAMPING follow-up open)",
   "isolation": "single-arm",
-  "measurement_locality": "cross-netns (prober in the zone's own netns via ip netns exec, reflector in the host default netns) -- see docs/TASKS.md for why this differs from exp-001/exp-002"
+  "measurement_locality": "cross-netns (prober in the zone's own netns via ip netns exec, reflector in the host default netns) -- see docs/ROADMAP.md for why this differs from exp-001/exp-002"
 }
 EOF
 }

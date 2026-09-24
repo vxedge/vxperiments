@@ -44,7 +44,7 @@ not any single repetition's own percentiles.
 
 ## Measurement locality
 
-Like exp-014 (and exp-001/exp-003 after `docs/TASKS.md` #28's fix), the device is genuinely
+Like exp-014 (and exp-001/exp-003 after `docs/ROADMAP.md` #28's fix), the device is genuinely
 zoned up (`zone up --vxid node-cold-probe-01`) and probed via
 `ip netns exec vx-node-cold-probe-01 vxprobe send ...` — prober in the device's own netns,
 reflector in the host's default netns. Different FIB domains, so there is no same-netns

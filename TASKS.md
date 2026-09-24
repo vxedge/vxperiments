@@ -1,6 +1,6 @@
 # TASKS.md — vxedge/vxperiments
 
-## Phase 1 (gate-defining — **PASSED 2026-07-13, RE-VERIFIED 2026-08-03**: exp-001/exp-002-exp-002b/exp-003 deliver the H1/H3/H4 numbers — H1/H4 were confirmed measured over loopback, not the real gateway path; fixed, re-run, and promoted over the original frozen summaries (`docs/TASKS.md` #28). H3 confirmed clean throughout, unaffected)
+## Phase 1 (gate-defining — **PASSED 2026-07-13, RE-VERIFIED 2026-08-03**: exp-001/exp-002-exp-002b/exp-003 deliver the H1/H3/H4 numbers — H1/H4 were confirmed measured over loopback, not the real gateway path; fixed, re-run, and promoted over the original frozen summaries (`docs/ROADMAP.md` #28). H3 confirmed clean throughout, unaffected)
 
 - [x] Repo layout: `experiments/`, `notebooks/`, `results/README.md` (`vehicles/` with the
       phase-3 vehicle manifest)
@@ -9,7 +9,7 @@
       600 mbit offered overload, zero loss**; load delivery verified (600.0 mbit, 0 errors);
       frozen summary committed (results/exp-001/exp-001-summary.md). **Confirmed 2026-08-03 to
       have measured loopback delivery, never the gateway's bridge/VLAN/HTB path** — see the
-      "Faithful measurement" item below and `docs/TASKS.md` #28. **Re-run the same day under
+      "Faithful measurement" item below and `docs/ROADMAP.md` #28. **Re-run the same day under
       the fix** (`results/exp-001-repro-2026-08-03/`, 25 archives, zero loss): **H1 still
       HOLDS — p99 81.9µs at 600mbit vs 89.6µs baseline, 0.91x**, a slightly better ratio than
       the original's 0.93x, at a higher absolute floor (~89.6µs vs ~77.3µs) exactly as expected
@@ -54,7 +54,7 @@
       analyzer output, no re-run needed. **This closed the phase-1 gate at the time** (H1+H3+H4
       all delivered). **2026-08-03: confirmed to share exp-001's loopback-measurement defect**
       (identical bare-host addressing) — see the "Faithful measurement" item under exp-001
-      above and `docs/TASKS.md` #28. **Fixed and re-run the same day**: H4 still HOLDS — p50
+      above and `docs/ROADMAP.md` #28. **Fixed and re-run the same day**: H4 still HOLDS — p50
       52.2µs baseline vs 51.9µs under OTA burst (Δ -0.3µs), 361 successful deliveries, zero
       failures — same conclusion as the original, at a higher absolute floor (~52.2µs vs the
       original's ~47.2µs), exactly as expected once traffic genuinely crosses the veth/bridge
@@ -95,7 +95,7 @@
       full runs refuse a results dir already holding archives; `--repro` writes to
       `results/<exp>-repro-<date>/`, `--quick` to `results/<exp>-quick/`. Root cause:
       exp-003's original archives were overwritten in place by its repro rerun, losing
-      the original manifest digest to a truncated summary prefix (docs/STATUS.md risk
+      the original manifest digest to a truncated summary prefix (risk register
       item). Behavior-tested against the live tree; shellcheck-clean.
 - [x] `scripts/run-smoke.sh` (2026-07-14): H* pipeline smoke — every experiment's
       `--quick` mode + analyzer, chained, ~5 min total, single PASS/FAIL summary. Keeps
@@ -117,11 +117,11 @@
       `GITHUB_TOKEN` cannot check it out). Until it was provisioned the job failed at checkout
       rather than skipping — the same choice, for the same reason, as vxmodels'
       `pipeline-regression`. **Secret set and job live-verified 2026-08-04**
-      (`docs/TASKS.md` #18): re-ran the most recent `main` push's CI, `workspace validation
+      (`docs/ROADMAP.md` #18): re-ran the most recent `main` push's CI, `workspace validation
       (cross-repo)` now completes successfully (2m13s) instead of failing at checkout. Still
       open: workspace-validation over experiments/ and vehicles/) — phase 2, once the CLI
       subcommand exists.
-- [x] **`runners` job bug found and fixed, 2026-08-04** (`docs/TASKS.md` #18, discovered
+- [x] **`runners` job bug found and fixed, 2026-08-04** (`docs/ROADMAP.md` #18, discovered
       while verifying the secret fix above): the same re-run showed `runners` had been failing
       on every push since at least 2026-08-01 — every runner's own binary-existence precondition
       (`[[ -x "$bin" ]] || { echo "error: missing $bin..."; exit 1; }`) hard-exits before the
@@ -138,13 +138,13 @@
       reintroduced (commented out, then `git checkout`-restored) — still correctly fails.
 - [ ] CI: workflow_dispatch pipeline re-running exp-001 end-to-end and diffing distributions
       (§13 on-demand reproduction; needs KVM-capable runner). **Split out of top-level #18 and
-      moved to phase 3, 2026-08-04** (`docs/TASKS.md` #34, full reasoning there) — needs a
+      moved to phase 3, 2026-08-04** (`docs/ROADMAP.md` #34, full reasoning there) — needs a
       privileged runner (CAP_NET_ADMIN + KVM) GitHub-hosted runners don't provide as configured
       today, plus a real design decision (self-hosted runner, cost/timeout budget, the
       reproducibility tolerance threshold), none of it scriptable in a single pass. Not phase 2
       work: phase 2 doesn't need it and it was never gating anything there. Not started.
-- [x] **exp-001/exp-002/exp-003 measurement-locality investigation** (`docs/TASKS.md` #24,
-      done 2026-08-03; fix tracked as `docs/TASKS.md` #28). Confirmed live against each
+- [x] **exp-001/exp-002/exp-003 measurement-locality investigation** (`docs/ROADMAP.md` #24,
+      done 2026-08-03; fix tracked as `docs/ROADMAP.md` #28). Confirmed live against each
       experiment's own real script, not disposable repros: **exp-001 (H1) and exp-003 (H4) are
       both broken** — bare-host addressing on both probe and reflector, `ip route get` reports
       `dev lo`, a real 2500/2500-clean exchange produced zero `udp:9800` packets on the access
@@ -154,7 +154,7 @@
       packets (2500+2500) crossed the access port exactly as expected. No fix needed for H3.
       The fix for H1/H4 (real netns isolation for both ends, following exp-002's own already-
       correct pattern, one shared `scripts/lib/` helper for exp-001-ws and exp-003-ws) is
-      tracked at the top level as `docs/TASKS.md` #28 — not duplicated here.
+      tracked at the top level as `docs/ROADMAP.md` #28 — not duplicated here.
 
 ## Phase 2
 
@@ -164,7 +164,7 @@
       sampler (unguarded `set -e` aborts, an ingest/sample scrape-window mismatch, a
       warmup below the methodology skill's minimum, missing metadata, orphaned/silently-
       swallowed sidecar failures, blocking calls on the async runtime, a cleanup-trap
-      zone-list drift risk, a `--out-dir=DIR` parsing gap — see docs/STATUS.md "Code-review
+      zone-list drift risk, a `--out-dir=DIR` parsing gap — see docs/RESULTS.md "Code-review
       hardening + reproducibility confirmation"). Both campaigns independently audited:
       1.8M probes, zero loss, zero warnings, same verdicts each time. The "microvm slower
       than full VM" finding from exp-002 is **not a machine-type effect** — machine
@@ -194,13 +194,13 @@
       isolation-refusal path. **Re-run done 2026-07-13**: 15 archives, zero loss, H3 still
       holds; libvirt's number moved measurably (see the `exp-002` entry above for the
       numbers and reading) — frozen summary updated in place.
-- [x] **exp-002/exp-002b `--repro` re-run 2026-08-05** (`docs/TASKS.md` #14, full account
+- [x] **exp-002/exp-002b `--repro` re-run 2026-08-05** (`docs/ROADMAP.md` #14, full account
       there): both reproduce clean — 15 + 30 archives, zero loss, medians within IQR of the
       frozen campaigns. H3 still holds (container 52.2µs / microvm 108.2µs / libvirt 69.7µs
       p50); exp-002b's decomposition still attributes the gap the same way (virtio transport
       dominant, vhost-net matters, management layer matters, machine type doesn't); resource
       cost reproduces near-exactly (container 4.3%/7.2MB vs frozen 4.3%/7.3MB). exp-010's own
-      `--repro` in the same session found a real gap instead — see `docs/TASKS.md` #14.
+      `--repro` in the same session found a real gap instead — see `docs/ROADMAP.md` #14.
 - [x] `check_fresh()` whole-repo false-positive fixed (2026-07-13): extracted
       `scripts/lib/freshness.sh`'s `check_fresh_bin()`, shared by all four run-exp-*.sh
       scripts, which walks each crate's *actual* local path dependencies (parsed from its
@@ -318,7 +318,7 @@
       `results/exp-010/` (this final HOLDS campaign, now canonical).
       `vxmodels/models/requirements/verification.sysml`'s `Exp010RealSlicingVerification`
       updated with the full trajectory (`verify h2`).
-      **`--repro` re-run 2026-08-05** (`docs/TASKS.md` #14, full account there — two real bugs
+      **`--repro` re-run 2026-08-05** (`docs/ROADMAP.md` #14, full account there — two real bugs
       found and fixed along the way: `vxedged` needing `setcap cap_net_admin+ep` after the
       rtnetlink port, then `pin_if_alive`'s own `taskset` call being refused against a
       setcap'd process): 25 archives, zero loss, full sample support. H2 still holds — p99
@@ -327,14 +327,14 @@
       S-NSSAI arm (p99 ≈260–335µs vs ≈82–90µs) — expected, real PDU sessions/GTP-U/RAN
       processing vs a bare VLAN tag, and orthogonal to the isolation question H2 asks.
 - [ ] `exp-011` — real ADAS traffic: CARLA → ROS2 → Autoware through the adas slice. The
-      other, still-open half of phase 2's gate (`docs/TASKS.md`) — H2's vlan-vs-s-nssai
-      half HOLDS (2026-07-18). **Re-scoped 2026-07-26** (`docs/TASKS.md` Track P/D): blocked
+      other, still-open half of phase 2's gate (`docs/ROADMAP.md`) — H2's vlan-vs-s-nssai
+      half HOLDS (2026-07-18). **Re-scoped 2026-07-26** (`docs/ROADMAP.md` Track P/D): blocked
       on `vxparts` (renamed/merged from `vxzones`+`vxcompute`) landing Autoware/ROS2 + CARLA
       server + carla-ros-bridge as real published parts, plus the `ARCHITECTURE.md` §6
       schema gaining a structured `parts:` list (Track D dimension 1) so this experiment's
       manifest can reference them — same zero-code blocker as before, now with a named
       dependency chain instead of an open-ended "vxcompute needs code" (tracked at the top
-      level as `docs/TASKS.md` item #25 — GPU-gated, distinct from the four GPU-free
+      level as `docs/ROADMAP.md` item #25 — GPU-gated, distinct from the four GPU-free
       experiments in that board's item #17)
 - [ ] `exp-013` — closed-loop control latency under slice contention (world → sensors →
       slices → AD stack → actuation → world), with/without infotainment load
@@ -412,7 +412,7 @@
       753 states plainly the TSN gateway variant itself is "phase 3", and a grep across
       `vxedge-core` confirms zero `taprio`/`gPTP`/TSN implementation anywhere — the mechanism
       this experiment exists to compare against HTB doesn't exist yet. This directly
-      contradicts `docs/TASKS.md`'s own phase-2 "GPU-free experiments" classification of
+      contradicts `docs/ROADMAP.md`'s own phase-2 "GPU-free experiments" classification of
       exp-012 (its 2026-08-01 re-scope note) — recorded there as a real inconsistency needing
       an owner call (re-scope exp-012 to phase 3 alongside its dependency, or split an
       HTB-only baseline arm that's authorable now from a TSN arm added once phase 3 delivers
@@ -424,7 +424,7 @@
       it. Candidate traffic source for V2V specifically once unblocked (not a required
       dependency): Waymax (https://github.com/waymo-research/waymax) — JAX-based, GPU-light
       multi-agent simulator, cheaper than N full CARLA instances for N simulated vehicles.
-      Mirrored in `docs/TASKS.md` phase 3's V2X groundwork item.
+      Mirrored in `docs/ROADMAP.md` phase 3's V2X groundwork item.
 - [ ] Determinism-controls ablation: PREEMPT_RT / pinning / VPP on-off matrix
 
 ## Workspace migration (decided 2026-07-30 — §6.0 becomes the only authored schema)
@@ -460,7 +460,7 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
         workspace (the only form there is since 2026-07-31) and holds everything downstream
         identical, so the only variable is which form the gateway came from. Until p50/p95/p99
         agree with the frozen campaign, the recorded `results/exp-001/` stays authoritative.
-        This is part of docs/TASKS.md item 7 and needs a provisioning-capable host.
+        This is part of docs/ROADMAP.md item 7 and needs a provisioning-capable host.
   - [x] **Faithful measurement: run the agents inside the zones** — the direction of travel, and
         the reason `--workspace` deliberately does *not* use `vxedge experiment up`. The frozen
         campaign treats the host-side veth peers as if they were the ECUs;
@@ -493,8 +493,8 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
         stand as measured; this checklist item's fix is needed for H1/H4 only, not H3. This
         item — running the agents inside the zones — **is the fix**, now confirmed necessary for
         correctness rather than optional faithfulness. Tracked at the top level, with the full
-        phased plan, as `docs/TASKS.md` #28. Full evidence chain: `docs/TASKS.md` #24 (closed)
-        and `docs/STATUS.md`. exp-014 (harness topology, authored 2026-08-01) is built the
+        phased plan, as `docs/ROADMAP.md` #28. Full evidence chain: `docs/ROADMAP.md` #24 (closed)
+        and `docs/RESULTS.md`. exp-014 (harness topology, authored 2026-08-01) is built the
         faithful way from the start — `zone up` for real, agents via `ip netns exec` —
         specifically so it never carried this risk.
         **Implemented and VERIFIED live 2026-08-03.** `vehicle.yaml`/`car1.yaml` gained pinned
@@ -509,7 +509,7 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
         `zone_traffic_reaches_the_access_port_not_loopback` — live-run
         (`sudo -E env "PATH=$PATH" cargo test -p vxedge-core --test gateway_netns --
         --ignored --nocapture`): 3 passed, 0 failed, alongside the two pre-existing gateway
-        tests. **`docs/TASKS.md` #28 fully closed 2026-08-03**: both real campaigns re-run
+        tests. **`docs/ROADMAP.md` #28 fully closed 2026-08-03**: both real campaigns re-run
         under the fix (H1 and H4 both hold) and promoted over the original frozen summaries —
         see the `exp-001`/`exp-003` entries above for the corrected numbers.
 - [x] **`exp-003` → workspace form** (2026-07-30, `experiments/exp-003-ws/`).
@@ -607,7 +607,7 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 
 - [ ] **exp-001's frozen directory holds the *repro-check* archives, not the original
       campaign's.** `results/exp-001/exp-001-summary.md` records the 2026-07-10 campaign
-      (load-0 p99 **77.3 µs**, the figure `PUBLICATION.md` and `STATUS.md` cite), but the `.zip`s
+      (load-0 p99 **77.3 µs**, the figure `docs/ROADMAP.md` and `docs/RESULTS.md` cite), but the `.zip`s
       beside it are the 2026-07-13 second-campaign check (**70.6 µs**), whose own summary is
       committed as `exp-001-repro-check-2026-07-13.md`. Both records are correct and internally
       consistent; they describe different runs, and the original's archives were overwritten in
@@ -634,7 +634,7 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 
 - [ ] `vehicles/vx-vehicle-01.yaml` — full OEM-representative composition (six zones, QNX +
       AAOS guests, CAN edges, Kuksa signal plane, CARLA world)
-- [ ] `exp-004`/`exp-012`/`exp-020` — moved to Phase 2 above (`docs/TASKS.md`'s 2026-08-01
+- [ ] `exp-004`/`exp-012`/`exp-020` — moved to Phase 2 above (`docs/ROADMAP.md`'s 2026-08-01
       re-scope classifies all three as "GPU-free experiments," item #17); this line is a
       pointer, not a second copy, so the record can't drift into two disagreeing entries the
       way it briefly did until 2026-08-05 (`vxperiments/TASKS.md` still listed them here only,
@@ -644,5 +644,5 @@ Blocked on `vxedge/TASKS.md` section 0 items (1)–(3) landing first.
 - [ ] End-to-end vehicle demo experiment referencing vx-vehicle-01
 - [ ] Paper dataset freeze: tag manifests + digests used in submitted figures
 - [ ] Repo cleanup and restructure to follow a catalogue of vxedge OEM-engineer SDV research
-      experiments flow. Mirrored from `docs/TASKS.md`'s Phase 3 board — scope/target structure
+      experiments flow. Mirrored from `docs/ROADMAP.md`'s Phase 3 board — scope/target structure
       not yet fleshed out, tracked here so it isn't a surprise when phase-3 work starts.

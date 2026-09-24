@@ -22,7 +22,7 @@
 # Like exp-014, the device is genuinely zoned up (`zone up --vxid node-cold-probe-01`) and
 # probed via `ip netns exec vx-node-cold-probe-01 ...` — prober in the device's own netns,
 # reflector in the host's default netns, different FIB domains, no same-netns loopback shortcut
-# for the kernel to take (docs/TASKS.md #28).
+# for the kernel to take (docs/ROADMAP.md).
 #
 # --repro: full campaign written to results/exp-005-repro-<date>/ — a first successful campaign
 #          becomes results/exp-005/ and is never overwritten in place (lib/results_dir.sh).
@@ -124,7 +124,7 @@ env_metadata() { # $1=rep -> json on stdout
   "loadavg_at_start": "$(cut -d' ' -f1-3 /proc/loadavg)",
   "timestamping": "userspace-monotonic (SO_TIMESTAMPING follow-up open)",
   "isolation": "single-device, no offered load",
-  "measurement_locality": "cross-netns (prober in the device's own netns via ip netns exec, reflector in the host default netns) -- see docs/TASKS.md #28"
+  "measurement_locality": "cross-netns (prober in the device's own netns via ip netns exec, reflector in the host default netns) -- see docs/ROADMAP.md"
 }
 EOF
 }

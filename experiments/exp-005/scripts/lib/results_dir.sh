@@ -3,7 +3,7 @@
 #
 # Why: superseded-campaign archives used to be overwritten in place — exp-003's
 # original archives were lost to its repro-check rerun, leaving only a truncated
-# manifest digest in the frozen summary (docs/STATUS.md risk item, 2026-07-13).
+# manifest digest in the frozen summary (risk register item, 2026-07-13).
 # Rule now: the first full campaign owns results/<exp>/; every later full run is
 # a reproducibility check and writes to a date-suffixed sibling; --quick pipeline
 # validation writes to its own disposable dir. A dir holding archives is never

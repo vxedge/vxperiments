@@ -65,7 +65,7 @@ functions:
 # that netns possible — addressing the peer from the host's default netns instead (exp-001's own
 # convention) would put prober and reflector in the same namespace, and a disposable-netns check
 # during this experiment's own authoring found that Linux's local routing table then delivers
-# between them via loopback, never touching this link's netem at all (`docs/TASKS.md`, "Do not
+# between them via loopback, never touching this link's netem at all (`docs/ROADMAP.md`, "Do not
 # lose these"). All six share one /24 with the reflector; namespace isolation is what makes
 # that safe here, unlike addressing host-side veth peers directly in one shared namespace.
 links:

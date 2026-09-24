@@ -38,7 +38,7 @@ method:
 telemetry:
   prometheus:
     scrape_targets:
-      # vxprobe's exporter now runs inside node-adas-probe-01's own netns (docs/TASKS.md #28),
+      # vxprobe's exporter now runs inside node-adas-probe-01's own netns (docs/ROADMAP.md),
       # so it's reachable at the zone's real address, not host loopback.
       - "10.101.0.2:9801"  # vxprobe live exporter (always up)
     optional_scrape_targets:

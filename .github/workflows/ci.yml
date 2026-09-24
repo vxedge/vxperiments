@@ -33,15 +33,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: vxperiments
-      # vxedge is a separate private repo, so this needs a PAT with read access to it —
-      # `secrets.GITHUB_TOKEN` only covers the repository it runs in. Until the secret is
-      # provisioned this job fails at checkout rather than silently skipping, which is the
-      # same choice vxmodels' pipeline-regression job made and for the same reason: a gate that
-      # quietly does nothing is worse than one that is visibly red.
       - uses: actions/checkout@v4
         with:
           repository: vxedge/vxedge
-          token: ${{ secrets.VXEDGE_CROSS_REPO_TOKEN }}
           path: vxedge
       - name: Install protoc
         # vxedge-api's build.rs (tonic-prost-build) needs it; matches vxedge's own CI step.

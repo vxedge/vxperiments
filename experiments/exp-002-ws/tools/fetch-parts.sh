@@ -9,7 +9,7 @@
 # stack/probe-bundle:0.1.0`, 2026-07-28) — but this still fetches from the sibling vxparts
 # checkout's own locally-built copy, not a real `oras pull` of that published ref. Genuine
 # registry-fetch (parts.yaml stops being local, verified against the digest-pinned ref
-# instead of a local path) is a separate, larger promotion — docs/TASKS.md #19 tracks it
+# instead of a local path) is a separate, larger promotion — docs/ROADMAP.md tracks it
 # as a still-open gap (no registry-fetch mechanism exists anywhere in this platform yet,
 # not just here) — not done as a side effect of this path redirect. This redirect exists
 # because vxzones (this script's original source) was archived 2026-08-04, migrated into

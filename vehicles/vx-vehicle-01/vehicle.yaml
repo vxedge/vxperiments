@@ -3,7 +3,7 @@ id: vx-vehicle-01
 class: road
 subtype: car
 
-# First real vehicle-up target (docs/TASKS.md's phase-3 gate: `vehicle up` boots vx-vehicle-01
+# First real vehicle-up target (docs/ROADMAP.md's phase-3 gate: `vehicle up` boots vx-vehicle-01
 # end to end). One device is enough to prove the whole chain — gateway, VLAN attachment,
 # qemu-microvm boot from a real published vxparts guest bundle — without waiting on a
 # production-representative guest image (AAOS/QNX/Zephyr, still unbuilt). Grow this file device

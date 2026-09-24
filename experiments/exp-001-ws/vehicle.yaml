@@ -22,7 +22,7 @@ functions:
   adas-probe:   { deployed_on: node-adas-probe-01 }
   infot-load:   { deployed_on: node-infot-load-01 }
 
-# Pinned IPs (2026-08-03, docs/TASKS.md #28): `zone up` assigns these to each device's real
+# Pinned IPs (2026-08-03, docs/ROADMAP.md): `zone up` assigns these to each device's real
 # `eth0` inside its own netns, so `scripts/run.sh` no longer has to inject them onto a host-side
 # veth peer by hand. That hand-rolled form was the measurement-locality bug (#24) — the sender's
 # address and the reflector's both lived in the host's default netns, so the kernel's `local`

@@ -16,7 +16,7 @@ devices:
 functions:
   cold-probe: { deployed_on: node-cold-probe-01 }
 
-# Pinned address (docs/TASKS.md #28 pattern): `zone up` assigns this to the device's real eth0
+# Pinned address (docs/ROADMAP.md pattern): `zone up` assigns this to the device's real eth0
 # inside its own netns. Prober lives in that netns, reflector in the host's default netns
 # (`scripts/run.sh`) — different FIB domains, so there is no same-netns loopback shortcut for
 # the kernel to take, exactly the fix #28 needed for H1/H4 and the pattern exp-014 also follows.

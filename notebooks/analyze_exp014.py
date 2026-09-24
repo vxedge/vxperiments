@@ -116,7 +116,7 @@ def main():
             f"REFUSING: archives for arm(s) {not_cross_netns} do not record cross-netns "
             "measurement -- these may have been probed with sender and reflector in the same "
             "network namespace, which a disposable-netns check found delivers via loopback "
-            "without ever crossing the harness under test (docs/TASKS.md). Re-run with the "
+            "without ever crossing the harness under test (docs/ROADMAP.md). Re-run with the "
             "current scripts/run.sh."
         )
     quick = any(r["env"].get("quick_profile") for r in runs)

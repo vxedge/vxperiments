@@ -37,7 +37,7 @@
 #     binding — the node is a logical placeholder for TrafficPlan's
 #     zone:node -> slice_id resolution, same as exp-001; the actual traffic
 #     endpoint is a fiveg-managed UE pod, not a zone-provisioned container
-#     (proven live 2026-07-17, docs/STATUS.md "TrafficService live end to
+#     (proven live 2026-07-17, docs/RESULTS.md "TrafficService live end to
 #     end").
 #   - traffic_profiles: exp-001 has the probe SOURCE on the adas node and
 #     TARGET `internet` (host-side uplink reflector) because vlan transport
@@ -45,7 +45,7 @@
 #     way — the UE is the only endpoint whose reflector needs to run
 #     somewhere (fiveg::ue_probe_up, inside the UE's own pod); a plain
 #     host-side reflector for a UE-bound probe would reintroduce the
-#     UE-netns 0.0.0.0-bind bug ue_probe_up already fixes (docs/STATUS.md,
+#     UE-netns 0.0.0.0-bind bug ue_probe_up already fixes (docs/RESULTS.md,
 #     "UDP reply-routing" bug writeup). So source/target are flipped from
 #     exp-001: `source: internet`, `target: <zone>:<node>` for both
 #     profiles — exactly the shape live-verified as `h2-probe` in

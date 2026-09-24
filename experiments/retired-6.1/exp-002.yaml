@@ -9,7 +9,7 @@
 # the original exp-002 grouped all three nodes under one zone, which meant
 # `zone up` always started all three backends concurrently even though only
 # one was being measured at a time. That was hardened out of exp-002b after
-# a real concurrent-VM CPU-contention bug (docs/STATUS.md "Anomaly caught
+# a real concurrent-VM CPU-contention bug (docs/RESULTS.md "Anomaly caught
 # and fixed"); this retrofits the same fix here. Same nodes/IPs/backends as
 # before — only the zone grouping changed, which doesn't affect what's
 # measured. Migrated to §6.0 as ../exp-002-ws (2026-07-31); host interface

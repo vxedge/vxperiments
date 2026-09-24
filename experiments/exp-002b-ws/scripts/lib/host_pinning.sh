@@ -2,12 +2,12 @@
 # host_pinning.sh — cpu governor + measurement-process pinning, shared by
 # every run-exp-*.sh / calibration script that cares about microsecond-scale
 # latency (currently exp-010, whose post-fix effect size is small enough
-# that host scheduling noise is the limiting factor — see docs/STATUS.md,
+# that host scheduling noise is the limiting factor — see docs/RESULTS.md,
 # "Real per-slice HTB isolation delivered and live-verified").
 #
 # Neither mitigation here is new debt: exp-002b/003 already carry a
 # cpu_pinning: "none" field admitting the absence of pinning, and
-# docs/STATUS.md already tracks the non-PREEMPT_RT kernel caveat. They just
+# docs/RESULTS.md already tracks the non-PREEMPT_RT kernel caveat. They just
 # never mattered enough to fix before, because every prior campaign's
 # effect size was large enough to survive them.
 #
@@ -78,7 +78,7 @@ reserve_measurement_cores() {
 # The `|| true` is on the taskset call itself, not just this function's trailing `return 0` --
 # under `set -e`, a failing command on the right-hand side of `&&` still aborts the whole
 # script immediately, so `return 0` below never gets a chance to run. Found live 2026-08-05,
-# closing docs/TASKS.md #14's exp-010 run: `taskset -pc` on a process holding an elevated file
+# closing docs/ROADMAP.md's exp-010 run: `taskset -pc` on a process holding an elevated file
 # capability (e.g. `vxedged` after `setcap cap_net_admin+ep`, needed once the rtnetlink port
 # made the daemon's own process require it) is refused by the kernel for a same-UID,
 # non-privileged caller — confirmed directly (`taskset: ... Operation not permitted`), not
