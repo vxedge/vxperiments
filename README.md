@@ -22,8 +22,10 @@ Every experiment is a self-contained workspace folder with its manifests, campai
 | `exp-005` | Cold-start / first-packet latency after zone boot | Effect confirmed in 20 of 20 reps | [`experiments/exp-005/`](experiments/exp-005/) |
 | `exp-014` | Wiring-harness topology: star vs daisy chain | Effect holds | [`experiments/exp-014/`](experiments/exp-014/) |
 
-Numbers, tables and caveats are in [`docs/RESULTS.md`](https://github.com/vxedge/docs/blob/main/RESULTS.md).
-Each frozen summary records the sha256 of the manifest that produced it. Superseded campaigns
+The summaries in `results/` are the primary record. Every number published from them is
+registered in [`docs/FACTS.md`](https://github.com/vxedge/docs/blob/main/FACTS.md), the one file the
+website and the READMEs quote; [`docs/RESULTS.md`](https://github.com/vxedge/docs/blob/main/RESULTS.md)
+explains them and their caveats. Each frozen summary records the sha256 of the manifest that produced it. Superseded campaigns
 are kept alongside the current ones and are never deleted.
 
 ## Layout
