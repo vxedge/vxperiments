@@ -1,12 +1,15 @@
 kind: baseline
 id: bl-vx-vehicle-01
 
-# The real, published vxparts guest bundle (vxparts/TASKS.md's own first end-to-end
-# proof-of-concept: "built -> pushed -> pulled fresh from the registry -> booted the pulled
-# artifact under qemu-microvm", 2026-07-26) -- the same one vxedge/crates/vxedge-core's
-# registry_fetch_boot.rs test proves the fetch-then-boot path against. Digest re-verified live
-# via `oras resolve` before writing this file, not copied from memory.
+# The linux-probe guest bundle, built locally from its vxparts recipe so a fresh clone works
+# with no registry access. The bundle embeds the host kernel, so it is per host and is not
+# published (the GHCR copy stays private). Build it once, from the workspace root:
+#
+#   vxparts/parts/zone/linux/stack/probe-bundle/build.sh \
+#       "$PWD/vxperiments/vehicles/vx-vehicle-01/bundle"
+#
+# `vehicle up` refuses with this command if ./bundle is missing. `./bundle` is git-ignored.
 parts:
-  - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0
-    digest: sha256:33c9c8d8625bd5c6d1f4d3d0c561fdaa930e057fcd1fb24fb3badb402f25429d
+  - ref: ./bundle
+    kind: bundle
     target_ids: fn-a

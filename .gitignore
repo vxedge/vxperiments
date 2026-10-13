@@ -1,3 +1,4 @@
 results/**/*.zip
 results/*-quick/
 results/*-repro-*/
+vehicles/*/bundle/
