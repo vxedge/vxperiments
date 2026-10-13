@@ -4,13 +4,11 @@
 # Run as root from the vxperiments repo root:
 #   sudo -E env "PATH=$PATH" ./scripts/run.sh [--quick|--repro]
 #
-# Provisions from the §6.0 workspace (experiments/exp-001-ws). The frozen results in
-# results/exp-001/ (both the original §6.1-manifest campaign and its --repro rerun) are
-# UNDER RE-VERIFICATION as of 2026-08-03 (docs/ROADMAP.md#28): both measured the probe
-# exchange over loopback, never through the bridge/HTB path — see the topology note below
-# for the fix. Neither is authoritative until a campaign from this corrected script produces
-# a new baseline; the numerical-equivalence question --repro originally existed to answer is
-# secondary to that until then.
+# Provisions from the §6.0 workspace (experiments/exp-001-ws). The original campaigns measured
+# the probe exchange over loopback, never through the bridge/HTB path (docs/ROADMAP.md#28). That
+# was fixed and re-measured on 2026-08-03 (#28 closed): the frozen results in results/exp-001/
+# are the corrected campaign, promoted in 3cc9b2f, and are authoritative. See the topology note
+# below for the fix.
 #
 # --repro: full campaign written to results/exp-001-repro-<date>/ — the frozen
 #          results/exp-001/ dir is never overwritten in place (lib/results_dir.sh).
