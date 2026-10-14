@@ -11,7 +11,7 @@ jobs:
     name: campaign runners + notebooks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
       - name: Static checks
@@ -30,10 +30,10 @@ jobs:
     name: workspace validation (cross-repo)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: vxperiments
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: vxedge/vxedge
           path: vxedge
