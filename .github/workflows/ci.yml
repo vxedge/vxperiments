@@ -33,25 +33,33 @@ jobs:
       - uses: actions/checkout@v7
         with:
           path: vxperiments
-      - uses: actions/checkout@v7
-        with:
-          repository: vxedge/vxedge
-          path: vxedge
-      - name: Install protoc
-        # vxedge-api's build.rs (tonic-prost-build) needs it; matches vxedge's own CI step.
-        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: vxedge
-      - name: Build vxedge-cli
-        working-directory: vxedge
-        run: cargo build --release -p vxedge-cli
+      - name: Install pinned vxedge release
+        # No cross-repo checkout, no build: the validator is the released x86_64 binary named in
+        # ci/vxedge-release.txt. Its sha256 is checked against that checked-in file, then its
+        # build provenance is verified against the vxedge release workflow. Bumping the validator
+        # is a one-line change to that file.
+        working-directory: vxperiments
+        env:
+          # The job's own read-only token, only for the attestation lookup. The release download
+          # itself is anonymous.
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^version=//p' ci/vxedge-release.txt)
+          sha256=$(sed -n 's/^sha256=//p' ci/vxedge-release.txt)
+          archive="vxedge-${version}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/vxedge/vxedge/releases/download/v${version}/${archive}"
+          echo "${sha256}  $RUNNER_TEMP/$archive" | sha256sum -c -
+          gh attestation verify "$RUNNER_TEMP/$archive" --repo vxedge/vxedge \
+            --signer-workflow vxedge/vxedge/.github/workflows/release.yml
+          tar -C "$RUNNER_TEMP" -xzf "$RUNNER_TEMP/$archive"
+          echo "VXEDGE=$RUNNER_TEMP/vxedge-${version}-x86_64-unknown-linux-gnu/vxedge" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/vxedge-${version}-x86_64-unknown-linux-gnu/vxedge" --version
       - name: Validate every workspace
         working-directory: vxperiments
         run: |
           set -euo pipefail
-          VXEDGE=../vxedge/target/release/vxedge
           for ws in experiments/*-ws; do
             echo "== $ws"
             "$VXEDGE" manifest validate --manifest "$ws" --json | tee /tmp/result.json
