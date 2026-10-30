@@ -26,7 +26,8 @@ The summaries in `results/` are the primary record. Every number published from 
 registered in [`docs/FACTS.md`](https://github.com/vxedge/docs/blob/main/FACTS.md), the one file the
 website and the READMEs quote; [`docs/RESULTS.md`](https://github.com/vxedge/docs/blob/main/RESULTS.md)
 explains them and their caveats. Each frozen summary records the sha256 of the manifest that produced it. Superseded campaigns
-are kept alongside the current ones and are never deleted.
+are kept alongside the current ones and are never deleted. The raw per-run archives are a dataset on
+Zenodo, [10.5281/zenodo.23804197](https://doi.org/10.5281/zenodo.23804197); the summaries stay in git.
 
 ## Layout
 
