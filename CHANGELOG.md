@@ -13,6 +13,7 @@ than a repo tag.
 
 ### Added
 
+- `README.md`: the Zenodo dataset DOI `10.5281/zenodo.23804197` for the raw result archives.
 - Open-source release preparation: `LICENSE` (Apache-2.0), `NOTICE`, rewritten `README.md`.
 
 ### Added
