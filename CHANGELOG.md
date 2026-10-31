@@ -14,7 +14,7 @@ than a repo tag.
 ### Added
 
 - `README.md`: the Zenodo dataset DOI `10.5281/zenodo.23804197` for the raw result archives.
-- `results/exp-003-repro-2026-10-30/` and `results/exp-010-repro-2026-10-30/`: summaries of the full H4 and H2 reruns of 2026-10-30, on kernel 7.0.0-42. Both verdicts held. The archives are in Zenodo version 2026-11 (`10.5281/zenodo.23810053`).
+- `results/exp-003-repro-2026-10-30/` and `results/exp-010-repro-2026-10-30/`: summaries of the full H4 and H2 reruns of 2026-10-30, on kernel 7.0.0-42-generic (`repro.kernel` in `docs/FACTS.md`). Both verdicts held. The archives are in Zenodo version 2026-11 (`10.5281/zenodo.23810053`).
 - Open-source release preparation: `LICENSE` (Apache-2.0), `NOTICE`, rewritten `README.md`.
 
 ### Added
