@@ -25,6 +25,8 @@ vxedge vehicle down --manifest .
 ./check-leaks.sh
 ```
 
+The gate run of this vehicle is in [`results/phase-3-gate-2026-11-01`](../../results/phase-3-gate-2026-11-01).
+
 `vxedged` needs `cap_net_admin,cap_sys_admin`, a cached sudo credential for `tc` and `nft`, and the
 user's Podman socket. `snapshot.sh` and `check-leaks.sh` read nftables through `sudo -n`.
 

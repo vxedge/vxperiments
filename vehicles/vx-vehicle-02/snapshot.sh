@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Print what `vehicle up` must not change: process and container identities, namespaces, links
-# and rules. Run it before and after a second `up` and diff. Rule handles and counters are dropped,
+# and rules. Run it before and after a second `up` and diff. Only vx tables are read. Rule handles
+# and counters are dropped,
 # because `up` re-installs the anti-spoof rule by design and a rule's identity is its text.
 set -uo pipefail
 
@@ -20,4 +21,6 @@ for dev in $(ip -o link | grep -oE 'vz-[^:@]+|vxbr0' | sort -u); do
     echo "$dev"; tc class show dev "$dev"; tc qdisc show dev "$dev"
 done
 echo "# nft"
-sudo -n nft list ruleset | sed -E 's/ # handle [0-9]+//; s/counter packets [0-9]+ bytes [0-9]+/counter/'
+sudo -n nft list tables | grep vx | while read -r _ family name; do
+    sudo -n nft list table "$family" "$name"
+done | sed -E 's/ # handle [0-9]+//; s/counter packets [0-9]+ bytes [0-9]+/counter/'
