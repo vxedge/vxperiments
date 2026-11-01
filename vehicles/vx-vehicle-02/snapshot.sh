@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Print what `vehicle up` must not change: process and container identities, namespaces, links
 # and rules. Run it before and after a second `up` and diff. Only vx tables are read. Rule handles
-# and counters are dropped,
-# because `up` re-installs the anti-spoof rule by design and a rule's identity is its text.
+# and counters are dropped, because `up` re-installs the anti-spoof rule by design and a rule's
+# identity is its text.
 set -uo pipefail
 
 echo "# qemu"; pgrep -a qemu-system | awk '{print $1}'
