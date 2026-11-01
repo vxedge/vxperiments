@@ -1,0 +1,11 @@
+kind: baseline
+id: bl-vx-vehicle-02
+
+# Everything here is local and per host: run ./build.sh once. `vehicle up` refuses if a part is
+# missing. The images are recorded by digest in the gate evidence, not here.
+parts:
+  - ref: ./bundle
+    kind: bundle
+    target_ids: fn-fl
+  - ref: localhost/vxedge/probe:1
+    target_ids: [fn-fr, fn-rl, fn-hpc]
