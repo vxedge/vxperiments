@@ -2,3 +2,5 @@ results/**/*.zip
 results/*-quick/
 results/*-repro-*/
 vehicles/*/bundle/
+vehicles/*/ota-store/
+vehicles/*/.ota-root.key
