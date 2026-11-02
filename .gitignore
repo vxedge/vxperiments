@@ -3,4 +3,5 @@ results/*-quick/
 results/*-repro-*/
 vehicles/*/bundle/
 vehicles/*/ota-store/
+vehicles/*/capsule/
 vehicles/*/.ota-root.key

@@ -1,0 +1,14 @@
+kind: baseline
+id: bl-vx-vehicle-03
+
+# Everything here is local and per host: run ./build.sh once. `vehicle up` refuses if a part is
+# missing.
+parts:
+  - ref: ./bundle
+    kind: bundle
+    target_ids: [fn-fl, fn-fr]
+  - ref: ./capsule/reflector-capsule.wasm
+    kind: wasm
+    target_ids: fn-rr
+  - ref: localhost/vxedge/probe:1
+    target_ids: [fn-rl, fn-cab, fn-hpc]
