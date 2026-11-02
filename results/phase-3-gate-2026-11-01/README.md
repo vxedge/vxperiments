@@ -18,6 +18,12 @@ all from one workspace. Run from a clean state on merged `main`: vxedge `879cd74
 | `down` after a failed `up` leaves nothing | passed |
 | Every step on the job stream, every mutating RPC in the audit log | passed |
 
+## Regression
+
+[`regression-2026-11-02.txt`](regression-2026-11-02.txt) is the same run on vxedge `208548c`, after
+the Cloud Hypervisor and capsule work and with the `vxprobe` fix in the probe image. Every check
+still holds.
+
 ## What this does not show
 
 - The guests are probes. No QNX, Android Automotive or application workload ran, and the compute

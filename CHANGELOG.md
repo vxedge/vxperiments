@@ -13,6 +13,7 @@ than a repo tag.
 
 ### Added
 
+- `results/all-backends-2026-11-02`: `vx-vehicle-03` from a clean state, and a regression run of the phase-3 gate.
 - `vehicles/vx-vehicle-03`: every zone backend in one vehicle, with its build script and checks.
 - `vehicles/vx-vehicle-02`: the phase-3 gate vehicle, with its build script and flow, identity and leak checks.
 - `results/phase-3-gate-2026-11-01`: the gate run.
