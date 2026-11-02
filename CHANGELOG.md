@@ -13,6 +13,7 @@ than a repo tag.
 
 ### Added
 
+- `vehicles/vx-vehicle-03`: every zone backend in one vehicle, with its build script and checks.
 - `vehicles/vx-vehicle-02`: the phase-3 gate vehicle, with its build script and flow, identity and leak checks.
 - `results/phase-3-gate-2026-11-01`: the gate run.
 - `README.md`: the Zenodo dataset DOI `10.5281/zenodo.23804197` for the raw result archives.
