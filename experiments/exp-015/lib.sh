@@ -76,8 +76,9 @@ rx_packets() {
 drop_provider() {
     local i
     podman rm -f -t 0 "vxt-$1" >/dev/null 2>&1
+    # Released once an actuation finds no provider. Probing with a claim would hold one itself.
     for i in $(seq 20); do
-        kv hpc1 provide-actuator "$2" --duration-s 0.2 | field provide result | grep -qx ok && return 0
+        kv hpc1 actuate "$2" false | field actuate code | grep -qx UNAVAILABLE && return 0
         sleep 0.5
     done
     fail "the claim on $2 was not released 10 s after its provider was removed"

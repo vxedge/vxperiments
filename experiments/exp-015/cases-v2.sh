@@ -62,13 +62,19 @@ out=$(kv cabin1 provide-signal Vehicle.Exterior.AirTemperature --values 18.5,19.
 echo "$out" | indent
 podman wait vxt-sub >/dev/null
 seen=$(podman logs vxt-sub | field update value | tr '\n' ' ')
-[ "$(echo "$out" | field published result | sort -u)" = ok ] && pass "provider publishes accepted" \
-    || fail "provider publishes: $(echo "$out" | field published errors | tr '\n' ' ')"
+# The databroker answers a provider's publish only to reject it.
+[ "$(echo "$out" | field sent result | grep -c ok)" = 3 ] && [ "$(echo "$out" | field provide-signal rejected | tail -1)" = 0 ] \
+    && pass "provider sent 3 values, none rejected" \
+    || fail "provider publishes: $(echo "$out" | field rejected errors | tr '\n' ' ')"
 case $seen in
     *"18.5 19.5 20.5 ") pass "subscriber on hpc1 saw the provider's values: $seen" ;;
     *) fail "subscriber on hpc1 saw: $seen" ;;
 esac
 podman rm -f -t 0 vxt-sub >/dev/null
+out=$(kv cabin1 provide-signal Vehicle.Powertrain.TractionBattery.StateOfCharge.Current --values 50.5,150 --interval-ms 200)
+echo "$out" | indent
+[ "$(echo "$out" | field rejected errors)" = '{"'"$(kv cabin1 metadata Vehicle.Powertrain.TractionBattery.StateOfCharge.Current | field metadata id)"'": "ERROR_CODE_INVALID_ARGUMENT"}' ] \
+    && pass "provider value outside max 100 rejected on the stream" || fail "provider value outside max: $(echo "$out" | field rejected errors)"
 
 h "the CAN feed: can-provider replays a dump, a subscriber on hpc1 consumes it"
 # can-provider uses kuksa-client 0.6.0: publish over v2 PublishValue, falling back to v1 only if
@@ -97,7 +103,7 @@ podman rm -f -t 0 vxt-sub vxt-can >/dev/null
 healthy "CAN feed"
 
 h "actuation with a provider that answers"
-kvbg prov cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode ok --duration-s 30
+kvbg prov cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode ok --duration-s 30 --claim-retry-s 10
 until_log prov provide ok || fail "provider did not claim"
 out=$(kv hpc1 actuate Vehicle.Body.Trunk.Rear.IsOpen true); echo "$out" | indent
 [ "$(echo "$out" | verdict actuate)" = ok ] && pass "actuate from hpc1, provider on cabin1" \
@@ -121,7 +127,7 @@ code=$(echo "$out" | field actuate code)
 misbehave() {
     local mode=$1 out code
     h "provider mode $mode"
-    kvbg prov cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode "$mode" --duration-s 40
+    kvbg prov cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode "$mode" --duration-s 40 --claim-retry-s 10
     until_log prov provide ok || fail "$mode: provider did not claim"
     out=$(kv hpc1 actuate Vehicle.Body.Trunk.Rear.IsOpen true --timeout-s 10); echo "$out" | indent
     podman logs vxt-prov | indent
@@ -137,7 +143,7 @@ misbehave slow:3000
 misbehave error
 
 h "a provider that drops its stream after one answer"
-kvbg prov cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode exit-after:1 --duration-s 30
+kvbg prov cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode exit-after:1 --duration-s 30 --claim-retry-s 10
 until_log prov provide ok || fail "exit-after: provider did not claim"
 first=$(kv hpc1 actuate Vehicle.Body.Trunk.Rear.IsOpen true)
 until_log prov provide dropped || fail "exit-after: provider did not drop"
@@ -148,11 +154,33 @@ echo "$first" | indent; echo "$second" | indent
 code=$(echo "$second" | field actuate code)
 [ "$code" = UNAVAILABLE ] && pass "exit-after: after the drop: $code" || fail "exit-after: after the drop: ${code:-none}"
 drop_provider prov Vehicle.Body.Trunk.Rear.IsOpen
-kvbg prov2 cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode ok --duration-s 10
+kvbg prov2 cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode ok --duration-s 10 --claim-retry-s 10
 until_log prov2 provide ok && pass "a new provider claims the released actuator" \
     || fail "the actuator stayed claimed after its provider dropped"
 drop_provider prov2 Vehicle.Body.Trunk.Rear.IsOpen
 healthy "exit-after"
+
+h "how long a gone provider's claim lasts"
+# Actuate stops finding a provider as soon as its stream closes; a new claim is refused until the
+# databroker's own sweep removes the old one. Recorded, not checked: the timing is upstream's.
+kvbg prov cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode ok --duration-s 30 --claim-retry-s 10
+until_log prov provide ok || fail "window: provider did not claim"
+t0=$(date +%s.%N)
+podman rm -f -t 0 vxt-prov >/dev/null
+t_actuate= t_claim=
+for _ in $(seq 100); do
+    now=$(date +%s.%N)
+    [ -z "$t_actuate" ] && kv hpc1 actuate Vehicle.Body.Trunk.Rear.IsOpen false | field actuate code | grep -qx UNAVAILABLE \
+        && t_actuate=$(python3 -c "print(round($now - $t0, 2))")
+    if [ -n "$t_actuate" ]; then
+        out=$(kv hpc1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --duration-s 0.2)
+        echo "$out" | field provide result | grep -qx ok && { t_claim=$(python3 -c "print(round($(date +%s.%N) - $t0, 2))"); break; }
+    fi
+    sleep 0.1
+done
+obs "after a provider is removed: actuate finds no provider within ${t_actuate:-?} s, a new claim succeeds after ${t_claim:-?} s"
+[ -n "$t_claim" ] && pass "window: the claim was released" || fail "window: the claim was never released"
+drop_provider prov Vehicle.Body.Trunk.Rear.IsOpen
 
 h "the client's own refusal, on the allowed slice"
 out=$(BROKER=10.100.0.50:55556 kv cabin1 --connect-s 3 info); echo "$out" | indent

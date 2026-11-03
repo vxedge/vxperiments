@@ -155,6 +155,21 @@ def cmd_subscribe(args, stub):
 
 
 def cmd_provide_actuator(args, stub):
+    """Claim actuators, retrying an ALREADY_EXISTS for up to --claim-retry-s, then serve them."""
+    deadline = time.monotonic() + args.claim_retry_s
+    while True:
+        try:
+            return serve_actuator(args, stub)
+        except grpc.RpcError as exc:
+            if exc.code() == grpc.StatusCode.ALREADY_EXISTS and time.monotonic() < deadline:
+                emit(op="provide", result="retry", code=exc.code().name)
+                time.sleep(0.1)
+                continue
+            rpc_error("provide", exc, answered=0)
+            return
+
+
+def serve_actuator(args, stub):
     """Claim actuators, then answer the databroker's actuation requests as --mode says.
 
     ok: answer at once. slow:MS: answer after MS. silent: never answer. error: answer with
@@ -207,6 +222,8 @@ def cmd_provide_actuator(args, stub):
                 stream.cancel()
                 return
     except grpc.RpcError as exc:
+        if exc.code() == grpc.StatusCode.ALREADY_EXISTS and answered == 0:
+            raise
         if exc.code() != grpc.StatusCode.CANCELLED:
             rpc_error("provide", exc, answered=answered)
             return
@@ -214,7 +231,12 @@ def cmd_provide_actuator(args, stub):
 
 
 def cmd_provide_signal(args, stub):
-    """Claim one sensor and publish --values on the provider stream, one per --interval-ms."""
+    """Claim one sensor and publish --values on the provider stream, one per --interval-ms.
+
+    The databroker answers a PublishValuesRequest only when something in it is rejected, so this
+    prints every value it sent, then any error responses that arrive within --grace-s after the
+    last one, then closes the stream.
+    """
     meta = metadata(stub, args.path)
     outbox = queue.Queue()
     outbox.put(val.OpenProviderStreamRequest(provide_signal_request=val.ProvideSignalRequest(
@@ -228,34 +250,36 @@ def cmd_provide_signal(args, stub):
                 return
             yield item
 
+    def publish():
+        for i, text in enumerate(args.values.split(",")):
+            outbox.put(val.OpenProviderStreamRequest(publish_values_request=val.PublishValuesRequest(
+                request_id=i + 1, data_points={meta.id: types.Datapoint(value=typed(meta, text))})))
+            emit(op="sent", result="ok", request_id=i + 1, value=text)
+            time.sleep(args.interval_ms / 1e3)
+        time.sleep(args.grace_s)
+        outbox.put(stop)
+        stream.cancel()  # the databroker keeps the stream open after the client half-closes
+
     stream = stub.OpenProviderStream(requests())
-    published = 0
-    values = args.values.split(",")
+    rejected = 0
     try:
         for resp in stream:
             kind = resp.WhichOneof("action")
             if kind == "provide_signal_response":
                 emit(op="provide-signal", result="ok", path=args.path, id=meta.id)
-                for i, text in enumerate(values):
-                    outbox.put(val.OpenProviderStreamRequest(publish_values_request=val.PublishValuesRequest(
-                        request_id=i + 1, data_points={meta.id: types.Datapoint(value=typed(meta, text))})))
-                    time.sleep(args.interval_ms / 1e3)
+                threading.Thread(target=publish, daemon=True).start()
             elif kind == "publish_values_response":
                 r = resp.publish_values_response
-                errors = {k: types.ErrorCode.Name(v.code) for k, v in r.status.items()}
-                emit(op="published", result="ok" if not errors else "error",
-                     request_id=r.request_id, errors=errors)
-                published += 1
+                errors = {str(k): types.ErrorCode.Name(v.code) for k, v in r.status.items()}
+                emit(op="rejected", result="error", request_id=r.request_id, errors=errors)
+                rejected += 1
             else:
                 emit(op="provider-message", result="ok", kind=kind)
-            if published >= len(values):
-                break
     except grpc.RpcError as exc:
-        rpc_error("provide-signal", exc, published=published)
-        return
-    finally:
-        outbox.put(stop)
-    emit(op="provide-signal", result="done", published=published)
+        if exc.code() != grpc.StatusCode.CANCELLED:
+            rpc_error("provide-signal", exc, rejected=rejected)
+            return
+    emit(op="provide-signal", result="done", rejected=rejected)
 
 
 def main():
@@ -281,10 +305,12 @@ def main():
     s.add_argument("paths", nargs="+")
     s.add_argument("--mode", default="ok")
     s.add_argument("--duration-s", type=float, default=30.0)
+    s.add_argument("--claim-retry-s", type=float, default=0.0)
     s = sub.add_parser("provide-signal")
     s.add_argument("path")
     s.add_argument("--values", required=True)
     s.add_argument("--interval-ms", type=int, default=100)
+    s.add_argument("--grace-s", type=float, default=1.0)
     args = p.parse_args()
 
     _, stub = connect(args)
