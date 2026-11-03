@@ -72,24 +72,27 @@ podman rm -f -t 0 vxt-sub >/dev/null
 
 h "the CAN feed: can-provider replays a dump, a subscriber on hpc1 consumes it"
 # can-provider uses kuksa-client 0.6.0: publish over v2 PublishValue, falling back to v1 only if
-# v2 is missing. The steering angle has no other writer in this run.
-kvbg sub hpc1 subscribe Vehicle.Chassis.SteeringWheel.Angle Vehicle.Speed --count 20 --timeout-s 60
+# v2 is missing. The dump in the image carries speed and gear frames; the gear has no other
+# writer in this run, so a gear value can only have come from the feed.
+kvbg sub hpc1 subscribe Vehicle.Powertrain.Transmission.CurrentGear Vehicle.Speed --count 30 --timeout-s 60
 until_log sub subscribe open || fail "subscriber did not open"
 podman rm -f -t 0 vxt-can >/dev/null 2>&1
-podman run -d --name vxt-can --network container:vx-cabin1-infra "$CAN" \
-    --address "grpc://$BROKER" --dumpfile candump.log --no-infinite >/dev/null
+podman run -d --init --name vxt-can --network container:vx-cabin1-infra "$CAN" \
+    --dumpfile candump.log --no-infinite "grpc://$BROKER" >/dev/null
 podman wait vxt-sub >/dev/null
-podman logs vxt-can 2>&1 | tail -5 | indent
-angles=$(podman logs vxt-sub | python3 -c '
+podman logs vxt-can 2>&1 | grep -v WARNING | tail -3 | indent
+gears=$(podman logs vxt-sub | python3 -c '
 import json, sys
 n = 0
 for line in sys.stdin:
     d = json.loads(line)
-    n += d.get("op") == "update" and d.get("path") == "Vehicle.Chassis.SteeringWheel.Angle" and d.get("value") is not None
+    n += d.get("op") == "update" and d.get("path") == "Vehicle.Powertrain.Transmission.CurrentGear" and d.get("value") is not None
 print(n)')
 updates=$(podman logs vxt-sub | field update result | grep -c ok)
-[ "$angles" -gt 0 ] && pass "consumer on hpc1 got $updates updates, $angles of them steering angles from the CAN feed" \
-    || fail "consumer on hpc1 got no steering angle ($updates updates)"
+[ "$gears" -gt 0 ] && pass "consumer on hpc1 got $updates updates, $gears of them gear values from the CAN feed" \
+    || fail "consumer on hpc1 got no gear value ($updates updates)"
+got=$(kv hpc1 get Vehicle.Powertrain.Transmission.CurrentGear | field get value)
+[ -n "$got" ] && pass "hpc1 reads the fed gear: $got" || fail "hpc1 reads no gear"
 podman rm -f -t 0 vxt-sub vxt-can >/dev/null
 healthy "CAN feed"
 
