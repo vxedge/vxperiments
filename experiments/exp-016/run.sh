@@ -46,7 +46,11 @@ cleanup() { podman rm -f vxt-load vxt-perf >/dev/null 2>&1; }
 trap cleanup EXIT
 
 cd "$here"
-exec > >(tee "$RUN/transcript.txt") 2>&1
+# Pull first, so no case or timed run includes a download.
+for img in ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd "$PERF"; do
+    podman pull -q "$img" >/dev/null || { echo "pull failed: $img"; exit 1; }
+done
+exec > "$RUN/transcript.txt" 2>&1
 sudo -n setcap cap_net_admin,cap_sys_admin+ep "$bin/vxedged" || { echo "setcap failed: no sudo timestamp"; exit 1; }
 echo "vxedge $(git -C "$bin/../.." rev-parse --short HEAD 2>/dev/null || echo unknown), vxperiments $(git rev-parse --short HEAD)"
 sha256sum vehicle.yaml parts.yaml data/*.json
