@@ -4,7 +4,7 @@ class: road
 subtype: car
 
 # Every zone backend in one vehicle: six zones on qemu-microvm, cloud-hypervisor, wasm-capsule and
-# container, with central compute and a service placed on a slice. Guests stay probes: this proves
+# container, with central compute, a service and the signal plane placed on a slice. Guests stay probes: this proves
 # the backends provision and isolate together, not application behaviour. libvirt is left out
 # because a boot here would add nothing the other VM backends do not show.
 #
@@ -60,3 +60,11 @@ services:
     image: { url: localhost/vxedge/ota:1, kind: container }
     on: hpc1
     config: { artifacts: ./ota-store, listen: "0.0.0.0:9900" }
+
+signal_plane:
+  kuksa:
+    image:
+      url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:9ace2824719ba7c05929f0af4827d9b25fa5ca7b2e0d58d0acff95885c649d6d
+      kind: container
+    on: hpc1
+    config: { listen: "0.0.0.0:55555" }

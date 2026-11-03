@@ -1,7 +1,7 @@
 # vx-vehicle-03
 
 Every zone backend in one vehicle: six zones on qemu-microvm, cloud-hypervisor, wasm-capsule and
-container, with central compute and an OTA service placed on a slice.
+container, with central compute, an OTA service and the Kuksa signal plane placed on a slice.
 
 | Device | Zone | Backend | Slice | Address | Runs |
 |---|---|---|---|---|---|
@@ -21,6 +21,7 @@ container, with central compute and an OTA service placed on a slice.
 vxedge vehicle up --manifest .
 vxedge vehicle status --manifest .
 ./check-flows.sh                          # allowed flows first, then denied ones
+./check-signals.sh                        # one VSS signal, allowed then denied
 ./snapshot.sh                             # diff before and after a second `up`
 vxedge vehicle down --manifest .
 ./check-leaks.sh
@@ -36,4 +37,6 @@ or named by `VXEDGE_CAPSULE_BIN`. The run in
   Hypervisor node's API socket lives there. `up` reports the path when it is too long.
 - Only the container nodes can send, so the VM and capsule nodes are probed as targets.
 - `libvirt` is left out: its boot adds nothing the two other VM backends do not show here.
+- The databroker runs with `--insecure`, so signals are unauthenticated and slice isolation is their
+  only protection.
 - This is `vx-vehicle-02`'s kind of evidence: probes, one Linux bridge, nothing timed.
