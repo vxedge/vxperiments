@@ -10,7 +10,7 @@ cli() {
         sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g; s/\r//g' | tail -n +2 | tr '\n' ' ')"
 }
 t() {
-    podman rm -f vxt-flags >/dev/null 2>&1
+    podman rm -f -t 0 vxt-flags >/dev/null 2>&1
     podman run -d --name vxt-flags "$B" "$@" >/dev/null 2>&1
     sleep 3
     echo; echo "args: ${*:-(none)}"
@@ -19,4 +19,4 @@ t() {
 }
 t --insecure --address 127.0.0.1 --port 55556; cli 127.0.0.1:55556; cli 127.0.0.1:55555
 t --address 127.0.0.1 --port 55556; cli 127.0.0.1:55556
-podman rm -f vxt-flags >/dev/null 2>&1
+podman rm -f -t 0 vxt-flags >/dev/null 2>&1

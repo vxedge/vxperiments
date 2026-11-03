@@ -19,15 +19,15 @@ h() { echo; echo "== $*"; }
 kv() {
     local node=$1
     shift
-    timeout 60 podman run --rm --network "container:vx-$node-infra" "$KV2" --server "$BROKER" "$@" 2>&1
+    timeout 60 podman run --rm --init --network "container:vx-$node-infra" "$KV2" --server "$BROKER" "$@" 2>&1
 }
 
 # kvbg <name> <node> <kv2 args...>: a client left running as vxt-<name>.
 kvbg() {
     local name=$1 node=$2
     shift 2
-    podman rm -f "vxt-$name" >/dev/null 2>&1
-    podman run -d --name "vxt-$name" --network "container:vx-$node-infra" "$KV2" \
+    podman rm -f -t 0 "vxt-$name" >/dev/null 2>&1
+    podman run -d --init --name "vxt-$name" --network "container:vx-$node-infra" "$KV2" \
         --server "$BROKER" "$@" >/dev/null
 }
 
@@ -68,6 +68,18 @@ verdict() {
 rx_packets() {
     ip -s -j link show "vz-$1" | python3 -c \
         'import json,sys; print(json.load(sys.stdin)[0]["stats64"]["rx"]["packets"])'
+}
+
+# drop_provider <name> <path>: remove a provider and wait for the databroker to release its claim.
+# The broker sweeps for gone providers on a timer, so the release is not immediate.
+drop_provider() {
+    local i
+    podman rm -f -t 0 "vxt-$1" >/dev/null 2>&1
+    for i in $(seq 20); do
+        kv hpc1 provide-actuator "$2" --duration-s 0.2 | field provide result | grep -qx ok && return 0
+        sleep 0.5
+    done
+    fail "the claim on $2 was not released 10 s after its provider was removed"
 }
 
 broker_state() {
