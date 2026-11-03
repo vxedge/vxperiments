@@ -85,7 +85,7 @@ done
 
 h "can-provider 0.5.1's newest mapping, vss_6.0, against the 6.1 broker"
 podman run -d --name vxt-can --network container:vxt-vss61 "$CAN" \
-    --address grpc://127.0.0.1:55555 --dumpfile candump.log --no-infinite >/dev/null
+    --dumpfile candump.log --no-infinite grpc://127.0.0.1:55555 >/dev/null
 sleep 15
 podman logs vxt-can 2>&1 | grep -iE 'error|warn|not found|ElectricMotor' | sort | uniq -c | sort -rn | head -10 | indent
 for p in Vehicle.Speed Vehicle.Powertrain.ElectricMotor.Front.Power; do
