@@ -64,7 +64,7 @@ services:
 signal_plane:
   kuksa:
     image:
-      url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:9ace2824719ba7c05929f0af4827d9b25fa5ca7b2e0d58d0acff95885c649d6d
+      url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
       kind: container
     on: hpc1
     config: { listen: "0.0.0.0:55555" }

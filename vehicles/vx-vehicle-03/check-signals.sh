@@ -8,7 +8,7 @@
 # and the denied check, so a broken client cannot pass as either.
 set -uo pipefail
 
-CLIENT=ghcr.io/eclipse-kuksa/kuksa-databroker-cli@sha256:a886f52e1fc1ef3fbebd482d19511065c1932c36db216b43b76403be59886c2e
+CLIENT=ghcr.io/eclipse-kuksa/kuksa-databroker-cli@sha256:871649f14576871ca048ed5f4ff2c109656d748877d8ddb8609c67091c9f9c33
 BROKER=10.100.0.50:55555
 VALUE=42.5
 SHOWN=42.50
