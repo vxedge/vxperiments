@@ -20,8 +20,10 @@ REPS=${REPS:-5}
 DURATION=${DURATION:-30}
 SKIP=${SKIP:-5}
 LOAD_MBPS=${LOAD_MBPS:-600}
-PERF=${PERF:-ghcr.io/eclipse-kuksa/kuksa-databroker-perf@sha256:74ad5bb003e2f541cf9862ba63cecf66cd93badb514f1c6c8b68bcaac29ffd93}
+PERF_RELEASE=ghcr.io/eclipse-kuksa/kuksa-databroker-perf@sha256:74ad5bb003e2f541cf9862ba63cecf66cd93badb514f1c6c8b68bcaac29ffd93
 PERF_MAIN=${PERF_MAIN:-localhost/vxperiments/kuksa-perf:aa6fba0}
+# Publish runs use PERF: the build of aa6fba0 unless set, because 0.3.2 cannot publish to 0.7.1.
+PERF=${PERF:-$PERF_MAIN}
 LOAD=localhost/vxperiments/vxtraffic:1
 BROKER_HOST=10.100.0.50
 E=unix://$RUN/d.sock
@@ -47,14 +49,15 @@ trap cleanup EXIT
 
 cd "$here"
 # Pull first, so no case or timed run includes a download.
-for img in ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd "$PERF"; do
+for img in ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd "$PERF_RELEASE"; do
     podman pull -q "$img" >/dev/null || { echo "pull failed: $img"; exit 1; }
 done
 exec > "$RUN/transcript.txt" 2>&1
 sudo -n setcap cap_net_admin,cap_sys_admin+ep "$bin/vxedged" || { echo "setcap failed: no sudo timestamp"; exit 1; }
 echo "vxedge $(git -C "$bin/../.." rev-parse --short HEAD 2>/dev/null || echo unknown), vxperiments $(git rev-parse --short HEAD)"
 sha256sum vehicle.yaml parts.yaml data/*.json
-echo "kuksa-perf, publish runs: $PERF"
+echo "kuksa-perf, publish runs: $PERF $(podman image inspect -f '{{.Id}}' "$PERF" | cut -c1-19)"
+echo "kuksa-perf release, recorded only: $PERF_RELEASE"
 echo "kuksa-perf, actuate runs: $PERF_MAIN $(podman image inspect -f '{{.Id}}' "$PERF_MAIN" | cut -c1-19)"
 echo "load: $LOAD $(podman image inspect -f '{{.Id}}' "$LOAD" | cut -c1-19), $LOAD_MBPS mbit/s"
 echo "reps $REPS, duration ${DURATION}s, skip ${SKIP}s"
@@ -76,7 +79,16 @@ perf() {
         -v "$here/data:/data:ro" "$image" --api kuksa.val.v2 --host "http://$BROKER_HOST" --port 55555 \
         --duration "$DURATION" --skip-seconds "$SKIP" "$@" >"$RUN/out/$out.txt" 2>&1
     echo "exit $? $out: $(grep -E '50% in under|Received:' "$RUN/out/$out.txt" | tr -s ' ' | tr '\n' ' ')"
+    # The databroker releases a finished run's claims on its own sweep, about a second later; a
+    # run started sooner finds its signals still claimed and sends nothing.
+    sleep 3
 }
+
+h "the released kuksa-perf, 0.3.2, against databroker 0.7.1 over kuksa.val.v2"
+# Recorded, not used for results: its v2 provider publishes without claiming the signals, which
+# 0.7.1 aborts, and it exits 0 having sent nothing.
+DURATION=5 SKIP=0 perf hpc1 "$PERF_RELEASE" release-0.3.2 --test-data-file /data/publish-1.json
+grep -E 'Sent:|Received:|50% in under' "$RUN/out/release-0.3.2.txt" | tr -s ' ' | sed 's/^/  /'
 
 h "the broker is not reachable from infotainment"
 before=$(ifstat info2 rx)

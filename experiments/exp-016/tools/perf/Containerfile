@@ -1,12 +1,13 @@
-# kuksa-perf built test-side from upstream commit aa6fba0 (main, 2025-07-28), for exp-016's actuate
-# runs only: `--operation actuate` is not in any release, and the 0.3.2 release's v2 provider never
-# claims its signals. Cargo.lock is upstream's and the build is --locked; protoc comes from Debian
-# bookworm and its version is printed in the build log.
+# kuksa-perf built test-side from upstream commit aa6fba0 (main, 2025-07-28), for every exp-016
+# measured run: the 0.3.2 release's v2 provider never claims its signals, so databroker 0.7.1
+# aborts it, and `--operation actuate` is not in any release. Cargo.lock is upstream's and the
+# build is --locked. The locked tree builds protoc from source (protobuf-src), so the toolchain
+# needs g++ and cmake from Debian bookworm.
 #
 #   podman build -t localhost/vxperiments/kuksa-perf:aa6fba0 tools/perf
 FROM docker.io/library/rust:1.88-slim-bookworm@sha256:38bc5a86d998772d4aec2348656ed21438d20fcdce2795b56ca434cf21430d89 AS build
-RUN apt-get update && apt-get install -y --no-install-recommends git protobuf-compiler ca-certificates \
-    && protoc --version
+RUN apt-get update && apt-get install -y --no-install-recommends git g++ cmake make ca-certificates \
+    && g++ --version | head -1 && cmake --version | head -1
 RUN git clone https://github.com/eclipse-kuksa/kuksa-perf /src \
     && git -C /src checkout --detach aa6fba0ce4035ea0db348d2e999a03ed43f87177
 RUN cd /src && cargo build --locked --release && ./target/release/databroker-perf --version

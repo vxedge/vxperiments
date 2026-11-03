@@ -27,7 +27,7 @@ def main(out):
     runs = {}
     failed = []
     for f in sorted(pathlib.Path(out).glob("*.txt")):
-        if f.stem.startswith("denied"):
+        if f.stem.startswith(("denied", "release")):
             continue
         key, _, rep = f.stem.rpartition("-")
         pct, counts = parse(f)
