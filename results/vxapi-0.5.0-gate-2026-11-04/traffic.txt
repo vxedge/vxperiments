@@ -1,0 +1,26 @@
+00:45:19 #### traffic x1
+00:45:19   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+00:45:19   PASS host clean before start
+00:45:20 == traffic and collection on exp-001 trial copy
+00:45:20    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `$TRIAL`
+00:45:21   PASS exp-001 up --stage gateway JOB_STATE_SUCCEEDED 
+00:45:21    ? svc_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start the `telemetry` service that `$HARNESS/exp-00
+00:45:23   PASS telemetry svc_up JOB_STATE_SUCCEEDED 
+00:45:23    ? traffic_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start every traffic profile that `$HARNESS/exp-001-
+00:45:23    ? traffic_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start every traffic profile that `$HARNESS/exp-001-
+00:45:23   PASS traffic_up retry with the same request_id returns the same job
+00:45:23   PASS traffic_up job JOB_STATE_SUCCEEDED 
+00:46:23   traffic states seen: ['TRAFFIC_PROFILE_STATE_FINISHED', 'TRAFFIC_PROFILE_STATE_RUNNING']; last {'profiles': [{'detail': '', 'id': 'infotainment-load', 'state': 'TRAFFIC_PROFILE_STATE_FINISHED'}]}
+00:46:23   PASS traffic_status moved from running to finished
+00:46:23    ? telemetry_collect asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Collect the telemetry `$TRIAL` inge
+00:46:23   PASS collect JOB_STATE_SUCCEEDED artifact {'path': '$TRIAL/results/exp-001-1793749583188.zip', 'sha256': 'ecd8613044c29629be6efa334a0177b10e7c59c4a182ae83ddd3bbb44e12272d'}
+00:46:23   PASS archive sha256 matches Job.artifact
+00:46:23   archive members ['metadata.json', 'workspace/exp-001.vxp', 'workspace/main.yaml', 'workspace/parts.yaml', 'workspace/vehicle.yaml', 'ingest/samples.jsonl']; metadata keys ['collected_at_unix_ms', 'experiment_id', 'image_digests', 'ingest', 'package', 'vxtelemetry_version', 'workspace_sha256']
+00:46:23   PASS archive holds the workspace and its metadata
+00:46:23   archive at $TRIAL/results/exp-001-1793749583188.zip
+00:46:23    ? svc_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Stop the `telemetry` service on this host: where the active run places it on a node, or else on the host, whichever experiment start
+00:46:23    ? experiment_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the experiment at `$TRIAL
+00:46:23   PASS exp-001 down JOB_STATE_SUCCEEDED
+00:46:24   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+00:46:24   PASS host clean after exp-001
+00:46:24 #### traffic: 0 failure(s)

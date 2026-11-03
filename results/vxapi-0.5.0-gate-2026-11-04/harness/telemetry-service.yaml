@@ -1,0 +1,8 @@
+# Release-gate trial only (vxedge #54): a telemetry service so TelemetryService.Collect has
+# something to archive. Not part of the exp-001 campaign.
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
