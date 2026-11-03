@@ -1,0 +1,214 @@
+vxedge e9b9596, vxperiments ac7d1b0
+8da37090dc5e696ae753ba900ceb5a319205ffeaa4126377d0138707f28576a7  vehicle.yaml
+a2ed763b2e0e1c1cdf44399e36ab5c38ed4bae2f3d6ad23342ad0d829d22a461  parts.yaml
+
+$ ./check-leaks.sh (clean state)
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ vxedge vehicle up --manifest .
+[ 10%] vehicle.up gateway: bridge, slices, endpoints
+[ 30%] vehicle.up gateway: provisioning bridge + uplink
+[ 30%] vehicle.up gateway: applying slice VLANs + HTB queue tree
+[ 30%] vehicle.up gateway: attaching zone endpoints
+[ 30%] vehicle.up gateway: applying tunnels
+[ 30%] vehicle.up gateway: verifying observed state
+[ 40%] vehicle.up zone 1/5: cabin1 (up)
+[ 40%] vehicle.up zone cabin1: starting node 1/1: cabin1 (Container)
+[ 44%] vehicle.up zone 2/5: sensor-rr (up)
+[ 44%] vehicle.up zone sensor-rr: starting node 1/1: sensor-rr (WasmCapsule)
+[ 48%] vehicle.up zone 3/5: zone-fl (up)
+[ 48%] vehicle.up zone zone-fl: starting node 1/1: zone-fl (QemuMicrovm)
+[ 52%] vehicle.up zone 4/5: zone-fr (up)
+[ 52%] vehicle.up zone zone-fr: starting node 1/1: zone-fr (CloudHypervisor)
+[ 56%] vehicle.up zone 5/5: zone-rl (up)
+[ 56%] vehicle.up zone zone-rl: starting node 1/1: zone-rl (Container)
+[ 60%] vehicle.up compute 1/1: hpc1 (up)
+[ 60%] vehicle.up compute hpc1: starting node 1/1: hpc1 (Container)
+[ 72%] vehicle.up signal plane: kuksa-databroker on hpc1 (up)
+[ 75%] vehicle.up service ota: up
+[ 90%] vehicle.up service ota: starting ota service
+[100%] vehicle.up vehicle `vx-vehicle-03` up — gateway, 5 zone(s), 1 compute(s), signal plane up on `hpc1`, 1 service(s)
+vehicle.up: succeeded
+exit 0
+
+$ databroker stays running
+running=true restarts=0
+
+$ vxperiments/experiments/exp-017/scenarios.sh
+kv2: localhost/vxperiments/kv2:1 0ee7e4eaaae56861c05
+databroker: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+metadata: KUKSA_DATABROKER_METADATA_FILE=vss_release_6.0.json
+
+== ADAS: speed, ABS and cruise control
+PASS  metadata Vehicle.Speed: ENTRY_TYPE_SENSOR DATA_TYPE_FLOAT km/h None None None
+      {"op": "publish", "path": "Vehicle.Speed", "result": "ok", "t": 1793742779.662245, "value": 88.5}
+PASS  publish Vehicle.Speed = 88.5
+      {"op": "publish", "path": "Vehicle.ADAS.ABS.IsEngaged", "result": "ok", "t": 1793742779.999739, "value": true}
+PASS  publish Vehicle.ADAS.ABS.IsEngaged = true
+PASS  consumer on hpc1 saw: Speed=None IsEngaged=None Speed=88.5 IsEngaged=True
+      {"elapsed_ms": 0.272, "op": "actuate", "path": "Vehicle.ADAS.CruiseControl.SpeedSet", "result": "ok", "t": 1793742780.942639, "value": 100.0}
+PASS  actuate Vehicle.ADAS.CruiseControl.SpeedSet = 100 reached the provider
+      {"elapsed_ms": 0.269, "op": "actuate", "path": "Vehicle.ADAS.CruiseControl.IsActive", "result": "ok", "t": 1793742781.596367, "value": true}
+PASS  actuate Vehicle.ADAS.CruiseControl.IsActive = true reached the provider
+      {"code": "INVALID_ARGUMENT", "details": "Tried to set a value for a non-actuator: Vehicle.Speed", "elapsed_ms": 0.334, "op": "actuate", "path": "Vehicle.Speed", "result": "error", "t": 1793742782.322813}
+PASS  actuate Vehicle.Speed = 50 : INVALID_ARGUMENT
+      {"code": "INVALID_ARGUMENT", "details": "Wrong type provided (id: 1232)", "op": "publish", "result": "error", "t": 1793742782.641685}
+PASS  publish Vehicle.Speed = fast --as string: INVALID_ARGUMENT
+
+== Body: doors, locks and windows
+PASS  metadata Vehicle.Cabin.Door.Row1.DriverSide.Window.Position: ENTRY_TYPE_ACTUATOR DATA_TYPE_UINT8 percent 0 100 None
+      {"elapsed_ms": 0.259, "op": "actuate", "path": "Vehicle.Cabin.Door.Row1.DriverSide.Window.Position", "result": "ok", "t": 1793742783.728052, "value": 50}
+PASS  actuate Vehicle.Cabin.Door.Row1.DriverSide.Window.Position = 50 reached the provider
+      {"elapsed_ms": 0.29, "op": "actuate", "path": "Vehicle.Cabin.Door.Row1.DriverSide.IsLocked", "result": "ok", "t": 1793742784.374035, "value": true}
+PASS  actuate Vehicle.Cabin.Door.Row1.DriverSide.IsLocked = true reached the provider
+      {"code": "INVALID_ARGUMENT", "details": "Out of bounds min/max value provided for Vehicle.Cabin.Door.Row1.DriverSide.Window.Position: 101 | Expected range [min: 0, max: 100]", "elapsed_ms": 0.348, "op": "actuate", "path": "Vehicle.Cabin.Door.Row1.DriverSide.Window.Position", "result": "error", "t": 1793742784.963322}
+PASS  actuate Vehicle.Cabin.Door.Row1.DriverSide.Window.Position = 101 : INVALID_ARGUMENT
+OBS   publish Vehicle.Cabin.Door.Row1.DriverSide.IsOpen = true : ok 
+
+== EV: state of charge and charging
+PASS  metadata Vehicle.Powertrain.TractionBattery.StateOfCharge.Current: ENTRY_TYPE_SENSOR DATA_TYPE_FLOAT percent 0.0 100.0 None
+      {"op": "publish", "path": "Vehicle.Powertrain.TractionBattery.StateOfCharge.Current", "result": "ok", "t": 1793742786.065804, "value": 80.5}
+PASS  publish Vehicle.Powertrain.TractionBattery.StateOfCharge.Current = 80.5
+      {"op": "publish", "path": "Vehicle.Powertrain.TractionBattery.Charging.IsCharging", "result": "ok", "t": 1793742786.408197, "value": true}
+PASS  publish Vehicle.Powertrain.TractionBattery.Charging.IsCharging = true
+      {"code": "INVALID_ARGUMENT", "details": "Value out of min/max bounds (id: 1201)", "op": "publish", "result": "error", "t": 1793742786.739562}
+PASS  publish Vehicle.Powertrain.TractionBattery.StateOfCharge.Current = 150 : INVALID_ARGUMENT
+PASS  hpc1 reads Vehicle.Powertrain.TractionBattery.StateOfCharge.Current = 80.5
+      {"elapsed_ms": 0.284, "op": "actuate", "path": "Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit", "result": "ok", "t": 1793742787.817865, "value": 90}
+PASS  actuate Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit = 90 reached the provider
+      {"code": "INVALID_ARGUMENT", "details": "Out of bounds min/max value provided for Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit: 120 | Expected range [min: 0, max: 100]", "elapsed_ms": 0.34, "op": "actuate", "path": "Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit", "result": "error", "t": 1793742788.423987}
+PASS  actuate Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit = 120 : INVALID_ARGUMENT
+
+== Cabin: HVAC
+PASS  metadata Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution: ENTRY_TYPE_ACTUATOR DATA_TYPE_STRING - None None ['UP', 'MIDDLE', 'DOWN']
+      {"elapsed_ms": 0.286, "op": "actuate", "path": "Vehicle.Cabin.HVAC.Station.Row1.Driver.Temperature", "result": "ok", "t": 1793742789.627149, "value": 21.5}
+PASS  actuate Vehicle.Cabin.HVAC.Station.Row1.Driver.Temperature = 21.5 reached the provider
+      {"elapsed_ms": 0.223, "op": "actuate", "path": "Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution", "result": "ok", "t": 1793742790.27171, "value": "MIDDLE"}
+PASS  actuate Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution = MIDDLE reached the provider
+      {"code": "INVALID_ARGUMENT", "details": "Out of bounds allowed value provided for Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution: SIDEWAYS | Expected values [[\"UP\", \"MIDDLE\", \"DOWN\"]]", "elapsed_ms": 0.344, "op": "actuate", "path": "Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution", "result": "error", "t": 1793742790.850165}
+PASS  actuate Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution = SIDEWAYS : INVALID_ARGUMENT
+
+== where the documentation does not say
+OBS   publish Vehicle.VehicleIdentification.VIN = TESTVIN0000000001 : ok 
+OBS   publish Vehicle.Speed = 1.5 --as double: error INVALID_ARGUMENT
+OBS   publish Vehicle.Powertrain.Transmission.CurrentGear = 3 --as int64: error INVALID_ARGUMENT
+OBS   signals the databroker lists under Vehicle: 1263
+OBS   Vehicle.Powertrain.FuelSystem.AfterRefuelingFuelEconomy: error NOT_FOUND
+OBS   Vehicle.Powertrain.FuelSystem.CumulativeFuelEconomy: error NOT_FOUND
+exit 0
+
+$ vxedge vehicle down --manifest .
+[ 75%] vehicle.down service ota: down
+[ 90%] vehicle.down service ota: stopping ota service
+[ 72%] vehicle.down signal plane: kuksa-databroker on hpc1 (down)
+[ 60%] vehicle.down compute 1/1: hpc1 (down)
+[ 60%] vehicle.down compute hpc1: stopping node 1/1: hpc1 (Container)
+[ 40%] vehicle.down zone 1/5: cabin1 (down)
+[ 40%] vehicle.down zone cabin1: stopping node 1/1: cabin1 (Container)
+[ 44%] vehicle.down zone 2/5: sensor-rr (down)
+[ 44%] vehicle.down zone sensor-rr: stopping node 1/1: sensor-rr (WasmCapsule)
+[ 48%] vehicle.down zone 3/5: zone-fl (down)
+[ 48%] vehicle.down zone zone-fl: stopping node 1/1: zone-fl (QemuMicrovm)
+[ 52%] vehicle.down zone 4/5: zone-fr (down)
+[ 52%] vehicle.down zone zone-fr: stopping node 1/1: zone-fr (CloudHypervisor)
+[ 56%] vehicle.down zone 5/5: zone-rl (down)
+[ 56%] vehicle.down zone zone-rl: stopping node 1/1: zone-rl (Container)
+[ 10%] vehicle.down gateway: removing bridge, slices, endpoints
+[ 30%] vehicle.down gateway: removing endpoints, uplink, bridge
+[100%] vehicle.down vehicle `vx-vehicle-03` down
+vehicle.down: succeeded
+exit 0
+
+$ ./check-leaks.sh
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ vxperiments/experiments/exp-017/vss61.sh
+
+== files
+vss-6.1.json: bef9ad501b38edd60e7b903cb39ba5b8f0864a984595b3e901d6efa3f06bdb70
+vss-6.0-bundled.json: de12e86c96585124140adde847951d0006295a944d6e5fbc338fe0c1babd90d4
+vss-6.0-release.json: b77785180dbe7fc674e4965ab9c1c58dcc97433867cf4abf4e3f78c013550e78
+
+== control: the bundled 6.0 file
+PASS  vxt-vss60 running after 2 s
+      2026-11-03T21:54:11.491939Z  INFO databroker: Populating metadata from file 'vss_release_6.0.json'
+      2026-11-03T21:54:11.498057Z  WARN databroker: Authorization is not enabled.
+      file: 1263 leaves, broker: 1263 signals
+      in the file, not listed: 0
+      listed, not in the file: 0
+      type differs: 0
+PASS  6.0 broker lists the bundled file exactly
+
+== the bundled 6.0 file against the COVESA v6.0 release
+      file: 1267 leaves, broker: 1263 signals
+      in the file, not listed: 4
+        Vehicle.Powertrain.FuelSystem.AfterRefuelingFuelEconomy
+        Vehicle.Powertrain.FuelSystem.CumulativeFuelEconomy
+        Vehicle.Powertrain.FuelSystem.DriveFuelEconomy
+        Vehicle.Powertrain.FuelSystem.InstantantFuelEconomy
+      listed, not in the file: 0
+      type differs: 0
+OBS   bundled 6.0 against the v6.0 release: exit 1 (non-zero means they differ, listed above)
+
+== VSS 6.1, mounted as a separate file
+PASS  vxt-vss61 running after 2 s
+      2026-11-03T21:54:14.043941Z  INFO databroker: Populating metadata from file '/vss/vss-6.1.json'
+      2026-11-03T21:54:14.050663Z  WARN databroker: Authorization is not enabled.
+      file: 1382 leaves, broker: 1382 signals
+      in the file, not listed: 0
+      listed, not in the file: 0
+      type differs: 0
+PASS  6.1 broker lists the 6.1 file exactly
+
+== 6.1: added and removed signals
+      {"op": "publish", "path": "Vehicle.Cabin.AirQuality.CO2", "result": "ok", "t": 1793742856.655843, "value": 650.0}
+PASS  added in 6.1: publish Vehicle.Cabin.AirQuality.CO2
+      {"code": "NOT_FOUND", "details": "Path not found", "op": "get", "result": "error", "t": 1793742856.999075}
+PASS  removed in 6.1: Vehicle.Powertrain.ElectricMotor.Power is NOT_FOUND
+      {"allowed": null, "data_type": "DATA_TYPE_INT16", "deprecation": "", "entry_type": "ENTRY_TYPE_SENSOR", "id": 1121, "max": null, "min": null, "op": "metadata", "path": "Vehicle.Powertrain.ElectricMotor.Front.Power", "result": "ok", "t": 1793742857.316545, "unit": "kW"}
+PASS  its 6.1 instance, ElectricMotor.Front.Power, exists
+
+== 6.1's new enum key
+      {"allowed": null, "data_type": "DATA_TYPE_UINT8", "deprecation": "", "entry_type": "ENTRY_TYPE_SENSOR", "id": 889, "max": null, "min": null, "op": "metadata", "path": "Vehicle.Exterior.PrecipitationType", "result": "ok", "t": 1793742857.654119, "unit": ""}
+OBS   publish Vehicle.Exterior.PrecipitationType = 2 (enum 0..5): ok 
+OBS   publish Vehicle.Exterior.PrecipitationType = 200 (enum 0..5): ok 
+
+== can-provider 0.5.1's newest mapping, vss_6.0, against the 6.1 broker
+            1 2026-11-03 21:54:19,210 ERROR dbcfeeder: Not all datapoints registered, exiting!
+            1 2026-11-03 21:54:19,206 ERROR dbcfeederlib.databrokerclientwrapper: Signal Vehicle.Powertrain.ElectricMotor.Power is not registered
+            1 2026-11-03 21:54:19,205 ERROR dbcfeederlib.databrokerclientwrapper: Signal Vehicle.Powertrain.ElectricMotor.Torque is not registered
+            1 2026-11-03 21:54:19,202 ERROR dbcfeederlib.databrokerclientwrapper: Signal Vehicle.Powertrain.ElectricMotor.Temperature is not registered
+            1 2026-11-03 21:54:19,187 WARNING dbcfeederlib.dbcparser: Signal name VCFRONT_voltageProfile is being used in multiple CAN messages (ID261_12vBattStatus, ID2E1VCFRONT_status).
+            1 2026-11-03 21:54:19,187 WARNING dbcfeederlib.dbcparser: Signal name VCFRONT_voltageFloorReachedCount is being used in multiple CAN messages (ID261_12vBattStatus, ID2E1VCFRONT_status).
+            1 2026-11-03 21:54:19,187 WARNING dbcfeederlib.dbcparser: Signal name VCFRONT_voltageDropCounter is being used in multiple CAN messages (ID261_12vBattStatus, ID2E1VCFRONT_status).
+            1 2026-11-03 21:54:19,187 WARNING dbcfeederlib.dbcparser: Signal name VCFRONT_silentWakeIBSCurrent is being used in multiple CAN messages (ID261_12vBattStatus, ID2E1VCFRONT_status).
+            1 2026-11-03 21:54:19,187 WARNING dbcfeederlib.dbcparser: Signal name VCFRONT_shortedCellFaultCounter is being used in multiple CAN messages (ID261_12vBattStatus, ID2E1VCFRONT_status).
+            1 2026-11-03 21:54:19,187 WARNING dbcfeederlib.dbcparser: Signal name VCFRONT_reverseBatteryFault is being used in multiple CAN messages (ID261_12vBattStatus, ID2E1VCFRONT_status).
+OBS   after the replay, Vehicle.Speed = 
+OBS   after the replay, Vehicle.Powertrain.ElectricMotor.Front.Power = 
+exit 0
+
+$ ./check-leaks.sh (after the test-side brokers)
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+EXP-017-FINISHED
