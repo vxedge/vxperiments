@@ -56,7 +56,7 @@ def main(out):
     print()
     print("differences of the medians, microseconds")
     for op in ("publish", "actuate"):
-        for a, b in (("idle", "baseline"), ("loaded", "idle"), ("loaded", "baseline")):
+        for a, b in (("idle", "baseline"), ("cpu", "idle"), ("loaded", "cpu"), ("loaded", "idle"), ("loaded", "baseline")):
             ka, kb = f"{op}-{a}", f"{op}-{b}"
             if (ka, 50) in med and (kb, 50) in med:
                 diffs = "  ".join(f"p{p} {med[(ka, p)] - med[(kb, p)]:+7.1f}" for p in (50, 90, 99))

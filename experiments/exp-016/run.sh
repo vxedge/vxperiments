@@ -7,6 +7,10 @@
 #   baseline  kuksa-perf in hpc1's own network namespace, no load. Never touches the bridge.
 #   idle      kuksa-perf in cabin1, on the broker's slice, no load
 #   loaded    as idle, with vxtraffic sending from zone-rl to info2 on infotainment
+#   cpu       as idle, with two busy loops in a container with no network: CPU load without traffic,
+#             so loaded minus cpu is the traffic's share and cpu minus idle the CPU's
+# The CPU governor is pinned to performance for the whole run and restored at the end: under
+# powersave, a busy host answered faster than an idle one, which measured CPU wake-up, not the slice.
 # The order rotates every repetition. Each run crosses the slice both ways (kuksa-perf's sender and
 # receiver share one process), so a number here is never a one-way latency.
 #
@@ -44,7 +48,8 @@ start() {
 stop() { [ -n "$D" ] && kill "$D" && wait "$D" 2>/dev/null; D=; }
 h() { echo; echo "\$ $*"; }
 ifstat() { ip -s -j link show "vz-$1" | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['stats64']['$2']['packets'])"; }
-cleanup() { podman rm -f -t 0 vxt-load vxt-perf >/dev/null 2>&1; }
+. "$here/../../scripts/lib/host_pinning.sh"
+cleanup() { podman rm -f -t 0 vxt-load vxt-perf vxt-cpu >/dev/null 2>&1; restore_cpu_governors; }
 trap cleanup EXIT
 
 cd "$here"
@@ -54,6 +59,10 @@ for img in ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672
 done
 exec > "$RUN/transcript.txt" 2>&1
 sudo -n setcap cap_net_admin,cap_sys_admin+ep "$bin/vxedged" || { echo "setcap failed: no sudo timestamp"; exit 1; }
+pin_cpu_governor_performance
+govs=$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -c | tr -s ' ')
+echo "cpu governors during the run:$govs"
+[ "$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort -u)" = performance ] || { echo "governor not pinned"; exit 1; }
 echo "vxedge $(git -C "$bin/../.." rev-parse --short HEAD 2>/dev/null || echo unknown), vxperiments $(git rev-parse --short HEAD)"
 sha256sum vehicle.yaml parts.yaml data/*.json
 echo "kuksa-perf, publish runs: $PERF $(podman image inspect -f '{{.Id}}' "$PERF" | cut -c1-19)"
@@ -103,6 +112,14 @@ load_on() {
     sleep 2
 }
 load_off() { podman rm -f -t 0 vxt-load >/dev/null 2>&1; }
+cpu_on() {
+    podman rm -f -t 0 vxt-cpu >/dev/null 2>&1
+    podman run -d --init --name vxt-cpu --network none --entrypoint sh "$PERF_MAIN" \
+        -c 'yes >/dev/null & yes >/dev/null & wait' >/dev/null
+    sleep 2
+    [ "$(podman inspect -f '{{.State.Running}}' vxt-cpu)" = true ] || echo "CPU LOAD NOT RUNNING"
+}
+cpu_off() { podman rm -f -t 0 vxt-cpu >/dev/null 2>&1; }
 
 # The load reaches info2 and stays on infotainment: delivered frames counted at info2's port, and
 # what reached the adas ports in the same window.
@@ -123,13 +140,14 @@ setup() {
         baseline) perf hpc1 "$image" "$op-baseline-$rep" "${data[@]}" ;;
         idle) perf cabin1 "$image" "$op-idle-$rep" "${data[@]}" ;;
         loaded) load_on; perf cabin1 "$image" "$op-loaded-$rep" "${data[@]}"; load_off ;;
+        cpu) cpu_on; perf cabin1 "$image" "$op-cpu-$rep" "${data[@]}"; cpu_off ;;
     esac
 }
-orders=("baseline idle loaded" "idle loaded baseline" "loaded baseline idle")
+orders=("baseline idle loaded cpu" "idle loaded cpu baseline" "loaded cpu baseline idle" "cpu baseline idle loaded")
 for op in publish actuate; do
     h "$op, three setups, $REPS repetitions"
     for rep in $(seq "$REPS"); do
-        for name in ${orders[$(((rep - 1) % 3))]}; do setup "$name" "$op" "$rep"; done
+        for name in ${orders[$(((rep - 1) % 4))]}; do setup "$name" "$op" "$rep"; done
     done
 done
 

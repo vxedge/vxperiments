@@ -20,8 +20,10 @@ move that one process instead:
 | baseline | `hpc1`'s own network namespace | none |
 | idle | `cabin1`, on `adas` | none |
 | loaded | `cabin1`, on `adas` | vxtraffic, 600 mbit/s from `zone-rl` to `info2` on `infotainment` |
+| cpu | `cabin1`, on `adas` | two busy loops in a container with no network: CPU load, no traffic |
 
-The result is the differences between the three, not one number. A baseline run never touches the
+The result is the differences between the setups, not one number. `cpu` separates the two things
+the loaded setup changes: loaded minus cpu is the traffic's share, cpu minus idle the CPU's. A baseline run never touches the
 bridge. In the other two, every update crosses the slice twice, to the broker and back to the
 subscriber, so a number here is never a one-way latency.
 
@@ -54,18 +56,24 @@ metadata the broker ships, and every path is checked against it. Upstream's `dat
 names two signals VSS 6.0 does not have (`Vehicle.Cabin.Seat.Row1.PassengerSide.Heating` and
 `.Massage`), so it is not used.
 
+The CPU governor is pinned to `performance` for the whole run, and restored after. A first run on
+this host under `powersave` found the loaded setup faster than the idle one (p50 88 µs against
+233 µs): busy CPUs stayed at a high clock and out of sleep states, so it measured CPU wake-up, not
+the slice. That run is not a result.
+
 ## Timing method
 
 kuksa-perf takes a monotonic timestamp (tokio `Instant`) just before its provider sends an update,
 and another when its subscriber receives it, in the same process, and records the difference in an
 HDR histogram. For actuate, the timestamps are at the `BatchActuate` call and at the provider's
 receipt. Clocks never cross a host or namespace boundary. Each run lasts 30 s with the first 5 s
-skipped, five repetitions per setup, in an order that rotates every repetition.
+skipped, five repetitions per setup, in an order that rotates every repetition, with 3 s between
+runs so the broker has released the last run's claims.
 
 ## Limits
 
-- One shared host: the broker, kuksa-perf, the load generator and the bridge share its CPUs, so
-  the loaded setup measures CPU contention as well as traffic on another slice.
+- One shared host: the broker, kuksa-perf, the load generator and the bridge share its CPUs. The
+  `cpu` setup separates CPU load from traffic, but the governor pin does not stop CPU sleep states.
 - Timestamps are in userspace, so scheduling delay on either side is inside every number.
 - The numbers belong to this host and this vehicle. kuksa-perf's README sample, a p50 near 0.2 ms on
   other hardware, is not a result here.
