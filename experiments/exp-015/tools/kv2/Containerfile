@@ -1,0 +1,10 @@
+# kv2: the kuksa.val.v2 test client for exp-015, built locally and used by the tests only.
+# Not a vxparts part. Base and every Python package are pinned: the base by digest, the packages
+# by hash (requirements.txt, from `uv pip compile --generate-hashes requirements.in`).
+#
+#   podman build -t localhost/vxperiments/kv2:1 tools/kv2
+FROM docker.io/library/python:3.12-slim@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30
+COPY requirements.txt /kv2/requirements.txt
+RUN pip install --no-cache-dir --require-hashes --no-deps -r /kv2/requirements.txt
+COPY kv2.py /kv2/kv2.py
+ENTRYPOINT ["python3", "-I", "/kv2/kv2.py"]
