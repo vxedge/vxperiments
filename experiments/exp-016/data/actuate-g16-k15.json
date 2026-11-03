@@ -1,0 +1,820 @@
+{
+  "groups": [
+    {
+      "group_name": "Group 1",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ABS.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.CruiseControl.IsActive"
+        },
+        {
+          "path": "Vehicle.ADAS.CruiseControl.IsAdaptive"
+        },
+        {
+          "path": "Vehicle.ADAS.CruiseControl.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.DMS.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.EBA.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.EBD.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.ESC.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.IsAutoPowerOptimize"
+        },
+        {
+          "path": "Vehicle.ADAS.LaneDepartureDetection.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Front.Center.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Front.Left.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Front.Right.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Rear.Center.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Rear.Left.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 2",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Rear.Right.IsEnabled"
+        },
+        {
+          "path": "Vehicle.ADAS.TCS.IsEnabled"
+        },
+        {
+          "path": "Vehicle.Body.Hood.IsOpen"
+        },
+        {
+          "path": "Vehicle.Body.Horn.IsActive"
+        },
+        {
+          "path": "Vehicle.Body.IsAutoPowerOptimize"
+        },
+        {
+          "path": "Vehicle.Body.Lights.Backup.IsOn"
+        },
+        {
+          "path": "Vehicle.Body.Lights.Beam.High.IsOn"
+        },
+        {
+          "path": "Vehicle.Body.Lights.Beam.Low.IsOn"
+        },
+        {
+          "path": "Vehicle.Body.Lights.DirectionIndicator.Left.IsSignaling"
+        },
+        {
+          "path": "Vehicle.Body.Lights.DirectionIndicator.Right.IsSignaling"
+        },
+        {
+          "path": "Vehicle.Body.Lights.Fog.Front.IsOn"
+        },
+        {
+          "path": "Vehicle.Body.Lights.Fog.Rear.IsOn"
+        },
+        {
+          "path": "Vehicle.Body.Lights.Hazard.IsSignaling"
+        },
+        {
+          "path": "Vehicle.Body.Lights.IsHighBeamSwitchOn"
+        },
+        {
+          "path": "Vehicle.Body.Lights.LicensePlate.IsOn"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 3",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Body.Lights.Parking.IsOn"
+        },
+        {
+          "path": "Vehicle.Body.Lights.Running.IsOn"
+        },
+        {
+          "path": "Vehicle.Body.Mirrors.DriverSide.IsFolded"
+        },
+        {
+          "path": "Vehicle.Body.Mirrors.DriverSide.IsHeatingOn"
+        },
+        {
+          "path": "Vehicle.Body.Mirrors.DriverSide.IsLocked"
+        },
+        {
+          "path": "Vehicle.Body.Mirrors.PassengerSide.IsFolded"
+        },
+        {
+          "path": "Vehicle.Body.Mirrors.PassengerSide.IsHeatingOn"
+        },
+        {
+          "path": "Vehicle.Body.Mirrors.PassengerSide.IsLocked"
+        },
+        {
+          "path": "Vehicle.Body.Trunk.Front.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Body.Trunk.Front.IsLocked"
+        },
+        {
+          "path": "Vehicle.Body.Trunk.Front.IsOpen"
+        },
+        {
+          "path": "Vehicle.Body.Trunk.Rear.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Body.Trunk.Rear.IsLocked"
+        },
+        {
+          "path": "Vehicle.Body.Trunk.Rear.IsOpen"
+        },
+        {
+          "path": "Vehicle.Body.Windshield.Front.IsHeatingOn"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 4",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Body.Windshield.Rear.IsHeatingOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row1.DriverSide.IsLocked"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row1.DriverSide.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row1.DriverSide.Shade.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row1.DriverSide.Window.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row1.PassengerSide.IsLocked"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row1.PassengerSide.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row1.PassengerSide.Shade.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row1.PassengerSide.Window.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row2.DriverSide.IsLocked"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row2.DriverSide.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row2.DriverSide.Shade.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row2.DriverSide.Window.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row2.PassengerSide.IsLocked"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row2.PassengerSide.IsOpen"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 5",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Door.Row2.PassengerSide.Shade.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Door.Row2.PassengerSide.Window.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.HVAC.IsAirConditioningActive"
+        },
+        {
+          "path": "Vehicle.Cabin.HVAC.IsAutoPowerOptimize"
+        },
+        {
+          "path": "Vehicle.Cabin.HVAC.IsFrontDefrosterActive"
+        },
+        {
+          "path": "Vehicle.Cabin.HVAC.IsRearDefrosterActive"
+        },
+        {
+          "path": "Vehicle.Cabin.HVAC.IsRecirculationActive"
+        },
+        {
+          "path": "Vehicle.Cabin.Infotainment.HMI.IsScreenAlwaysOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Infotainment.IsAutoPowerOptimize"
+        },
+        {
+          "path": "Vehicle.Cabin.Infotainment.Navigation.Map.IsAutoScaleModeUsed"
+        },
+        {
+          "path": "Vehicle.Cabin.IsAutoPowerOptimize"
+        },
+        {
+          "path": "Vehicle.Cabin.IsWindowChildLockEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.AmbientLight.Row1.DriverSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.AmbientLight.Row1.PassengerSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.AmbientLight.Row2.DriverSide.IsLightOn"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 6",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Light.AmbientLight.Row2.PassengerSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.InteractiveLightBar.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.IsDomeOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.IsGloveBoxOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.Spotlight.Row1.DriverSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.Spotlight.Row1.PassengerSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.Spotlight.Row2.DriverSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.Spotlight.Row2.PassengerSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.Spotlight.Row3.DriverSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.Spotlight.Row3.PassengerSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.Spotlight.Row4.DriverSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.Light.Spotlight.Row4.PassengerSide.IsLightOn"
+        },
+        {
+          "path": "Vehicle.Cabin.RearShade.IsOpen"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Backrest.IsLessLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Backrest.IsLessSideBolsterSupportSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 7",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Backrest.IsLumbarDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Backrest.IsLumbarUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Backrest.IsMoreLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Backrest.IsMoreSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Backrest.IsReclineBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Backrest.IsReclineForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Headrest.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Headrest.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Headrest.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Headrest.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsCoolerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsDecreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsForwardSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 8",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsIncreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsTiltBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsTiltForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.IsWarmerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Seating.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.DriverSide.Seating.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Backrest.IsLessLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Backrest.IsLessSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Backrest.IsLumbarDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Backrest.IsLumbarUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Backrest.IsMoreLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Backrest.IsMoreSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Backrest.IsReclineBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Backrest.IsReclineForwardSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 9",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Headrest.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Headrest.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Headrest.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Headrest.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsCoolerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsDecreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsIncreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsTiltBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsTiltForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.IsWarmerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Seating.IsBackwardSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 10",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.Middle.Seating.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Backrest.IsLessLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Backrest.IsLessSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Backrest.IsLumbarDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Backrest.IsLumbarUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Backrest.IsMoreLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Backrest.IsMoreSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Backrest.IsReclineBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Backrest.IsReclineForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Headrest.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Headrest.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Headrest.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Headrest.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsCoolerSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 11",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsDecreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsIncreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsTiltBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsTiltForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.IsWarmerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Seating.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row1.PassengerSide.Seating.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Backrest.IsLessLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Backrest.IsLessSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Backrest.IsLumbarDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Backrest.IsLumbarUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Backrest.IsMoreLumbarSupportSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 12",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Backrest.IsMoreSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Backrest.IsReclineBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Backrest.IsReclineForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Headrest.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Headrest.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Headrest.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Headrest.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsCoolerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsDecreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsIncreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsTiltBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsTiltForwardSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 13",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.IsWarmerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Seating.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.DriverSide.Seating.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Backrest.IsLessLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Backrest.IsLessSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Backrest.IsLumbarDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Backrest.IsLumbarUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Backrest.IsMoreLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Backrest.IsMoreSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Backrest.IsReclineBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Backrest.IsReclineForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Headrest.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Headrest.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Headrest.IsForwardSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 14",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Headrest.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsCoolerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsDecreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsIncreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsTiltBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsTiltForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.IsWarmerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Seating.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.Middle.Seating.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Backrest.IsLessLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Backrest.IsLessSideBolsterSupportSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 15",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Backrest.IsLumbarDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Backrest.IsLumbarUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Backrest.IsMoreLumbarSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Backrest.IsMoreSideBolsterSupportSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Backrest.IsReclineBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Backrest.IsReclineForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Headrest.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Headrest.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Headrest.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Headrest.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsCoolerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsDecreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsDownSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsForwardSwitchEngaged"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 16",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsIncreaseMassageLevelSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsTiltBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsTiltForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsUpSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.IsWarmerSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Seating.IsBackwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Seat.Row2.PassengerSide.Seating.IsForwardSwitchEngaged"
+        },
+        {
+          "path": "Vehicle.Cabin.Sunroof.Shade.IsOpen"
+        },
+        {
+          "path": "Vehicle.Chassis.ParkingBrake.IsAutoApplyEnabled"
+        },
+        {
+          "path": "Vehicle.Chassis.ParkingBrake.IsEngaged"
+        },
+        {
+          "path": "Vehicle.IsAutoPowerOptimize"
+        },
+        {
+          "path": "Vehicle.Powertrain.FuelSystem.IsFuelPortFlapOpen"
+        },
+        {
+          "path": "Vehicle.Powertrain.IsAutoPowerOptimize"
+        },
+        {
+          "path": "Vehicle.Powertrain.TractionBattery.Charging.ChargingPort.AnyPosition.IsChargingCableLocked"
+        },
+        {
+          "path": "Vehicle.Powertrain.TractionBattery.Charging.ChargingPort.AnyPosition.IsFlapOpen"
+        }
+      ]
+    }
+  ]
+}

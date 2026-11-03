@@ -1,0 +1,148 @@
+{
+  "groups": [
+    {
+      "group_name": "Group 1",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ABS.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 2",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.CruiseControl.IsActive"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 3",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.CruiseControl.IsAdaptive"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 4",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.CruiseControl.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 5",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.DMS.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 6",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.EBA.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 7",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.EBD.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 8",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ESC.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 9",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.IsAutoPowerOptimize"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 10",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.LaneDepartureDetection.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 11",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Front.Center.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 12",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Front.Left.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 13",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Front.Right.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 14",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Rear.Center.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 15",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Rear.Left.IsEnabled"
+        }
+      ]
+    },
+    {
+      "group_name": "Group 16",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ObstacleDetection.Rear.Right.IsEnabled"
+        }
+      ]
+    }
+  ]
+}
