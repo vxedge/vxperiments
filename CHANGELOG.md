@@ -13,6 +13,7 @@ than a repo tag.
 
 ### Added
 
+- `results/signal-plane-2026-11-03`: the Kuksa signal plane on `vx-vehicle-03`, one VSS signal allowed and denied.
 - `vehicles/vx-vehicle-03`: the Kuksa signal plane on `hpc1`, and `check-signals.sh`, which writes and reads one VSS signal with the upstream client pinned by digest.
 - `results/all-backends-2026-11-02`: `vx-vehicle-03` from a clean state, and a regression run of the phase-3 gate.
 - `vehicles/vx-vehicle-03`: every zone backend in one vehicle, with its build script and checks.

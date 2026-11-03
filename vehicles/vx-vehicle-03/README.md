@@ -36,6 +36,8 @@ or named by `VXEDGE_CAPSULE_BIN`. The run in
 - `vxedged`'s runtime dir must be short: a Unix socket path has a length limit, and a Cloud
   Hypervisor node's API socket lives there. `up` reports the path when it is too long.
 - Only the container nodes can send, so the VM and capsule nodes are probed as targets.
+- The signal plane run is in
+  [`results/signal-plane-2026-11-03`](../../results/signal-plane-2026-11-03).
 - `libvirt` is left out: its boot adds nothing the two other VM backends do not show here.
 - The databroker runs with `--insecure`, so signals are unauthenticated and slice isolation is their
   only protection.
