@@ -27,7 +27,13 @@ stop() { [ -n "$D" ] && kill "$D" && wait "$D" 2>/dev/null; D=; }
 h() { echo; echo "\$ $*"; }
 
 cd "$ws"
-exec > >(tee "$RUN/transcript.txt") 2>&1
+# Pull first, so no case or timed run includes a download.
+for img in ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd \
+    ghcr.io/eclipse-kuksa/kuksa-databroker-cli@sha256:871649f14576871ca048ed5f4ff2c109656d748877d8ddb8609c67091c9f9c33 \
+    ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider@sha256:41f5abffe30be4dd0bf6d82f28ca149d327e2d6de8619b562a12035a30da0c8e; do
+    podman pull -q "$img" >/dev/null || { echo "pull failed: $img"; exit 1; }
+done
+exec > "$RUN/transcript.txt" 2>&1
 sudo -n setcap cap_net_admin,cap_sys_admin+ep "$bin/vxedged" || { echo "setcap failed: no sudo timestamp"; exit 1; }
 echo "vxedge $(git -C "$bin/../.." rev-parse --short HEAD 2>/dev/null || echo unknown), vxperiments $(git rev-parse --short HEAD)"
 sha256sum vehicle.yaml parts.yaml
