@@ -9,7 +9,7 @@ set -uo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/lib.sh"
 
-cleanup() { podman rm -f vxt-sub vxt-can vxt-prov vxt-prov2 vxt-sig >/dev/null 2>&1; }
+cleanup() { podman rm -f -t 0 vxt-sub vxt-can vxt-prov vxt-prov2 vxt-sig >/dev/null 2>&1; }
 trap cleanup EXIT
 
 echo "kv2: $KV2 $(podman image inspect -f '{{.Id}}' "$KV2" | cut -c1-19)"
@@ -53,7 +53,7 @@ podman logs vxt-sub | indent
 # The first response carries the current value, 51.5.
 [ "$seen" = "51.5 10.0 20.0 30.0 40.0 50.0 " ] && pass "subscriber on cabin1 saw: $seen" \
     || fail "subscriber on cabin1 saw: $seen"
-podman rm -f vxt-sub >/dev/null
+podman rm -f -t 0 vxt-sub >/dev/null
 
 h "a signal provider claims a sensor and publishes on its stream"
 kvbg sub hpc1 subscribe Vehicle.Exterior.AirTemperature --count 4 --timeout-s 30
@@ -68,14 +68,14 @@ case $seen in
     *"18.5 19.5 20.5 ") pass "subscriber on hpc1 saw the provider's values: $seen" ;;
     *) fail "subscriber on hpc1 saw: $seen" ;;
 esac
-podman rm -f vxt-sub >/dev/null
+podman rm -f -t 0 vxt-sub >/dev/null
 
 h "the CAN feed: can-provider replays a dump, a subscriber on hpc1 consumes it"
 # can-provider uses kuksa-client 0.6.0: publish over v2 PublishValue, falling back to v1 only if
 # v2 is missing. The steering angle has no other writer in this run.
 kvbg sub hpc1 subscribe Vehicle.Chassis.SteeringWheel.Angle Vehicle.Speed --count 20 --timeout-s 60
 until_log sub subscribe open || fail "subscriber did not open"
-podman rm -f vxt-can >/dev/null 2>&1
+podman rm -f -t 0 vxt-can >/dev/null 2>&1
 podman run -d --name vxt-can --network container:vx-cabin1-infra "$CAN" \
     --address "grpc://$BROKER" --dumpfile candump.log --no-infinite >/dev/null
 podman wait vxt-sub >/dev/null
@@ -90,7 +90,7 @@ print(n)')
 updates=$(podman logs vxt-sub | field update result | grep -c ok)
 [ "$angles" -gt 0 ] && pass "consumer on hpc1 got $updates updates, $angles of them steering angles from the CAN feed" \
     || fail "consumer on hpc1 got no steering angle ($updates updates)"
-podman rm -f vxt-sub vxt-can >/dev/null
+podman rm -f -t 0 vxt-sub vxt-can >/dev/null
 healthy "CAN feed"
 
 h "actuation with a provider that answers"
@@ -106,7 +106,7 @@ h "a second provider for a claimed actuator"
 out=$(kv hpc1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --duration-s 5); echo "$out" | indent
 code=$(echo "$out" | field provide code)
 [ "$code" = ALREADY_EXISTS ] && pass "second claim refused: $code" || fail "second claim: ${code:-none}"
-podman rm -f vxt-prov >/dev/null
+drop_provider prov Vehicle.Body.Trunk.Rear.IsOpen
 
 h "actuation with no provider"
 out=$(kv hpc1 actuate Vehicle.Body.Trunk.Rear.IsOpen true); echo "$out" | indent
@@ -127,7 +127,7 @@ misbehave() {
     code=$(echo "$out" | field actuate code); [ -n "$code" ] || code=$(echo "$out" | field actuate result)
     obs "$mode: actuate returned ${code:-nothing} after $(echo "$out" | field actuate elapsed_ms) ms"
     healthy "$mode"
-    podman rm -f vxt-prov >/dev/null
+    drop_provider prov Vehicle.Body.Trunk.Rear.IsOpen
 }
 misbehave silent
 misbehave slow:3000
@@ -144,11 +144,11 @@ echo "$first" | indent; echo "$second" | indent
 [ "$(echo "$first" | verdict actuate)" = ok ] && pass "exit-after: first actuate ok" || fail "exit-after: first actuate"
 code=$(echo "$second" | field actuate code)
 [ "$code" = UNAVAILABLE ] && pass "exit-after: after the drop: $code" || fail "exit-after: after the drop: ${code:-none}"
-podman rm -f vxt-prov >/dev/null
+drop_provider prov Vehicle.Body.Trunk.Rear.IsOpen
 kvbg prov2 cabin1 provide-actuator Vehicle.Body.Trunk.Rear.IsOpen --mode ok --duration-s 10
 until_log prov2 provide ok && pass "a new provider claims the released actuator" \
     || fail "the actuator stayed claimed after its provider dropped"
-podman rm -f vxt-prov2 >/dev/null
+drop_provider prov2 Vehicle.Body.Trunk.Rear.IsOpen
 healthy "exit-after"
 
 h "the client's own refusal, on the allowed slice"
