@@ -73,7 +73,14 @@ def metadata(stub, path):
     raise LookupError(path)
 
 
-def typed(meta, text):
+FIELDS = {"string": str, "bool": lambda s: {"true": True, "false": False}[s.lower()],
+          "int32": int, "int64": int, "uint32": int, "uint64": int, "float": float, "double": float}
+
+
+def typed(meta, text, as_type=None):
+    """The value as the signal's own type, or as --as names, to send a deliberately wrong one."""
+    if as_type:
+        return types.Value(**{as_type: FIELDS[as_type](text)})
     if meta.data_type not in SCALAR:
         raise ValueError(f"{meta.path}: {types.DataType.Name(meta.data_type)} is not supported")
     field, conv = SCALAR[meta.data_type]
@@ -93,6 +100,13 @@ def cmd_metadata(args, stub):
          allowed=value_out(m.allowed_values), deprecation=m.deprecation)
 
 
+def cmd_list(args, stub):
+    resp = stub.ListMetadata(val.ListMetadataRequest(root=args.root))
+    rows = sorted((m.path, types.EntryType.Name(m.entry_type), types.DataType.Name(m.data_type))
+                  for m in resp.metadata)
+    emit(op="list", result="ok", root=args.root, count=len(rows), signals=rows)
+
+
 def cmd_get(args, stub):
     r = stub.GetValue(val.GetValueRequest(signal_id=types.SignalID(path=args.path)))
     has = r.HasField("data_point") and r.data_point.HasField("value")
@@ -100,14 +114,14 @@ def cmd_get(args, stub):
 
 
 def cmd_publish(args, stub):
-    v = typed(metadata(stub, args.path), args.value)
+    v = typed(metadata(stub, args.path), args.value, args.as_type)
     stub.PublishValue(val.PublishValueRequest(signal_id=types.SignalID(path=args.path),
                                               data_point=types.Datapoint(value=v)))
     emit(op="publish", result="ok", path=args.path, value=value_out(v))
 
 
 def cmd_actuate(args, stub):
-    v = typed(metadata(stub, args.path), args.value)
+    v = typed(metadata(stub, args.path), args.value, args.as_type)
     start = time.monotonic()
     try:
         stub.Actuate(val.ActuateRequest(signal_id=types.SignalID(path=args.path), value=v),
@@ -252,11 +266,13 @@ def main():
     sub.add_parser("info")
     for name in ("metadata", "get"):
         sub.add_parser(name).add_argument("path")
+    sub.add_parser("list").add_argument("root", nargs="?", default="Vehicle")
     for name in ("publish", "actuate"):
         s = sub.add_parser(name)
         s.add_argument("path")
         s.add_argument("value")
         s.add_argument("--timeout-s", type=float, default=10.0)
+        s.add_argument("--as", dest="as_type", choices=sorted(FIELDS))
     s = sub.add_parser("subscribe")
     s.add_argument("paths", nargs="+")
     s.add_argument("--count", type=int, default=0)
