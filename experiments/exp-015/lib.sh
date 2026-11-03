@@ -41,7 +41,7 @@ until_log() {
     return 1
 }
 
-# field <op> <key>: that key of every JSON line whose op matches, one per line.
+# field <op> <key>: that key of every JSON line whose op matches, one per line; empty if unset.
 field() {
     python3 -c '
 import json, sys
@@ -52,7 +52,8 @@ for line in sys.stdin:
     except ValueError:
         continue
     if d.get("op") == op:
-        print(json.dumps(d.get(key)) if not isinstance(d.get(key), str) else d.get(key))' "$1" "$2"
+        v = d.get(key)
+        print("" if v is None else v if isinstance(v, str) else json.dumps(v))' "$1" "$2"
 }
 
 # verdict <op>: ok, refused or unclear, from a call's output. refused needs the client's own
