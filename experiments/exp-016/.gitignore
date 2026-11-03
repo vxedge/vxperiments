@@ -3,3 +3,4 @@ ota-store/
 capsule/
 .ota-root.key
 tools/load/vxtraffic
+.target/

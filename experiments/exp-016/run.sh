@@ -42,7 +42,7 @@ start() {
 stop() { [ -n "$D" ] && kill "$D" && wait "$D" 2>/dev/null; D=; }
 h() { echo; echo "\$ $*"; }
 ifstat() { ip -s -j link show "vz-$1" | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['stats64']['$2']['packets'])"; }
-cleanup() { podman rm -f vxt-load vxt-perf >/dev/null 2>&1; }
+cleanup() { podman rm -f -t 0 vxt-load vxt-perf >/dev/null 2>&1; }
 trap cleanup EXIT
 
 cd "$here"
@@ -71,7 +71,7 @@ podman inspect -f 'running={{.State.Running}} restarts={{.RestartCount}} image={
 perf() {
     local node=$1 image=$2 out=$3
     shift 3
-    podman rm -f vxt-perf >/dev/null 2>&1
+    podman rm -f -t 0 vxt-perf >/dev/null 2>&1
     timeout $((DURATION + 60)) podman run --rm --name vxt-perf --network "container:vx-$node-infra" \
         -v "$here/data:/data:ro" "$image" --api kuksa.val.v2 --host "http://$BROKER_HOST" --port 55555 \
         --duration "$DURATION" --skip-seconds "$SKIP" "$@" >"$RUN/out/$out.txt" 2>&1
@@ -85,12 +85,12 @@ echo "frames from info2 reaching the bridge: $(( $(ifstat info2 rx) - before ))"
 grep -iE 'error|fail|refused|connect' "$RUN/out/denied-info2.txt" | head -3
 
 load_on() {
-    podman rm -f vxt-load >/dev/null 2>&1
+    podman rm -f -t 0 vxt-load >/dev/null 2>&1
     podman run -d --name vxt-load --network container:vx-zone-rl-infra "$LOAD" \
         --target 10.100.0.32:9999 --bandwidth-mbps "$LOAD_MBPS" --duration-s $((DURATION + 30)) >/dev/null
     sleep 2
 }
-load_off() { podman rm -f vxt-load >/dev/null 2>&1; }
+load_off() { podman rm -f -t 0 vxt-load >/dev/null 2>&1; }
 
 # The load reaches info2 and stays on infotainment: delivered frames counted at info2's port, and
 # what reached the adas ports in the same window.

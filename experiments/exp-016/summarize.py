@@ -5,7 +5,7 @@ repetitions with its range, then the differences between setups.
     python3 -I summarize.py <run dir>/out
 
 Reads only what kuksa-perf prints ("50% in under 0.132 ms", "Sent:", "Received:"). A run whose
-output has no latency distribution is listed as failed, never dropped.
+output has no latency distribution, or that received nothing, is listed as failed, never dropped.
 """
 import pathlib
 import re
@@ -31,7 +31,9 @@ def main(out):
             continue
         key, _, rep = f.stem.rpartition("-")
         pct, counts = parse(f)
-        if 50 not in pct:
+        # kuksa-perf 0.3.2 against databroker 0.7.1 exits 0 having sent nothing, and prints a
+        # distribution of 0.000 ms. A run with no traffic is a failed run, never a fast one.
+        if 50 not in pct or not counts.get("Received"):
             failed.append(f.name)
             continue
         runs.setdefault(key, []).append((pct, counts))

@@ -10,8 +10,11 @@ target=x86_64-unknown-linux-musl
 
 VXEDGE_ROOT=$root "$three/build.sh"
 for d in bundle ota-store capsule; do [ -d "$here/$d" ] || cp -a "$three/$d" "$here/$d"; done
-(cd "$root/vxagents" && cargo build --release --target "$target" -p vxtraffic)
-cp "$root/vxagents/target/$target/release/vxtraffic" "$here/tools/load/vxtraffic"
+# A private target dir, so the vxagents checkout's own target/ is not touched.
+cargo_target=${CARGO_TARGET_DIR:-$here/.target}
+cargo build --locked --release --manifest-path "$root/vxagents/Cargo.toml" --target "$target" \
+    -p vxtraffic --target-dir "$cargo_target"
+cp "$cargo_target/$target/release/vxtraffic" "$here/tools/load/vxtraffic"
 podman build -q -t localhost/vxperiments/vxtraffic:1 "$here/tools/load"
 rm -f "$here/tools/load/vxtraffic"
 podman build -t localhost/vxperiments/kuksa-perf:aa6fba0 "$here/tools/perf"
