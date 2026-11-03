@@ -50,7 +50,7 @@ observe() {
 }
 # provider_on <paths...>: an actuator provider on cabin1 until provider_off.
 provider_on() {
-    kvbg prov cabin1 provide-actuator "$@" --mode ok --duration-s 60
+    kvbg prov cabin1 provide-actuator "$@" --mode ok --duration-s 60 --claim-retry-s 10
     until_log prov provide ok || fail "provider for $* did not claim"
 }
 provider_off() { podman rm -f -t 0 vxt-prov >/dev/null; }
@@ -75,8 +75,8 @@ until_log sub subscribe open || fail "subscriber did not open"
 publish_ok Vehicle.Speed 88.5
 publish_ok Vehicle.ADAS.ABS.IsEngaged true
 podman wait vxt-sub >/dev/null
-seen=$(podman logs vxt-sub | python3 -c 'import json,sys
-print(" ".join(f"{d[\"path\"].split(\".\")[-1]}={d[\"value\"]}" for d in map(json.loads, sys.stdin) if d["op"] == "update"))')
+seen=$(podman logs vxt-sub | python3 -c 'import json, sys
+print(" ".join(d["path"].rsplit(".", 1)[-1] + "=" + str(d["value"]) for d in map(json.loads, sys.stdin) if d["op"] == "update"))')
 case $seen in *"Speed=88.5"*"IsEngaged=True"*) pass "consumer on hpc1 saw: $seen" ;; *) fail "consumer on hpc1 saw: $seen" ;; esac
 podman rm -f -t 0 vxt-sub >/dev/null
 provider_on Vehicle.ADAS.CruiseControl.SpeedSet Vehicle.ADAS.CruiseControl.IsActive

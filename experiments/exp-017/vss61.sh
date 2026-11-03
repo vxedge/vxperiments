@@ -18,7 +18,7 @@ VSS60_SHA=de12e86c96585124140adde847951d0006295a944d6e5fbc338fe0c1babd90d4
 VSS60_RELEASE_URL=https://github.com/COVESA/vehicle_signal_specification/releases/download/v6.0/vss.json
 VSS60_RELEASE_SHA=b77785180dbe7fc674e4965ab9c1c58dcc97433867cf4abf4e3f78c013550e78
 
-cleanup() { podman rm -f -t 0 vxt-vss60 vxt-vss61 vxt-can >/dev/null 2>&1; }
+cleanup() { podman rm -f -t 0 vxt-can >/dev/null 2>&1; podman rm -f -t 0 vxt-vss60 vxt-vss61 >/dev/null 2>&1; }
 trap cleanup EXIT
 mkdir -p "$RUN"
 
