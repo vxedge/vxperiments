@@ -1,0 +1,67 @@
+# vxAPI 0.5.0 release gate, 2026-11-04
+
+The live gate for `vxedge` 0.5.0 ([vxedge#54](https://github.com/vxedge/vxedge/issues/54)), run
+through `vxmcp` as an agent would: every step is an MCP tool call, every check reads a typed field
+(an enum name, an `ErrorReason`, an id), and every mutating call went through the human
+confirmation, answered `accept` by the harness. Run on merged `main`: vxedge `4728e21`, vxmcp
+`5ca0c89`, vxperiments `main` of the day.
+
+| Gate | Workspace | Result |
+|---|---|---|
+| The agent sequence, 10 consecutive runs, each with a daemon restart | [`vx-vehicle-03`](../../vehicles/vx-vehicle-03) | 10 of 10, 271 checks passed, [`core10.txt`](core10.txt) |
+| Typed status on all five backends | `vx-vehicle-03` (container, qemu-microvm, cloud-hypervisor, wasm-capsule), [`exp-002-ws`](../../experiments/exp-002-ws) (libvirt) | passed, [`libvirt.txt`](libvirt.txt) |
+| No bridge, tap, namespace, process, container, VM or nft table left after a run | every run | passed after each one |
+| Cancel during `up`, then `down` | `vx-vehicle-03` | passed, [`cancel.txt`](cancel.txt) |
+| Traffic from running to finished, then the archive and its digest | `exp-001-ws` plus a telemetry service | passed, [`traffic.txt`](traffic.txt) |
+
+Each core run checks, in order:
+
+1. `host_capabilities` reports all five backends available, and `workspace_plan` is valid with every
+   host check passed.
+2. `vehicle_up` returns a job. The same call again returns that job; the same vehicle with other
+   stages is refused `ERROR_REASON_BUSY`; another workspace is refused
+   `ERROR_REASON_WRONG_WORKSPACE`.
+3. The job succeeds, its child jobs all succeed, and it carries the run id `run_list` reports.
+4. `vehicle_status`: every node `RESOURCE_STATE_UP`, with a typed backend and payload. Another
+   vehicle's status is refused.
+5. A second agent follows events in 2-second windows, resuming each from `lastId`: no
+   `EVENTS_LOST`, contiguous ids, and `run.up` with its run id.
+6. The daemon is restarted. The run is still listed and every node still up; the old job id answers
+   `ERROR_REASON_JOB_UNKNOWN`, the old event cursor `ERROR_REASON_EVENTS_LOST`, and a stale run id
+   `ERROR_REASON_RUN_MISMATCH`.
+7. `vehicle_down`: cancelling it is refused `ERROR_REASON_NOT_CANCELLABLE`, it succeeds, `run_list`
+   is empty, and `check-leaks.sh` finds nothing.
+
+## Found and fixed during the gate
+
+- A `vehicle up` with other stages, sent while a full `up` ran, was handed the running job instead of
+  `BUSY`. Fixed in [vxedge#70](https://github.com/vxedge/vxedge/pull/70) before the runs above.
+- A daemon stopped in the middle of `up` left a half-built vehicle. A new daemon listed the run, and
+  `vehicle_down` converged it with nothing left behind: the behaviour the gate asks for.
+
+## What this does not show
+
+- `exp-001-ws` traffic runs with the gateway stage only, as its campaign does: a full `up` moves the
+  source's veth peer into the node's namespace (`experiments/exp-001-ws/scripts/run.sh`).
+- No workspace declares a telemetry service, so the traffic run used a scratch copy of `exp-001-ws`
+  with [`harness/telemetry-service.yaml`](harness/telemetry-service.yaml) appended to `main.yaml`.
+  The exp-001 campaign workspace is unchanged.
+- The archive's `image_digests` marks the two `local/...:host-process` parts unresolved, because
+  they are host processes, not images.
+- Every part of `vx-vehicle-03` is local, so payload digests are empty by contract; published-part
+  digests are not exercised here.
+- Guests are probes, and nothing was timed.
+
+## Reproduce
+
+[`harness/`](harness) holds the driver. `live.py` sends privileged steps (`setcap`, starting
+`vxedged`, the leak check) to a tmux pane named `vxpriv` where `sudo` is cached, and talks to
+`vxmcp` over stdio.
+
+```bash
+export VX_BIN=/path/to/bin VXPERIMENTS=/path/to/vxperiments   # the seven binaries, built from the commits above
+python3 -I harness/live.py core 10
+python3 -I harness/live.py cancel
+python3 -I harness/live.py libvirt
+TRIAL=/path/to/exp-001-ws-copy python3 -I harness/live.py traffic
+```

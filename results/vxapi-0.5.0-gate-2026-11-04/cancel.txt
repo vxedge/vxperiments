@@ -1,0 +1,13 @@
+00:44:30 #### cancel x1
+00:44:30   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+00:44:30   PASS host clean before start
+00:44:31 == cancel during up
+00:44:31    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+00:44:37    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-f7bfb6-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
+00:44:37   PASS job_cancel accepted (JOB_STATE_RUNNING)
+00:44:39   PASS cancelled up ends JOB_STATE_CANCELLED
+00:44:39    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+00:45:13   PASS down after cancel JOB_STATE_SUCCEEDED
+00:45:13   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+00:45:13   PASS host clean after cancel and down
+00:45:14 #### cancel: 0 failure(s)

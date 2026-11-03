@@ -1,0 +1,13 @@
+00:45:14 #### libvirt x1
+00:45:14   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+00:45:14   PASS host clean before start
+00:45:15 == libvirt typed status on exp-002-ws
+00:45:15    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `$VXPERIMENTS/experiments/exp-002-ws` (every stage): provisions this host's gatew
+00:45:17   PASS exp-002 up JOB_STATE_SUCCEEDED 
+00:45:17   zone nodes: [('NODE_BACKEND_CONTAINER', 'RESOURCE_STATE_UP'), ('NODE_BACKEND_LIBVIRT', 'RESOURCE_STATE_UP'), ('NODE_BACKEND_QEMU_MICROVM', 'RESOURCE_STATE_UP')]
+00:45:17   PASS a libvirt node reported UP with a typed backend
+00:45:17    ? experiment_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the experiment at `$VXPERIMENTS/experiments/exp-002-ws` (every stage): stops the services it decla
+00:45:18   PASS exp-002 down JOB_STATE_SUCCEEDED
+00:45:18   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+00:45:18   PASS host clean after exp-002
+00:45:19 #### libvirt: 0 failure(s)
