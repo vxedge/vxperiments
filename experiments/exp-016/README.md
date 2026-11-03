@@ -22,10 +22,10 @@ move that one process instead:
 | loaded | `cabin1`, on `adas` | vxtraffic, 600 mbit/s from `zone-rl` to `info2` on `infotainment` |
 | cpu | `cabin1`, on `adas` | two busy loops in a container with no network: CPU load, no traffic |
 
-The result is the differences between the setups, not one number. `cpu` separates the two things
-the loaded setup changes: loaded minus cpu is the traffic's share, cpu minus idle the CPU's. A baseline run never touches the
-bridge. In the other two, every update crosses the slice twice, to the broker and back to the
-subscriber, so a number here is never a one-way latency.
+The result is the differences between the setups, not one number. `cpu` separates the two things the
+loaded setup changes: loaded minus cpu is the traffic's share, cpu minus idle the CPU's. A baseline
+run never touches the bridge. In the other two, every update crosses the slice twice, to the broker
+and back to the subscriber, so a number here is never a one-way latency.
 
 [`vehicle.yaml`](vehicle.yaml) is `vx-vehicle-03` plus one container device, `info2`, so the load
 has two ends on a slice the broker is not on. `diff ../../vehicles/vx-vehicle-03/vehicle.yaml
