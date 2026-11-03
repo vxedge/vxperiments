@@ -10,7 +10,7 @@ set -uo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../exp-015/lib.sh"
 
-cleanup() { podman rm -f vxt-sub vxt-prov >/dev/null 2>&1; }
+cleanup() { podman rm -f -t 0 vxt-sub vxt-prov >/dev/null 2>&1; }
 trap cleanup EXIT
 
 echo "kv2: $KV2 $(podman image inspect -f '{{.Id}}' "$KV2" | cut -c1-19)"
@@ -53,7 +53,7 @@ provider_on() {
     kvbg prov cabin1 provide-actuator "$@" --mode ok --duration-s 60
     until_log prov provide ok || fail "provider for $* did not claim"
 }
-provider_off() { podman rm -f vxt-prov >/dev/null; }
+provider_off() { podman rm -f -t 0 vxt-prov >/dev/null; }
 # The databroker may name the signal by id in its request, so count requests, not paths.
 actuated() {
     local out before
@@ -78,7 +78,7 @@ podman wait vxt-sub >/dev/null
 seen=$(podman logs vxt-sub | python3 -c 'import json,sys
 print(" ".join(f"{d[\"path\"].split(\".\")[-1]}={d[\"value\"]}" for d in map(json.loads, sys.stdin) if d["op"] == "update"))')
 case $seen in *"Speed=88.5"*"IsEngaged=True"*) pass "consumer on hpc1 saw: $seen" ;; *) fail "consumer on hpc1 saw: $seen" ;; esac
-podman rm -f vxt-sub >/dev/null
+podman rm -f -t 0 vxt-sub >/dev/null
 provider_on Vehicle.ADAS.CruiseControl.SpeedSet Vehicle.ADAS.CruiseControl.IsActive
 actuated Vehicle.ADAS.CruiseControl.SpeedSet 100
 actuated Vehicle.ADAS.CruiseControl.IsActive true

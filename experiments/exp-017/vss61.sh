@@ -18,7 +18,7 @@ VSS60_SHA=de12e86c96585124140adde847951d0006295a944d6e5fbc338fe0c1babd90d4
 VSS60_RELEASE_URL=https://github.com/COVESA/vehicle_signal_specification/releases/download/v6.0/vss.json
 VSS60_RELEASE_SHA=b77785180dbe7fc674e4965ab9c1c58dcc97433867cf4abf4e3f78c013550e78
 
-cleanup() { podman rm -f vxt-vss60 vxt-vss61 vxt-can >/dev/null 2>&1; }
+cleanup() { podman rm -f -t 0 vxt-vss60 vxt-vss61 vxt-can >/dev/null 2>&1; }
 trap cleanup EXIT
 mkdir -p "$RUN"
 
@@ -35,12 +35,12 @@ fetch "$VSS60_RELEASE_URL" vss-6.0-release.json "$VSS60_RELEASE_SHA"
 kvb() {
     local b=$1
     shift
-    timeout 60 podman run --rm --network "container:$b" "$KV2" --server 127.0.0.1:55555 "$@" 2>&1
+    timeout 60 podman run --rm --init --network "container:$b" "$KV2" --server 127.0.0.1:55555 "$@" 2>&1
 }
 broker() {
     local name=$1
     shift
-    podman rm -f "$name" >/dev/null 2>&1
+    podman rm -f -t 0 "$name" >/dev/null 2>&1
     podman run -d --name "$name" "$@" >/dev/null
     sleep 2
     if [ "$(podman inspect -f '{{.State.Running}}' "$name")" = true ]; then pass "$name running after 2 s"
