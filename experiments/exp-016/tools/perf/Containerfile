@@ -1,0 +1,18 @@
+# kuksa-perf built test-side from upstream commit aa6fba0 (main, 2025-07-28), for every exp-016
+# measured run: the 0.3.2 release's v2 provider never claims its signals, so databroker 0.7.1
+# aborts it, and `--operation actuate` is not in any release. Cargo.lock is upstream's and the
+# build is --locked. The locked tree builds protoc from source (protobuf-src), so the toolchain
+# needs g++ and cmake from Debian bookworm.
+#
+#   podman build -t localhost/vxperiments/kuksa-perf:aa6fba0 tools/perf
+FROM docker.io/library/rust:1.88-slim-bookworm@sha256:38bc5a86d998772d4aec2348656ed21438d20fcdce2795b56ca434cf21430d89 AS build
+RUN apt-get update && apt-get install -y --no-install-recommends git g++ cmake make ca-certificates \
+    && g++ --version | head -1 && cmake --version | head -1
+RUN git clone https://github.com/eclipse-kuksa/kuksa-perf /src \
+    && git -C /src checkout --detach aa6fba0ce4035ea0db348d2e999a03ed43f87177
+RUN cd /src && cargo build --locked --release && ./target/release/databroker-perf --version
+
+FROM docker.io/library/debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3
+COPY --from=build /src/target/release/databroker-perf /app/databroker-perf
+COPY --from=build /src/LICENSE /src/NOTICE.md /app/
+ENTRYPOINT ["/app/databroker-perf"]

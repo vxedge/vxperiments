@@ -1,0 +1,13 @@
+{
+  "groups": [
+    {
+      "group_name": "Group 1",
+      "cycle_time_ms": 100,
+      "signals": [
+        {
+          "path": "Vehicle.ADAS.ABS.IsEnabled"
+        }
+      ]
+    }
+  ]
+}
