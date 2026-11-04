@@ -1,0 +1,73 @@
+kind: vehicle
+id: vx-reference-sedan-01
+class: road
+subtype: car
+
+# Six-zone reference vehicle (PROVISIONING.md section 4): four corner zones with an ECU plus a
+# sensor or actuator where a real car has them, and central compute. Every VM device boots the
+# probe guest bundle: this proves the topology provisions, isolates and tears down, not
+# application behaviour. The roles are structural claims; the RTOS images they imply replace the
+# probe one zone at a time (see README). One /24 on one slice so every device can reach the others.
+zones:
+  front-left: {}
+  front-right: {}
+  rear-left: {}
+  rear-right: {}
+  central-hpc: {}
+
+devices:
+  fl-safety-ecu: { role: ecu, zone: front-left, backend: qemu-microvm }
+  fl-camera-sensor: { role: sensor, zone: front-left, backend: qemu-microvm }
+  fr-body-ecu: { role: ecu, zone: front-right, backend: qemu-microvm }
+  fr-steer-actuator: { role: actuator, zone: front-right, backend: qemu-microvm }
+  rl-radar-sensor: { role: sensor, zone: rear-left, backend: qemu-microvm }
+  rr-brake-actuator: { role: actuator, zone: rear-right, backend: qemu-microvm }
+  hpc-ad-01: { role: hpc, zone: central-hpc, backend: container }
+
+functions:
+  fn-fl-safety-ecu: { deployed_on: fl-safety-ecu }
+  fn-fl-camera-sensor: { deployed_on: fl-camera-sensor }
+  fn-fr-body-ecu: { deployed_on: fr-body-ecu }
+  fn-fr-steer-actuator: { deployed_on: fr-steer-actuator }
+  fn-rl-radar-sensor: { deployed_on: rl-radar-sensor }
+  fn-rr-brake-actuator: { deployed_on: rr-brake-actuator }
+  fn-hpc-ad-01: { deployed_on: hpc-ad-01 }
+
+links:
+  - id: link-fl-safety-ecu
+    endpoints: [{ node: fl-safety-ecu, port: eth0, ip: 10.120.0.11/24 }]
+    slice: adas
+  - id: link-fl-camera-sensor
+    endpoints: [{ node: fl-camera-sensor, port: eth0, ip: 10.120.0.12/24 }]
+    slice: adas
+  - id: link-fr-body-ecu
+    endpoints: [{ node: fr-body-ecu, port: eth0, ip: 10.120.0.21/24 }]
+    slice: adas
+  - id: link-fr-steer-actuator
+    endpoints: [{ node: fr-steer-actuator, port: eth0, ip: 10.120.0.22/24 }]
+    slice: adas
+  - id: link-rl-radar-sensor
+    endpoints: [{ node: rl-radar-sensor, port: eth0, ip: 10.120.0.31/24 }]
+    slice: adas
+  - id: link-rr-brake-actuator
+    endpoints: [{ node: rr-brake-actuator, port: eth0, ip: 10.120.0.41/24 }]
+    slice: adas
+  - id: link-hpc-ad-01
+    endpoints: [{ node: hpc-ad-01, port: eth0, ip: 10.120.0.50/24 }]
+    slice: adas
+
+services:
+  ota:
+    id: ota-01
+    type: ota
+    image: { url: localhost/vxedge/ota:1, kind: container }
+    on: hpc-ad-01
+    config: { artifacts: ./ota-store, listen: "0.0.0.0:9900" }
+
+signal_plane:
+  kuksa:
+    image:
+      url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+      kind: container
+    on: hpc-ad-01
+    config: { listen: "0.0.0.0:55555" }
