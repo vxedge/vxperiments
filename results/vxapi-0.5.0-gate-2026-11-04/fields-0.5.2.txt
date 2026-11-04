@@ -1,0 +1,42 @@
+11:41:26 #### fields
+11:41:26   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+11:41:26   PASS host clean before start
+11:41:29   PASS host_capabilities carries gpu ({'computeCapability': 6.099999904632568, 'vramMib': '2048'})
+11:41:29   PASS container backend available where Podman answers ({'available': True, 'backend': 'NODE_BACKEND_CONTAINER', 'detail': ''})
+11:41:31   PASS Plan's backend checks come from the same probe {'host requirements': True, 'active workspace': True, 'other vehicles': True, 'placed services': True, 'local images': True, 'guest bundles': True, 'capsule modules': True, 'socket paths': True, 'backend container': True, 'backend qemu_microvm': True, 'backend cloud_hypervisor': True, 'backend wasm_capsule': True}
+11:41:32    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+11:41:52   PASS vehicle_up JOB_STATE_SUCCEEDED
+11:42:01   PASS events kinds=[zone] is a family filter: ['zone.up']
+11:42:01   PASS job_list pages: job-49ccb6-000008 then job-49ccb6-000007
+11:42:01   PASS job_list filters by state and kind (1 jobs)
+11:42:03   PASS NodeSpec port, peer and vlan set on every node (missing: [])
+11:42:03   PASS observedUnixMs set on every node
+11:42:03   sinceUnixMs: [0, 0, 0, 0, 0, 0] (0 means the transition time is unknown)
+11:42:04   PASS svc_status with a workspace reports the placed service (RESOURCE_STATE_UP: ota service on `hpc1`: container Up)
+11:42:05   PASS run_list UP in 1.6s
+11:42:05    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+11:43:00   PASS vehicle_down
+11:43:01   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+11:43:01   PASS host clean after vx-vehicle-03
+11:43:01    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `$TRIAL`
+11:43:03   PASS exp-001 full up
+11:43:03    ? traffic_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start every traffic profile that `$HARNESS/exp-001-
+11:43:03   PASS traffic_up after a full up refused before a job (ERROR_REASON_ENDPOINT_NOT_ON_HOST)
+11:43:03    ? experiment_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the experiment at `$TRIAL
+11:43:03   PASS exp-001 down
+11:43:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `$TRIAL`
+11:43:04   PASS exp-001 up --stage gateway
+11:43:04    ? svc_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start the `telemetry` service that `$HARNESS/exp-00
+11:43:06    ? traffic_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start every traffic profile that `$HARNESS/exp-001-
+11:43:06   PASS traffic_up on the gateway stage
+11:43:11    ? telemetry_collect asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Collect the telemetry `$TRIAL` inge
+11:43:11   PASS Collect honours out_path ($TRIAL/results/fields-check.zip)
+11:43:11   image_digests: {'local/vxprobe:host-process': 'host-process: a local/ part runs on the host, not from an image', 'local/vxtraffic:host-process': 'host-process: a local/ part runs on the host, not from an image'}
+11:43:11   PASS local/ parts recorded as host processes
+11:43:11    ? traffic_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Stop every traffic profile that `$HARNESS/exp-001-t
+11:43:11    ? svc_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Stop the `telemetry` service on this host: where the active run places it on a node, or else on the host, whichever experiment start
+11:43:11    ? experiment_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the experiment at `$TRIAL
+11:43:11   PASS exp-001 down --stage gateway
+11:43:12   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+11:43:12   PASS host clean after exp-001
+11:43:12 #### fields: 0 failure(s)
