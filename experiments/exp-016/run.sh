@@ -64,7 +64,15 @@ signal.pause()' "$LATENCY_US" &
     kill -0 "$HOLD" 2>/dev/null || { echo "cpu latency hold failed"; HOLD=; return 1; }
 }
 release_cpu_latency() { [ -n "$HOLD" ] && kill "$HOLD" 2>/dev/null && wait "$HOLD" 2>/dev/null; HOLD=; }
-cleanup() { podman rm -f -t 0 vxt-load vxt-perf vxt-cpu >/dev/null 2>&1; release_cpu_latency; restore_cpu_governors; }
+# Keeps this terminal's sudo timestamp fresh, so the restore at the end never waits on a password.
+KEEP=
+cleanup() {
+    podman rm -f -t 0 vxt-load vxt-perf vxt-cpu >/dev/null 2>&1
+    release_cpu_latency
+    restore_cpu_governors
+    echo "cpu governors after the run:$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -c | tr -s ' ')"
+    [ -n "$KEEP" ] && kill "$KEEP" 2>/dev/null
+}
 trap cleanup EXIT
 
 cd "$here"
@@ -74,6 +82,8 @@ for img in ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672
 done
 exec > "$RUN/transcript.txt" 2>&1
 sudo -n setcap cap_net_admin,cap_sys_admin+ep "$bin/vxedged" || { echo "setcap failed: no sudo timestamp"; exit 1; }
+( while sleep 60; do sudo -n -v; done ) >/dev/null 2>&1 &
+KEEP=$!
 pin_cpu_governor_performance
 govs=$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -c | tr -s ' ')
 echo "cpu governors during the run:$govs"

@@ -1,0 +1,8 @@
+Error: Failed to connect to server 10.100.0.50:55555
+
+Caused by:
+    0: transport error
+    1: error trying to connect: tcp connect error: No route to host (os error 113)
+    2: tcp connect error: No route to host (os error 113)
+    3: No route to host (os error 113)
+deep idle: 0 ms across all CPUs
