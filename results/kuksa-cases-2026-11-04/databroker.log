@@ -1,0 +1,22 @@
+[2m2026-11-04T00:37:06.689517Z[0m [32m INFO[0m [2mdatabroker[0m[2m:[0m Init logging from RUST_LOG (environment variable not found)
+[2m2026-11-04T00:37:06.689528Z[0m [32m INFO[0m [2mdatabroker[0m[2m:[0m Starting Kuksa Databroker 0.7.1
+[2m2026-11-04T00:37:06.689531Z[0m [32m INFO[0m [2mdatabroker[0m[2m:[0m Using 32 threads with 32 cores available on the system
+[2m2026-11-04T00:37:06.690175Z[0m [32m INFO[0m [2mdatabroker[0m[2m:[0m Populating metadata from file 'vss_release_6.0.json'
+[2m2026-11-04T00:37:06.696452Z[0m [33m WARN[0m [2mdatabroker[0m[2m:[0m Authorization is not enabled.
+[2m2026-11-04T00:37:06.696489Z[0m [32m INFO[0m [2mdatabroker::grpc::server[0m[2m:[0m Listening on 0.0.0.0:55555
+[2m2026-11-04T00:37:06.696493Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Starting housekeeping task
+[2m2026-11-04T00:37:06.696504Z[0m [32m INFO[0m [2mdatabroker::grpc::server[0m[2m:[0m TLS is not enabled
+[2m2026-11-04T00:37:06.696506Z[0m [32m INFO[0m [2mdatabroker::grpc::server[0m[2m:[0m Authorization is not enabled.
+[2m2026-11-04T00:37:56.697280Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Subscriber gone: removing subscription
+[2m2026-11-04T00:37:57.697248Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Subscriber gone: removing subscription
+[2m2026-11-04T00:37:58.697747Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Singal Provider gone: removing provided
+[2m2026-11-04T00:38:00.697461Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Singal Provider gone: removing provided
+[2m2026-11-04T00:38:03.697207Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Subscriber gone: removing subscription
+[2m2026-11-04T00:38:05.697891Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Actuation Provider gone: removing provided actuation
+[2m2026-11-04T00:38:07.697279Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Actuation Provider gone: removing provided actuation
+[2m2026-11-04T00:38:09.696913Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Actuation Provider gone: removing provided actuation
+[2m2026-11-04T00:38:11.697416Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Actuation Provider gone: removing provided actuation
+[2m2026-11-04T00:38:12.697461Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Actuation Provider gone: removing provided actuation
+[2m2026-11-04T00:38:14.697206Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Actuation Provider gone: removing provided actuation
+[2m2026-11-04T00:38:15.697765Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Actuation Provider gone: removing provided actuation
+[2m2026-11-04T00:38:16.697164Z[0m [32m INFO[0m [2mdatabroker::broker[0m[2m:[0m Actuation Provider gone: removing provided actuation

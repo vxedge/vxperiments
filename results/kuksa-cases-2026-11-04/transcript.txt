@@ -1,0 +1,449 @@
+vxedge 8ad34b1, vxperiments a68aa8c
+8da37090dc5e696ae753ba900ceb5a319205ffeaa4126377d0138707f28576a7  vehicle.yaml
+a2ed763b2e0e1c1cdf44399e36ab5c38ed4bae2f3d6ad23342ad0d829d22a461  parts.yaml
+localhost/vxperiments/kuksa-perf:aa6fba0 sha256:c659b84f669c148a548b53360f8b6029dea3003abb93a7a5fcbe7f24ab9fffff
+localhost/vxperiments/kv2:1 sha256:a339c160a7c279058645de1b1bf92168895edc689b796ac896622b1a7385b94b
+localhost/vxperiments/vxtraffic:1 sha256:be3e69593100698c36d43602c8e3638785b0a074313ddaa6d0cf31b65d56f2a0
+localhost/vxedge/probe:1 sha256:df3ada5312118ce1a4b4d3fb0fe477f05c596d376c2da78124f885f4718c0e79
+localhost/vxedge/ota:1 sha256:8aa1fbae80cc36a09e21bf713fdfc692c3e11a77f0d515480387a861a5a684c6
+
+$ databroker flags
+databroker: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+client: ghcr.io/eclipse-kuksa/kuksa-databroker-cli@sha256:871649f14576871ca048ed5f4ff2c109656d748877d8ddb8609c67091c9f9c33
+
+args: --insecure --address 127.0.0.1 --port 55556
+  INFO databroker: Starting Kuksa Databroker 0.7.1
+  INFO databroker::grpc::server: Listening on 127.0.0.1:55556
+  client -> 127.0.0.1:55556: [get]  OK   Vehicle.Speed: NotAvailable 
+  client -> 127.0.0.1:55555: [get]  Error  Failed to connect to http://127.0.0.1:55555/: transport error 
+
+args: --address 127.0.0.1 --port 55556
+  INFO databroker: Starting Kuksa Databroker 0.7.1
+  WARN databroker: TLS is not enabled. Default behavior of accepting insecure connections when TLS is 
+  INFO databroker::grpc::server: Listening on 127.0.0.1:55556
+  client -> 127.0.0.1:55556: [get]  OK   Vehicle.Speed: NotAvailable 
+
+$ ./check-leaks.sh (clean state)
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ vxedge vehicle up --manifest .
+[ 10%] vehicle.up gateway: bridge, slices, endpoints
+[ 30%] vehicle.up gateway: provisioning bridge + uplink
+[ 30%] vehicle.up gateway: applying slice VLANs + HTB queue tree
+[ 30%] vehicle.up gateway: attaching zone endpoints
+[ 30%] vehicle.up gateway: applying tunnels
+[ 30%] vehicle.up gateway: verifying observed state
+[ 40%] vehicle.up zone 1/5: cabin1 (up)
+[ 40%] vehicle.up zone cabin1: starting node 1/1: cabin1 (Container)
+[ 44%] vehicle.up zone 2/5: sensor-rr (up)
+[ 44%] vehicle.up zone sensor-rr: starting node 1/1: sensor-rr (WasmCapsule)
+[ 48%] vehicle.up zone 3/5: zone-fl (up)
+[ 48%] vehicle.up zone zone-fl: starting node 1/1: zone-fl (QemuMicrovm)
+[ 52%] vehicle.up zone 4/5: zone-fr (up)
+[ 52%] vehicle.up zone zone-fr: starting node 1/1: zone-fr (CloudHypervisor)
+[ 56%] vehicle.up zone 5/5: zone-rl (up)
+[ 56%] vehicle.up zone zone-rl: starting node 1/1: zone-rl (Container)
+[ 60%] vehicle.up compute 1/1: hpc1 (up)
+[ 60%] vehicle.up compute hpc1: starting node 1/1: hpc1 (Container)
+[ 72%] vehicle.up signal plane: kuksa-databroker on hpc1 (up)
+[ 75%] vehicle.up service ota: up
+[ 90%] vehicle.up service ota: starting ota service
+[100%] vehicle.up vehicle `vx-vehicle-03` up — gateway, 5 zone(s), 1 compute(s), signal plane up on `hpc1`, 1 service(s)
+vehicle.up: succeeded
+exit 0
+
+$ vxedge vehicle status --manifest .
+vehicle vx-vehicle-03: up (9 resource(s))
+  gateway      vxgateway        up               up: 2 vlan slice(s), 0 s-nssai slice(s), 6/6 endpoint(s)
+  zone         cabin1           up               zone=cabin backend=Container port=vz-cabin1 peer=vzp-cabin1 vlan=100
+  compute      hpc1             up               zone=central backend=Container port=vz-hpc1 peer=vzp-hpc1 vlan=100
+  zone         sensor-rr        up               zone=rear-right backend=WasmCapsule port=vz-sensor-rr peer=vzp-sensor-rr vlan=100
+  zone         zone-fl          up               zone=front-left backend=QemuMicrovm port=vz-zone-fl peer=vz-zone-fl vlan=100
+  zone         zone-fr          up               zone=front-right backend=CloudHypervisor port=vz-zone-fr peer=vz-zone-fr vlan=100
+  zone         zone-rl          up               zone=rear-left backend=Container port=vz-zone-rl peer=vzp-zone-rl vlan=101
+  service      svc-ota          up               ota service on `hpc1`: container Up
+  signal_plane kuksa-databroker up               signal plane on `hpc1`: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+  slice        adas             up               vlan 100: class=true trunk_vlan=true
+  slice        infotainment     up               vlan 101: class=true trunk_vlan=true
+  filter       vz-cabin1        up               present=true
+  filter       vz-hpc1          up               present=true
+  filter       vz-sensor-rr     up               present=true
+  filter       vz-zone-fl       up               present=true
+  filter       vz-zone-fr       up               present=true
+  filter       vz-zone-rl       up               present=true
+exit 0
+
+$ databroker stays running
+running=true restarts=0
+
+$ ./check-flows.sh
+PASS  allowed hpc1 -> qemu-microvm 10.100.0.11:9800 (20/20 replies)
+PASS  allowed hpc1 -> cloud-hypervisor 10.100.0.12:9800 (20/20 replies)
+PASS  allowed hpc1 -> wasm-capsule 10.100.0.14:9800 (20/20 replies)
+PASS  allowed hpc1 -> container 10.100.0.13:9800 (20/20 replies)
+PASS  allowed cabin1 -> compute 10.100.0.50:9800 (20/20 replies)
+PASS  allowed cabin1 -> ota root.json
+PASS  denied zone-rl -> qemu-microvm 10.100.0.11:9800 (0 replies, 2 frames reached the bridge)
+PASS  denied zone-rl -> cloud-hypervisor 10.100.0.12:9800 (0 replies, 3 frames reached the bridge)
+PASS  denied zone-rl -> wasm-capsule 10.100.0.14:9800 (0 replies, 3 frames reached the bridge)
+PASS  denied zone-rl -> container 10.100.0.13:9800 (0 replies, 3 frames reached the bridge)
+PASS  denied zone-rl -> compute 10.100.0.50:9800 (0 replies, 3 frames reached the bridge)
+PASS  denied zone-rl -> ota root.json
+bridge VLAN membership:
+  vz-cabin1 [100]
+  vz-hpc1 [100]
+  vz-sensor-rr [100]
+  vz-zone-fl [100]
+  vz-zone-fr [100]
+  vz-zone-rl [101]
+exit 0
+
+$ ./check-signals.sh (kuksa.val.v1 CLI)
+client: ghcr.io/eclipse-kuksa/kuksa-databroker-cli@sha256:871649f14576871ca048ed5f4ff2c109656d748877d8ddb8609c67091c9f9c33
+databroker args: [--insecure --address 0.0.0.0 --port 55555]
+databroker image: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+      Using kuksa.val.v1
+      [publish]  OK  
+PASS  allowed cabin1: publish Vehicle.Speed 42.5
+      Using kuksa.val.v1
+      [get]  OK  
+      Vehicle.Speed: 42.50 km/h
+PASS  allowed cabin1: get Vehicle.Speed
+      Using kuksa.val.v1
+      [get metadata]  Error  Failed to connect to http://10.100.0.50:55555/: transport error
+PASS  denied zone-rl: publish Vehicle.Speed 99 (client refused, 3 frames reached the bridge)
+      Using kuksa.val.v1
+      [get]  Error  Failed to connect to http://10.100.0.50:55555/: transport error
+PASS  denied zone-rl: get Vehicle.Speed (client refused, 3 frames reached the bridge)
+      Using kuksa.val.v1
+      [get]  OK  
+      Vehicle.Speed: 42.50 km/h
+PASS  allowed cabin1: get Vehicle.Speed
+bridge VLAN membership:
+  vz-cabin1 [100]
+  vz-hpc1 [100]
+  vz-zone-rl [101]
+exit 0
+
+$ vxperiments/experiments/exp-015/cases-v2.sh
+kv2: localhost/vxperiments/kv2:1 0ee7e4eaaae56861c05
+can-provider: ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider@sha256:41f5abffe30be4dd0bf6d82f28ca149d327e2d6de8619b562a12035a30da0c8e
+databroker: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+databroker args: [--insecure --address 0.0.0.0 --port 55555]
+databroker state: running=true restarts=0 started=2026-11-04 00:37:06.687027941 UTC
+
+== server info over v2
+      {"commit": "a79e2420b319cedccd98298e2a75ee78cfca4b87", "name": "databroker", "op": "info", "result": "ok", "t": 1793752671.782231, "version": "0.7.1"}
+PASS  info from cabin1: 0.7.1
+
+== publish and get over v2
+      {"op": "publish", "path": "Vehicle.Speed", "result": "ok", "t": 1793752672.142154, "value": 51.5}
+PASS  publish from cabin1
+      {"op": "get", "path": "Vehicle.Speed", "result": "ok", "t": 1793752672.475741, "value": 51.5}
+PASS  get from hpc1: 51.5
+
+== a subscriber sees every published value, in order
+      {"op": "subscribe", "paths": ["Vehicle.Speed"], "result": "open", "t": 1793752672.830892}
+      {"op": "update", "path": "Vehicle.Speed", "result": "ok", "t": 1793752672.831213, "value": 51.5}
+      {"op": "update", "path": "Vehicle.Speed", "result": "ok", "t": 1793752673.697918, "value": 10.0}
+      {"op": "update", "path": "Vehicle.Speed", "result": "ok", "t": 1793752674.201762, "value": 20.0}
+      {"op": "update", "path": "Vehicle.Speed", "result": "ok", "t": 1793752674.710927, "value": 30.0}
+      {"op": "update", "path": "Vehicle.Speed", "result": "ok", "t": 1793752675.225077, "value": 40.0}
+      {"op": "update", "path": "Vehicle.Speed", "result": "ok", "t": 1793752675.727114, "value": 50.0}
+      {"op": "subscribe", "responses": 6, "result": "done", "t": 1793752675.727256}
+PASS  subscriber on cabin1 saw: 51.5 10.0 20.0 30.0 40.0 50.0 
+
+== a signal provider claims a sensor and publishes on its stream
+      {"id": 860, "op": "provide-signal", "path": "Vehicle.Exterior.AirTemperature", "result": "ok", "t": 1793752676.817765}
+      {"op": "sent", "request_id": 1, "result": "ok", "t": 1793752676.817946, "value": "18.5"}
+      {"op": "sent", "request_id": 2, "result": "ok", "t": 1793752677.018606, "value": "19.5"}
+      {"op": "sent", "request_id": 3, "result": "ok", "t": 1793752677.219203, "value": "20.5"}
+      {"op": "provide-signal", "rejected": 0, "result": "done", "t": 1793752678.420568}
+PASS  provider sent 3 values, none rejected
+PASS  subscriber on hpc1 saw the provider's values:  18.5 19.5 20.5 
+      {"id": 1201, "op": "provide-signal", "path": "Vehicle.Powertrain.TractionBattery.StateOfCharge.Current", "result": "ok", "t": 1793752678.889036}
+      {"op": "sent", "request_id": 1, "result": "ok", "t": 1793752678.889205, "value": "50.5"}
+      {"op": "sent", "request_id": 2, "result": "ok", "t": 1793752679.089344, "value": "150"}
+      {"errors": {"1201": "ERROR_CODE_INVALID_ARGUMENT"}, "op": "rejected", "request_id": 2, "result": "error", "t": 1793752679.089802}
+      {"op": "provide-signal", "rejected": 1, "result": "done", "t": 1793752680.290657}
+PASS  provider value outside max 100 rejected on the stream
+
+== the CAN feed: can-provider replays a dump, a subscriber on hpc1 consumes it
+      2026-11-04 00:38:02,137 INFO dbcfeeder: Update datapoint requests sent to kuksa.val so far: 16, maximum number of queued CAN messages so far: 7
+      2026-11-04 00:38:02,389 INFO dbcfeeder: Update datapoint requests sent to kuksa.val so far: 32, maximum number of queued CAN messages so far: 7
+      2026-11-04 00:38:02,876 INFO dbcfeeder: Update datapoint requests sent to kuksa.val so far: 64, maximum number of queued CAN messages so far: 7
+PASS  consumer on hpc1 got 31 updates, 15 of them gear values from the CAN feed
+PASS  hpc1 reads the fed gear: 0
+PASS  CAN feed: databroker still answers and was not restarted
+
+== actuation with a provider that answers
+      {"elapsed_ms": 0.31, "op": "actuate", "path": "Vehicle.Body.Trunk.Rear.IsOpen", "result": "ok", "t": 1793752685.140207, "value": true}
+PASS  actuate from hpc1, provider on cabin1
+PASS  provider received the request: true
+
+== a second provider for a claimed actuator
+      {"answered": 0, "code": "ALREADY_EXISTS", "details": "Providers for the following vss_ids already registered: [138]", "op": "provide", "result": "error", "t": 1793752685.502174}
+PASS  second claim refused: ALREADY_EXISTS
+
+== actuation with no provider
+      {"code": "UNAVAILABLE", "details": "Provider for vss_id 138 does not exist", "elapsed_ms": 0.347, "op": "actuate", "path": "Vehicle.Body.Trunk.Rear.IsOpen", "result": "error", "t": 1793752686.254026}
+PASS  no provider: UNAVAILABLE
+
+== provider mode silent
+      {"elapsed_ms": 0.325, "op": "actuate", "path": "Vehicle.Body.Trunk.Rear.IsOpen", "result": "ok", "t": 1793752686.986847, "value": true}
+      {"mode": "silent", "op": "provide", "paths": ["Vehicle.Body.Trunk.Rear.IsOpen"], "result": "ok", "t": 1793752686.609891}
+      {"op": "actuation-request", "result": "ok", "signal": 138, "t": 1793752686.986953, "value": true}
+PASS  silent: the request reached the provider
+OBS   silent: actuate returned ok after 0.325 ms
+PASS  silent: databroker still answers and was not restarted
+
+== provider mode slow:3000
+      {"elapsed_ms": 0.351, "op": "actuate", "path": "Vehicle.Body.Trunk.Rear.IsOpen", "result": "ok", "t": 1793752688.586501, "value": true}
+      {"mode": "slow:3000", "op": "provide", "paths": ["Vehicle.Body.Trunk.Rear.IsOpen"], "result": "ok", "t": 1793752688.216936}
+      {"op": "actuation-request", "result": "ok", "signal": 138, "t": 1793752688.58658, "value": true}
+PASS  slow:3000: the request reached the provider
+OBS   slow:3000: actuate returned ok after 0.351 ms
+PASS  slow:3000: databroker still answers and was not restarted
+
+== provider mode error
+      {"elapsed_ms": 0.299, "op": "actuate", "path": "Vehicle.Body.Trunk.Rear.IsOpen", "result": "ok", "t": 1793752690.202038, "value": true}
+      {"mode": "error", "op": "provide", "paths": ["Vehicle.Body.Trunk.Rear.IsOpen"], "result": "ok", "t": 1793752689.819179}
+      {"op": "actuation-request", "result": "ok", "signal": 138, "t": 1793752690.202111, "value": true}
+      {"code": "ERROR_CODE_INVALID_ARGUMENT", "op": "actuation-answer", "result": "ok", "t": 1793752690.202211}
+PASS  error: the request reached the provider
+OBS   error: actuate returned ok after 0.299 ms
+PASS  error: databroker still answers and was not restarted
+
+== a provider that drops its stream after one answer
+      {"elapsed_ms": 0.27, "op": "actuate", "path": "Vehicle.Body.Trunk.Rear.IsOpen", "result": "ok", "t": 1793752692.05101, "value": true}
+      {"code": "UNAVAILABLE", "details": "Provider for vss_id 138 does not exist", "elapsed_ms": 0.327, "op": "actuate", "path": "Vehicle.Body.Trunk.Rear.IsOpen", "result": "error", "t": 1793752693.427697}
+PASS  exit-after: first actuate ok
+PASS  exit-after: after the drop: UNAVAILABLE
+PASS  a new provider claims the released actuator
+PASS  exit-after: databroker still answers and was not restarted
+
+== how long a gone provider's claim lasts
+OBS   after a provider is removed: actuate finds no provider within 0.14 s, a new claim succeeds after 0.98 s
+PASS  window: the claim was released
+
+== the client's own refusal, on the allowed slice
+      {"op": "connect", "result": "refused", "server": "10.100.0.50:55556", "t": 1793752700.073839, "waited_s": 3.0}
+PASS  wrong port from cabin1 reads as refused
+
+== denied over v2: zone-rl on infotainment
+      {"op": "connect", "result": "refused", "server": "10.100.0.50:55555", "t": 1793752705.700212, "waited_s": 5.0}
+PASS  denied zone-rl: publish Vehicle.Speed 99 (client refused, 5 frames reached the bridge)
+      {"op": "connect", "result": "refused", "server": "10.100.0.50:55555", "t": 1793752711.049054, "waited_s": 5.0}
+PASS  denied zone-rl: get Vehicle.Speed (client refused, 6 frames reached the bridge)
+      {"op": "connect", "result": "refused", "server": "10.100.0.50:55555", "t": 1793752716.404809, "waited_s": 5.0}
+PASS  denied zone-rl: subscribe Vehicle.Speed --count 1 (client refused, 5 frames reached the bridge)
+PASS  value after the denied write: 61.5
+bridge VLAN membership:
+  vz-cabin1 [100]
+  vz-hpc1 [100]
+  vz-zone-rl [101]
+databroker state at the end: running=true restarts=0 started=2026-11-04 00:37:06.687027941 UTC
+exit 0
+
+$ databroker log
+22
+
+$ vxedge vehicle up --manifest . (second)
+[ 10%] vehicle.up gateway: bridge, slices, endpoints
+[ 30%] vehicle.up gateway: provisioning bridge + uplink
+[ 30%] vehicle.up gateway: applying slice VLANs + HTB queue tree
+[ 30%] vehicle.up gateway: attaching zone endpoints
+[ 30%] vehicle.up gateway: applying tunnels
+[ 30%] vehicle.up gateway: verifying observed state
+[ 40%] vehicle.up zone 1/5: cabin1 (up)
+[ 40%] vehicle.up zone cabin1: starting node 1/1: cabin1 (Container)
+[ 44%] vehicle.up zone 2/5: sensor-rr (up)
+[ 44%] vehicle.up zone sensor-rr: starting node 1/1: sensor-rr (WasmCapsule)
+[ 48%] vehicle.up zone 3/5: zone-fl (up)
+[ 48%] vehicle.up zone zone-fl: starting node 1/1: zone-fl (QemuMicrovm)
+[ 52%] vehicle.up zone 4/5: zone-fr (up)
+[ 52%] vehicle.up zone zone-fr: starting node 1/1: zone-fr (CloudHypervisor)
+[ 56%] vehicle.up zone 5/5: zone-rl (up)
+[ 56%] vehicle.up zone zone-rl: starting node 1/1: zone-rl (Container)
+[ 60%] vehicle.up compute 1/1: hpc1 (up)
+[ 60%] vehicle.up compute hpc1: starting node 1/1: hpc1 (Container)
+[ 72%] vehicle.up signal plane: kuksa-databroker on hpc1 (up)
+[ 75%] vehicle.up service ota: up
+[ 90%] vehicle.up service ota: starting ota service
+[100%] vehicle.up vehicle `vx-vehicle-03` up — gateway, 5 zone(s), 1 compute(s), signal plane up on `hpc1`, 1 service(s)
+vehicle.up: succeeded
+exit 0
+
+$ diff of identities before and after the second up
+exit 0 (91 lines compared)
+
+$ wrong vehicle (daemon running)
+`vehicle-vx-vehicle-03` is the one active on this host, not `vehicle-vx-vehicle-01`: `vehicle status` only acts on what is active — run it f
+status exit 1
+`vehicle-vx-vehicle-03` is the one active on this host, not `vehicle-vx-vehicle-01`: `vehicle up` only acts on what is active — run it from 
+up exit 1
+`vehicle-vx-vehicle-03` is the one active on this host, not `vehicle-vx-vehicle-01`: `vehicle down` only acts on what is active — run it fro
+down exit 1
+unchanged: exit 0
+
+$ restart vxedged
+
+$ wrong vehicle (after restart)
+`vehicle-vx-vehicle-03` is the one active on this host, not `vehicle-vx-vehicle-01`: `vehicle status` only acts on what is active — run it f
+status exit 1
+`vehicle-vx-vehicle-03` is the one active on this host, not `vehicle-vx-vehicle-01`: `vehicle up` only acts on what is active — run it from 
+up exit 1
+`vehicle-vx-vehicle-03` is the one active on this host, not `vehicle-vx-vehicle-01`: `vehicle down` only acts on what is active — run it fro
+down exit 1
+unchanged: exit 0
+
+$ vxedge vehicle status --manifest . (after restart)
+vehicle vx-vehicle-03: up (9 resource(s))
+  gateway      vxgateway        up               up: 2 vlan slice(s), 0 s-nssai slice(s), 6/6 endpoint(s)
+  zone         cabin1           up               zone=cabin backend=Container port=vz-cabin1 peer=vzp-cabin1 vlan=100
+  compute      hpc1             up               zone=central backend=Container port=vz-hpc1 peer=vzp-hpc1 vlan=100
+  zone         sensor-rr        up               zone=rear-right backend=WasmCapsule port=vz-sensor-rr peer=vzp-sensor-rr vlan=100
+  zone         zone-fl          up               zone=front-left backend=QemuMicrovm port=vz-zone-fl peer=vz-zone-fl vlan=100
+  zone         zone-fr          up               zone=front-right backend=CloudHypervisor port=vz-zone-fr peer=vz-zone-fr vlan=100
+  zone         zone-rl          up               zone=rear-left backend=Container port=vz-zone-rl peer=vzp-zone-rl vlan=101
+  service      svc-ota          up               ota service on `hpc1`: container Up
+  signal_plane kuksa-databroker up               signal plane on `hpc1`: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+  slice        adas             up               vlan 100: class=true trunk_vlan=true
+  slice        infotainment     up               vlan 101: class=true trunk_vlan=true
+  filter       vz-cabin1        up               present=true
+  filter       vz-hpc1          up               present=true
+  filter       vz-sensor-rr     up               present=true
+  filter       vz-zone-fl       up               present=true
+  filter       vz-zone-fr       up               present=true
+  filter       vz-zone-rl       up               present=true
+exit 0
+
+$ vxedge vehicle down --manifest .
+[ 75%] vehicle.down service ota: down
+[ 90%] vehicle.down service ota: stopping ota service
+[ 72%] vehicle.down signal plane: kuksa-databroker on hpc1 (down)
+[ 60%] vehicle.down compute 1/1: hpc1 (down)
+[ 60%] vehicle.down compute hpc1: stopping node 1/1: hpc1 (Container)
+[ 40%] vehicle.down zone 1/5: cabin1 (down)
+[ 40%] vehicle.down zone cabin1: stopping node 1/1: cabin1 (Container)
+[ 44%] vehicle.down zone 2/5: sensor-rr (down)
+[ 44%] vehicle.down zone sensor-rr: stopping node 1/1: sensor-rr (WasmCapsule)
+[ 48%] vehicle.down zone 3/5: zone-fl (down)
+[ 48%] vehicle.down zone zone-fl: stopping node 1/1: zone-fl (QemuMicrovm)
+[ 52%] vehicle.down zone 4/5: zone-fr (down)
+[ 52%] vehicle.down zone zone-fr: stopping node 1/1: zone-fr (CloudHypervisor)
+[ 56%] vehicle.down zone 5/5: zone-rl (down)
+[ 56%] vehicle.down zone zone-rl: stopping node 1/1: zone-rl (Container)
+[ 10%] vehicle.down gateway: removing bridge, slices, endpoints
+[ 30%] vehicle.down gateway: removing endpoints, uplink, bridge
+[100%] vehicle.down vehicle `vx-vehicle-03` down
+vehicle.down: succeeded
+exit 0
+
+$ vxedge vehicle down --manifest . (again)
+vehicle.down: succeeded
+exit 0
+
+$ ./check-leaks.sh
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ failed up: a foreign container holds the service's name
+vehicle.up: failed — service `ota`: node `hpc1`: container payload: create `vx-hpc1-ota-01`: Docker responded with status code 500: container create: creating container storage: the container name "vx-hpc1-ota-01" is already in use by dc0f8050f41e56afa9af1dc05afe045e8a46b5e94b471ebe7ae2197e95e1c05e. You have to remove that container to be able to reuse that name: that name is already in use
+[ 72%] vehicle.up signal plane: kuksa-databroker on hpc1 (up)
+[ 75%] vehicle.up service ota: up
+[ 90%] vehicle.up service ota: starting ota service
+exit 1
+
+$ vxedge vehicle down --manifest . (after the failed up)
+[100%] vehicle.down vehicle `vx-vehicle-03` down
+vehicle.down: succeeded
+exit 0
+
+$ ./check-leaks.sh
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ a databroker that exits straight after starting fails the job
+bad image in place
+vehicle.up: failed — signal plane `kuksa-databroker`: started, then stopped running within 2 s: see its log
+[ 60%] vehicle.up compute hpc1: starting node 1/1: hpc1 (Container)
+[ 72%] vehicle.up signal plane: kuksa-databroker on hpc1 (up)
+exit 1
+vehicle vx-vehicle-03: degraded (9 resource(s))
+  signal_plane kuksa-databroker down             signal plane on `hpc1`: localhost/vxedge/ota:1
+vehicle.down: succeeded
+exit 0
+
+$ ./check-leaks.sh
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ experiment up with a declared signal plane
+[100%] experiment.up experiment `exp-signal-plane` up — gateway, 5 zone(s), 1 compute(s), signal plane up on `hpc1`, 1 service(s). Traffic is not started by `up`: run `vxedge traffic up`.
+experiment.up: succeeded
+exit 0
+experiment exp-signal-plane: up (9 resource(s))
+  signal_plane kuksa-databroker up               signal plane on `hpc1`: ghcr.io/eclipse-kuksa/kuksa-databroke
+member running=true args=[--insecure --address 0.0.0.0 --port 55555]
+experiment.down: succeeded
+exit 0
+
+$ ./check-leaks.sh
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ full ruleset, vx lines only
+# Warning: table ip filter is managed by iptables-nft, do not touch!
+# Warning: table ip nat is managed by iptables-nft, do not touch!
+# Warning: table ip6 nat is managed by iptables-nft, do not touch!
+# Warning: table ip mangle is managed by iptables-nft, do not touch!
+vx lines: 0
+
+$ audit log, by rpc
+  5 ComputeService.Down
+  5 ComputeService.Up
+  1 ExperimentService.Down
+  1 ExperimentService.Up
+  5 GatewayService.Down
+  5 GatewayService.Up
+  5 SignalPlane.Down
+  5 SignalPlane.Up
+  5 SvcService.Down
+  4 SvcService.Up
+  4 VehicleService.Down
+  4 VehicleService.Up
+ 25 ZoneService.Down
+ 25 ZoneService.Up
+EXP-015-FINISHED
