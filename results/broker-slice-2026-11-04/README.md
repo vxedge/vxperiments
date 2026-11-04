@@ -2,8 +2,8 @@
 
 [`exp-016`](../../experiments/exp-016) with kuksa-databroker 0.7.1 on `hpc1` of
 [`vx-vehicle-03-load`](../../experiments/exp-016/vehicle.yaml). **This is the branch run, before the
-merge:** vxedge `4626e0e`, vxperiments `933146f`, from 16:47 to 17:19 UTC. The run from merged `main`
-will be the published one.
+merge:** vxedge `4626e0e`, vxperiments `933146f`, from 16:47 to 17:19 UTC. The published run, from merged
+`main`, is [`broker-slice-main-2026-11-04`](../broker-slice-main-2026-11-04).
 
 [`transcript.txt`](transcript.txt) is the whole run, [`out/`](out) holds each kuksa-perf run's
 output, and [`summary.txt`](summary.txt) is `summarize.py` over `out/`, the same table the

@@ -1,0 +1,229 @@
+== pinning cpu governor to performance (was: powersave) ==
+cpu governors during the run: 32 performance
+cpu idle states: POLL(0us) C1(1us) C2(18us) 
+cpu latency held at 2 us for the run (pid 1162856): idle states slower to leave are not entered
+vxedge 6eff42d, vxperiments 31284a9
+b187f1a14fdb4b44ab8459b432ca876b2f11970ed8fe034b935daca40f682866  vehicle.yaml
+164110ef625bdfcefcbd272b17556c7141f907b7249684d1565463c7a49be043  parts.yaml
+cd3a82fdc52b3792a650922214d515dc37a36f8463ceb46e7169596db792d9d2  data/actuate-g16-k15.json
+c5c54c3282399d4192202f0712c9d8dfdb0adea704d4f25158287ad265573d39  data/actuate-g16-k1.json
+3989f85facaf556f005bd62b08b58867e2ff7a781dfbbe74987467a48cc3e86b  data/actuate-g1-k1.json
+8a7cebe5d158cab8c8c98061b3ef6ff4ccf8fc12f252b2fb9e15d0a01efe052d  data/actuate-g1-k240.json
+741ba5ceba0cf54ff3d5b98163b3beb9c8f596f600df2730e15a17cc04857774  data/publish-1.json
+kuksa-perf, publish runs: localhost/vxperiments/kuksa-perf:aa6fba0 d28e7cbfb94bcdfa76a
+kuksa-perf release, recorded only: ghcr.io/eclipse-kuksa/kuksa-databroker-perf@sha256:74ad5bb003e2f541cf9862ba63cecf66cd93badb514f1c6c8b68bcaac29ffd93
+kuksa-perf, actuate runs: localhost/vxperiments/kuksa-perf:aa6fba0 d28e7cbfb94bcdfa76a
+load: localhost/vxperiments/vxtraffic:1 0211c340a5343ecff64, 600 mbit/s
+reps 5, duration 30s, skip 5s
+localhost/vxperiments/kuksa-perf:aa6fba0 sha256:c659b84f669c148a548b53360f8b6029dea3003abb93a7a5fcbe7f24ab9fffff
+localhost/vxperiments/kv2:1 sha256:a339c160a7c279058645de1b1bf92168895edc689b796ac896622b1a7385b94b
+localhost/vxperiments/vxtraffic:1 sha256:be3e69593100698c36d43602c8e3638785b0a074313ddaa6d0cf31b65d56f2a0
+localhost/vxedge/probe:1 sha256:df3ada5312118ce1a4b4d3fb0fe477f05c596d376c2da78124f885f4718c0e79
+localhost/vxedge/ota:1 sha256:8aa1fbae80cc36a09e21bf713fdfc692c3e11a77f0d515480387a861a5a684c6
+
+$ ../../vehicles/vx-vehicle-03/check-leaks.sh (clean state)
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ vxedge vehicle up --manifest .
+[ 10%] vehicle.up gateway: bridge, slices, endpoints
+[ 30%] vehicle.up gateway: provisioning bridge + uplink
+[ 30%] vehicle.up gateway: applying slice VLANs + HTB queue tree
+[ 30%] vehicle.up gateway: attaching zone endpoints
+[ 30%] vehicle.up gateway: applying tunnels
+[ 30%] vehicle.up gateway: verifying observed state
+[ 40%] vehicle.up zone 1/6: cabin1 (up)
+[ 40%] vehicle.up zone cabin1: starting node 1/1: cabin1 (Container)
+[ 43%] vehicle.up zone 2/6: info2 (up)
+[ 43%] vehicle.up zone info2: starting node 1/1: info2 (Container)
+[ 46%] vehicle.up zone 3/6: sensor-rr (up)
+[ 46%] vehicle.up zone sensor-rr: starting node 1/1: sensor-rr (WasmCapsule)
+[ 50%] vehicle.up zone 4/6: zone-fl (up)
+[ 50%] vehicle.up zone zone-fl: starting node 1/1: zone-fl (QemuMicrovm)
+[ 53%] vehicle.up zone 5/6: zone-fr (up)
+[ 53%] vehicle.up zone zone-fr: starting node 1/1: zone-fr (CloudHypervisor)
+[ 56%] vehicle.up zone 6/6: zone-rl (up)
+[ 56%] vehicle.up zone zone-rl: starting node 1/1: zone-rl (Container)
+[ 60%] vehicle.up compute 1/1: hpc1 (up)
+[ 60%] vehicle.up compute hpc1: starting node 1/1: hpc1 (Container)
+[ 72%] vehicle.up signal plane: kuksa-databroker on hpc1 (up)
+[ 75%] vehicle.up service ota: up
+[ 90%] vehicle.up service ota: starting ota service
+[100%] vehicle.up vehicle `vx-vehicle-03-load` up — gateway, 6 zone(s), 1 compute(s), signal plane up on `hpc1`, 1 service(s)
+vehicle.up: succeeded
+exit 0
+
+$ vxedge vehicle status --manifest .
+vehicle vx-vehicle-03-load: up (10 resource(s))
+  gateway      vxgateway        up               up: 2 vlan slice(s), 0 s-nssai slice(s), 7/7 endpoint(s)
+  zone         cabin1           up               zone=cabin backend=Container port=vz-cabin1 peer=vzp-cabin1 vlan=100
+  compute      hpc1             up               zone=central backend=Container port=vz-hpc1 peer=vzp-hpc1 vlan=100
+  zone         info2            up               zone=cabin backend=Container port=vz-info2 peer=vzp-info2 vlan=101
+  zone         sensor-rr        up               zone=rear-right backend=WasmCapsule port=vz-sensor-rr peer=vzp-sensor-rr vlan=100
+  zone         zone-fl          up               zone=front-left backend=QemuMicrovm port=vz-zone-fl peer=vz-zone-fl vlan=100
+  zone         zone-fr          up               zone=front-right backend=CloudHypervisor port=vz-zone-fr peer=vz-zone-fr vlan=100
+  zone         zone-rl          up               zone=rear-left backend=Container port=vz-zone-rl peer=vzp-zone-rl vlan=101
+  service      svc-ota          up               ota service on `hpc1`: container Up
+  signal_plane kuksa-databroker up               signal plane on `hpc1`: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+  slice        adas             up               vlan 100: class=true trunk_vlan=true
+  slice        infotainment     up               vlan 101: class=true trunk_vlan=true
+  filter       vz-cabin1        up               present=true
+  filter       vz-hpc1          up               present=true
+  filter       vz-info2         up               present=true
+  filter       vz-sensor-rr     up               present=true
+  filter       vz-zone-fl       up               present=true
+  filter       vz-zone-fr       up               present=true
+  filter       vz-zone-rl       up               present=true
+exit 0
+
+$ databroker stays running
+running=true restarts=0 image=ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd args=[--insecure --address 0.0.0.0 --port 55555]
+
+$ the released kuksa-perf, 0.3.2, against databroker 0.7.1 over kuksa.val.v2
+exit 0 release-0.3.2:  Received: 0 signal updates  50% in under 0.000 ms deep idle: 0 ms across all CPUs 
+   Sent: 0 signal updates
+   Received: 0 signal updates
+   50% in under 0.000 ms
+
+$ the broker is not reachable from infotainment
+exit 1 denied-info2: deep idle: 0 ms across all CPUs 
+frames from info2 reaching the bridge: 3
+Error: Failed to connect to server 10.100.0.50:55555
+    0: transport error
+    1: error trying to connect: tcp connect error: No route to host (os error 113)
+
+$ load check
+in 7 s: zone-rl sent 438503, info2 received 441578, hpc1 received 0, cabin1 received 1 frames
+
+$ publish, three setups, 5 repetitions
+exit 0 publish-baseline-1:  Received: 2500 signal updates  50% in under 0.058 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-idle-1:  Received: 2500 signal updates  50% in under 0.066 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-loaded-1:  Received: 2500 signal updates  50% in under 0.064 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-cpu-1:  Received: 2500 signal updates  50% in under 0.070 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-idle-2:  Received: 2500 signal updates  50% in under 0.067 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-loaded-2:  Received: 2500 signal updates  50% in under 0.065 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-cpu-2:  Received: 2500 signal updates  50% in under 0.070 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-baseline-2:  Received: 2500 signal updates  50% in under 0.057 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-loaded-3:  Received: 2500 signal updates  50% in under 0.067 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-cpu-3:  Received: 2500 signal updates  50% in under 0.074 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-baseline-3:  Received: 2500 signal updates  50% in under 0.058 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-idle-3:  Received: 2500 signal updates  50% in under 0.067 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-cpu-4:  Received: 2500 signal updates  50% in under 0.070 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-baseline-4:  Received: 2500 signal updates  50% in under 0.059 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-idle-4:  Received: 2500 signal updates  50% in under 0.066 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-loaded-4:  Received: 2500 signal updates  50% in under 0.067 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-baseline-5:  Received: 2500 signal updates  50% in under 0.055 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-idle-5:  Received: 2500 signal updates  50% in under 0.065 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-loaded-5:  Received: 2500 signal updates  50% in under 0.068 ms deep idle: 0 ms across all CPUs 
+exit 0 publish-cpu-5:  Received: 2500 signal updates  50% in under 0.068 ms deep idle: 0 ms across all CPUs 
+
+$ actuate, three setups, 5 repetitions
+exit 0 actuate-baseline-1:  Received: 250 signal updates  50% in under 0.113 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-idle-1:  Received: 250 signal updates  50% in under 0.130 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-loaded-1:  Received: 250 signal updates  50% in under 0.128 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-cpu-1:  Received: 250 signal updates  50% in under 0.135 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-idle-2:  Received: 250 signal updates  50% in under 0.128 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-loaded-2:  Received: 250 signal updates  50% in under 0.121 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-cpu-2:  Received: 250 signal updates  50% in under 0.133 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-baseline-2:  Received: 250 signal updates  50% in under 0.116 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-loaded-3:  Received: 250 signal updates  50% in under 0.134 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-cpu-3:  Received: 250 signal updates  50% in under 0.139 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-baseline-3:  Received: 250 signal updates  50% in under 0.118 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-idle-3:  Received: 250 signal updates  50% in under 0.123 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-cpu-4:  Received: 250 signal updates  50% in under 0.125 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-baseline-4:  Received: 250 signal updates  50% in under 0.119 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-idle-4:  Received: 250 signal updates  50% in under 0.127 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-loaded-4:  Received: 250 signal updates  50% in under 0.128 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-baseline-5:  Received: 250 signal updates  50% in under 0.115 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-idle-5:  Received: 250 signal updates  50% in under 0.123 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-loaded-5:  Received: 250 signal updates  50% in under 0.127 ms deep idle: 0 ms across all CPUs 
+exit 0 actuate-cpu-5:  Received: 250 signal updates  50% in under 0.131 ms deep idle: 0 ms across all CPUs 
+
+$ issue 233 data: actuate on the broker's device, providers by actuator ids
+exit 0 scale-g1-k1-1:  Received: 250 signal updates  50% in under 0.118 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g1-k1-2:  Received: 250 signal updates  50% in under 0.122 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g1-k1-3:  Received: 250 signal updates  50% in under 0.118 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g1-k240-1:  Received: 60000 signal updates  50% in under 0.703 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g1-k240-2:  Received: 60000 signal updates  50% in under 0.691 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g1-k240-3:  Received: 60000 signal updates  50% in under 0.694 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g16-k1-1:  Received: 4015 signal updates  50% in under 0.128 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g16-k1-2:  Received: 4013 signal updates  50% in under 0.123 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g16-k1-3:  Received: 4011 signal updates  50% in under 0.133 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g16-k15-1:  Received: 60225 signal updates  50% in under 0.130 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g16-k15-2:  Received: 60225 signal updates  50% in under 0.128 ms deep idle: 0 ms across all CPUs 
+exit 0 scale-g16-k15-3:  Received: 60225 signal updates  50% in under 0.132 ms deep idle: 0 ms across all CPUs 
+
+$ databroker after the runs
+running=true restarts=0
+1
+
+$ vxedge vehicle down --manifest .
+[ 75%] vehicle.down service ota: down
+[ 90%] vehicle.down service ota: stopping ota service
+[ 72%] vehicle.down signal plane: kuksa-databroker on hpc1 (down)
+[ 60%] vehicle.down compute 1/1: hpc1 (down)
+[ 60%] vehicle.down compute hpc1: stopping node 1/1: hpc1 (Container)
+[ 40%] vehicle.down zone 1/6: cabin1 (down)
+[ 40%] vehicle.down zone cabin1: stopping node 1/1: cabin1 (Container)
+[ 43%] vehicle.down zone 2/6: info2 (down)
+[ 43%] vehicle.down zone info2: stopping node 1/1: info2 (Container)
+[ 46%] vehicle.down zone 3/6: sensor-rr (down)
+[ 46%] vehicle.down zone sensor-rr: stopping node 1/1: sensor-rr (WasmCapsule)
+[ 50%] vehicle.down zone 4/6: zone-fl (down)
+[ 50%] vehicle.down zone zone-fl: stopping node 1/1: zone-fl (QemuMicrovm)
+[ 53%] vehicle.down zone 5/6: zone-fr (down)
+[ 53%] vehicle.down zone zone-fr: stopping node 1/1: zone-fr (CloudHypervisor)
+[ 56%] vehicle.down zone 6/6: zone-rl (down)
+[ 56%] vehicle.down zone zone-rl: stopping node 1/1: zone-rl (Container)
+[ 10%] vehicle.down gateway: removing bridge, slices, endpoints
+[ 30%] vehicle.down gateway: removing endpoints, uplink, bridge
+[100%] vehicle.down vehicle `vx-vehicle-03-load` down
+vehicle.down: succeeded
+exit 0
+
+$ ../../vehicles/vx-vehicle-03/check-leaks.sh
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+exit 0
+
+$ summary
+median across repetitions, microseconds; [min-max] in brackets
+run                       n                p50                p90                p99  received/sent deep idle ms
+actuate-baseline          5    116.0 [113-119]    137.0 [129-139]    158.0 [150-172]      1250/1500            0
+actuate-cpu               5    133.0 [125-139]    160.0 [148-161]    185.0 [184-191]      1250/1500            0
+actuate-idle              5    127.0 [123-130]    144.0 [139-162]    188.0 [157-243]      1250/1500            0
+actuate-loaded            5    128.0 [121-134]    143.0 [139-159]    158.0 [151-195]      1250/1500            0
+publish-baseline          5       58.0 [55-59]       69.0 [66-70]       87.0 [84-89]    12500/15000            0
+publish-cpu               5       70.0 [68-74]       79.0 [77-87]       88.0 [87-98]    12500/15000            0
+publish-idle              5       66.0 [65-67]       78.0 [77-79]       97.0 [93-99]    12500/15000            0
+publish-loaded            5       67.0 [64-68]       77.0 [74-86]       89.0 [83-99]    12500/15000            0
+scale-g1-k1               3    118.0 [118-122]    137.0 [136-137]    164.0 [158-166]        750/900            0
+scale-g1-k240             3    694.0 [691-703]    812.0 [806-825]    901.0 [894-956]  180000/216000            0
+scale-g16-k1              3    128.0 [123-133]    187.0 [181-191]    256.0 [254-257]    12039/14437            0
+scale-g16-k15             3    130.0 [128-132]    157.0 [155-162]    193.0 [182-202]  180675/216675            0
+
+differences of the medians, microseconds
+publish     idle - baseline p50    +8.0  p90    +9.0  p99   +10.0
+publish      cpu - idle     p50    +4.0  p90    +1.0  p99    -9.0
+publish   loaded - cpu      p50    -3.0  p90    -2.0  p99    +1.0
+publish   loaded - idle     p50    +1.0  p90    -1.0  p99    -8.0
+publish   loaded - baseline p50    +9.0  p90    +8.0  p99    +2.0
+actuate     idle - baseline p50   +11.0  p90    +7.0  p99   +30.0
+actuate      cpu - idle     p50    +6.0  p90   +16.0  p99    -3.0
+actuate   loaded - cpu      p50    -5.0  p90   -17.0  p99   -27.0
+actuate   loaded - idle     p50    +1.0  p90    -1.0  p99   -30.0
+actuate   loaded - baseline p50   +12.0  p90    +6.0  p99    +0.0
+EXP-016-FINISHED
+== restoring original cpu governor(s) ==
+cpu governors after the run: 32 powersave

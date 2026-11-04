@@ -1,0 +1,39 @@
+
+
+Global Summary:
+  API: kuksa.val.v2
+  Total elapsed seconds: 30
+  Skipped test seconds: 5
+  Total signals: 1 signals
+  Sent: 300 signal updates
+  Skipped: 50 signal updates
+  Received: 250 signal updates
+  Throughput: 10 signal/second
+  95% in under: 0.172 ms
+  Fastest:   0.108 ms
+  Slowest:   0.256 ms
+  Average:   0.137 ms
+
+Latency histogram:
+    0.111 ms [32   ] |∎∎∎∎∎∎∎
+    0.124 ms [90   ] |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+    0.137 ms [50   ] |∎∎∎∎∎∎∎∎∎∎∎
+    0.150 ms [41   ] |∎∎∎∎∎∎∎∎∎
+    0.163 ms [21   ] |∎∎∎∎
+    0.176 ms [7    ] |∎
+    0.189 ms [1    ] |
+    0.202 ms [2    ] |
+    0.215 ms [2    ] |
+    0.228 ms [1    ] |
+    0.241 ms [2    ] |
+    0.254 ms [1    ] |
+
+Latency distribution:
+  10% in under 0.116 ms
+  25% in under 0.121 ms
+  50% in under 0.130 ms
+  75% in under 0.147 ms
+  90% in under 0.162 ms
+  95% in under 0.172 ms
+  99% in under 0.243 ms
+deep idle: 0 ms across all CPUs
