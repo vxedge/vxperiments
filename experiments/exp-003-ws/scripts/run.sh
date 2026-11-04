@@ -139,6 +139,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
+tool_version() { # $1=binary -> the version it reports and the sha256 of the file that runs
+  local v s
+  v="$("$1" --version 2>/dev/null | awk '{print $2}')" || true
+  s="$(sha256sum "$1" 2>/dev/null | cut -d' ' -f1)" || true
+  printf '{"version": "%s", "sha256": "%s"}' "${v:-unknown}" "${s:-unknown}"
+}
+
 env_metadata() { # $1=arm $2=rep
   cat <<EOF
 {
@@ -155,11 +162,11 @@ env_metadata() { # $1=arm $2=rep
   "loadavg_at_start": "$(cut -d' ' -f1-3 /proc/loadavg)",
   "timestamping": "userspace-monotonic",
   "tool_versions": {
-    "vxedge": "$($VXEDGE --version | awk '{print $2}')",
-    "vxprobe": "$($VXPROBE --version | awk '{print $2}')",
-    "vxtelemetry": "$($VXTELEMETRY --version | awk '{print $2}')",
-    "vxota": "$($VXOTA --version | awk '{print $2}')",
-    "vxota_probe": "$($VXOTA_PROBE --version | awk '{print $2}')"
+    "vxedge": $(tool_version "$VXEDGE"),
+    "vxprobe": $(tool_version "$VXPROBE"),
+    "vxtelemetry": $(tool_version "$VXTELEMETRY"),
+    "vxota": $(tool_version "$VXOTA"),
+    "vxota_probe": $(tool_version "$VXOTA_PROBE")
   }
 }
 EOF
