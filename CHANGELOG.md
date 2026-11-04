@@ -13,6 +13,7 @@ than a repo tag.
 
 ### Changed
 
+- CI's workspace validation runs vxedge 0.5.3 (`ci/vxedge-release.txt`), which computes workspace identities under `vxws/2` and checks each `.vxp` descriptor against its experiment.
 - Every experiment's `run-env.json` records `tool_versions` from the binaries that ran: the version each reports and the sha256 of the file. Four runners used to record the commit of a source checkout, which can differ from the build in `target/`. exp-002, exp-002b, exp-005 and exp-014 now name `vxprobe` where they named its repository `vxagents`.
 - `scripts/lib/check-runners.sh` fails a runner whose `tool_versions` asks a checkout instead of the binary, or whose `tool_version` does not emit valid JSON.
 
