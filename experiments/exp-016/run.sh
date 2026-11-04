@@ -39,6 +39,8 @@ if pgrep -x vxedged >/dev/null; then
     echo "another vxedged is running: $(pgrep -a -x vxedged | cut -c1-120)"
     exit 1
 fi
+# A fresh out/ each run, so no earlier run's output is summarised with this one.
+rm -rf "${RUN:?}/out"
 mkdir -p "$RUN/out"
 start() {
     rm -f "$RUN/d.sock"
@@ -102,7 +104,12 @@ podman images --no-trunc --format '{{.Repository}}:{{.Tag}} {{.Digest}}' | grep 
 
 h ../../vehicles/vx-vehicle-03/check-leaks.sh "(clean state)"; ../../vehicles/vx-vehicle-03/check-leaks.sh; echo "exit $?"
 start
-h vxedge vehicle up --manifest .; $V vehicle up --manifest .; echo "exit $?"
+h vxedge vehicle up --manifest .; $V vehicle up --manifest .; rc=$?; echo "exit $rc"
+# Nothing below measures anything without the vehicle: stop here, after taking it down.
+if [ "$rc" -ne 0 ]; then
+    $V vehicle down --manifest . >/dev/null 2>&1; stop
+    echo "EXP-016-ABORTED: vehicle up failed"; exit 1
+fi
 h vxedge vehicle status --manifest .; $V vehicle status --manifest .; echo "exit $?"
 h "databroker stays running"; sleep 2
 podman inspect -f 'running={{.State.Running}} restarts={{.RestartCount}} image={{.ImageName}} args={{.Args}}' vx-hpc1-kuksa-databroker
@@ -206,5 +213,6 @@ podman logs vx-hpc1-kuksa-databroker > "$RUN/databroker.log" 2>&1; grep -ciE 'er
 h vxedge vehicle down --manifest .; $V vehicle down --manifest .; echo "exit $?"
 stop
 h ../../vehicles/vx-vehicle-03/check-leaks.sh; ../../vehicles/vx-vehicle-03/check-leaks.sh; echo "exit $?"
-h "summary"; python3 -I "$here/summarize.py" "$RUN/out"
+h "summary"; python3 -I "$here/summarize.py" "$RUN/out"; rc=$?
 echo EXP-016-FINISHED
+exit $rc
