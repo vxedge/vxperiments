@@ -49,6 +49,18 @@ after it, and `DEGRADED` with the daemon stopped during the zone, compute and si
 each converged by a second `up`; [`core3-0.5.1.txt`](core3-0.5.1.txt): three more core runs, now
 also checking the run reads `UP` before and after a restart.
 
+## Follow-up: vxedge 0.5.2
+
+The fields the gate had not checked live, and the 0.5.2 fixes, on `4626e0e`'s daemon through
+`vxmcp` 0.2.1 ([`fields-0.5.2.txt`](fields-0.5.2.txt)): `job_list` paging and its state and kind
+filters, `events_subscribe` with a kind family, `NodeSpec` port, peer and VLAN, `observed_unix_ms`,
+`svc_status` with a workspace, `Collect.out_path`, `HostCapabilities.gpu` and the container backend
+from the preflight's own Podman check, `traffic_up` refused with
+`ERROR_REASON_ENDPOINT_NOT_ON_HOST` after a full `up`, and `local/` parts recorded as host processes
+by `vxtelemetry` 0.2.1. `vehicle status` and `run_list` took 1.6 s, down from 6.0 s. The half-built
+run check and three core runs pass again on that build
+([`halfbuilt-0.5.2.txt`](halfbuilt-0.5.2.txt), [`core3-0.5.2.txt`](core3-0.5.2.txt)).
+
 ## What this does not show
 
 - `exp-001-ws` traffic runs with the gateway stage only, as its campaign does: a full `up` moves the
@@ -56,8 +68,8 @@ also checking the run reads `UP` before and after a restart.
 - No workspace declares a telemetry service, so the traffic run used a scratch copy of `exp-001-ws`
   with [`harness/telemetry-service.yaml`](harness/telemetry-service.yaml) appended to `main.yaml`.
   The exp-001 campaign workspace is unchanged.
-- The archive's `image_digests` marks the two `local/...:host-process` parts unresolved, because
-  they are host processes, not images.
+- In the 0.5.0 runs the archive's `image_digests` marked the two `local/...:host-process` parts
+  unresolved; `vxtelemetry` 0.2.1 records them as host processes.
 - Every part of `vx-vehicle-03` is local, so payload digests are empty by contract; published-part
   digests are not exercised here.
 - Guests are probes, and nothing was timed.
@@ -74,5 +86,6 @@ python3 -I harness/live.py core 10
 python3 -I harness/live.py cancel
 python3 -I harness/live.py libvirt
 python3 -I harness/halfbuilt.py      # run from harness/, needs live.py beside it
+python3 -I harness/fields.py
 TRIAL=/path/to/exp-001-ws-copy python3 -I harness/live.py traffic
 ```
