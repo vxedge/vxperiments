@@ -1,0 +1,119 @@
+11:48:55 #### core x3
+11:48:55   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+11:48:55   PASS host clean before start
+11:48:56 == core 1: vx-vehicle-03 through vxmcp
+11:48:58   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
+11:49:00   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
+11:49:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+11:49:02   PASS vehicle_up returns a job
+11:49:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+11:49:04   PASS duplicate vehicle_up returns the running job (job-cc03be-000000)
+11:49:04    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (stages gateway): provisions this host's gatew
+11:49:05   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
+11:49:05    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `$VXPERIMENTS/experiments/exp-002-ws` (every stage): provisions this host's gatew
+11:49:05   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
+11:49:21   PASS vehicle_up job JOB_STATE_SUCCEEDED 
+11:49:21   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
+11:49:21   PASS job carries run_id run-8c7869454328
+11:49:23   PASS run_list holds the one run ['run-8c7869454328']
+11:49:23   PASS run_list reads the run UP once up succeeded ['RESOURCE_STATE_UP']
+11:49:24   PASS vehicle_status: every node UP (not: []) backends ['NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+11:49:24   PASS vehicle_status: every node has a typed payload (missing: [])
+11:49:24   payloads: cabin1=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1; hpc1=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1; sensor-rr=PAYLOAD_KIND_WASM:$VXPERIMENTS/vehicles/vx-vehicle-03/./capsule/reflector-capsule.wasm; zone-fl=PAYLOAD_KIND_GUEST_BUNDLE:$VXPERIMENTS/vehicles/vx-vehicle-03/./bundle; zone-fr=PAYLOAD_KIND_GUEST_BUNDLE:$VXPERIMENTS/vehicles/vx-vehicle-03/./bundle; zone-rl=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1
+11:49:24   PASS another vehicle's status refused (ERROR_REASON_WRONG_WORKSPACE)
+11:49:28   PASS event tail resumed with no EVENTS_LOST ([])
+11:49:28   PASS events include run.up
+11:49:28   PASS event ids contiguous across 39 events
+11:49:28   PASS run.up carries run_id
+11:49:31   PASS after restart: run still listed
+11:49:31   PASS after restart: run still UP
+11:49:33   PASS after restart: every node still UP (not: [])
+11:49:33   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
+11:49:33   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
+11:49:33   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
+11:49:33    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+11:49:33   PASS vehicle_down returns a job
+11:49:33    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-d980fa-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
+11:49:33   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
+11:50:27   PASS vehicle_down job JOB_STATE_SUCCEEDED 
+11:50:27   PASS run_list empty after down
+11:50:28   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+11:50:28   PASS host clean after down
+11:50:28 == core 2: vx-vehicle-03 through vxmcp
+11:50:29   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
+11:50:31   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
+11:50:32    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+11:50:34   PASS vehicle_up returns a job
+11:50:34    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+11:50:35   PASS duplicate vehicle_up returns the running job (job-d980fa-000009)
+11:50:35    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (stages gateway): provisions this host's gatew
+11:50:36   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
+11:50:36    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `$VXPERIMENTS/experiments/exp-002-ws` (every stage): provisions this host's gatew
+11:50:36   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
+11:50:53   PASS vehicle_up job JOB_STATE_SUCCEEDED 
+11:50:53   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
+11:50:53   PASS job carries run_id run-70974606856b
+11:50:54   PASS run_list holds the one run ['run-70974606856b']
+11:50:54   PASS run_list reads the run UP once up succeeded ['RESOURCE_STATE_UP']
+11:50:56   PASS vehicle_status: every node UP (not: []) backends ['NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+11:50:56   PASS vehicle_status: every node has a typed payload (missing: [])
+11:50:56   payloads: cabin1=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1; hpc1=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1; sensor-rr=PAYLOAD_KIND_WASM:$VXPERIMENTS/vehicles/vx-vehicle-03/./capsule/reflector-capsule.wasm; zone-fl=PAYLOAD_KIND_GUEST_BUNDLE:$VXPERIMENTS/vehicles/vx-vehicle-03/./bundle; zone-fr=PAYLOAD_KIND_GUEST_BUNDLE:$VXPERIMENTS/vehicles/vx-vehicle-03/./bundle; zone-rl=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1
+11:50:56   PASS another vehicle's status refused (ERROR_REASON_WRONG_WORKSPACE)
+11:50:59   PASS event tail resumed with no EVENTS_LOST ([])
+11:50:59   PASS events include run.up
+11:50:59   PASS event ids contiguous across 39 events
+11:50:59   PASS run.up carries run_id
+11:51:03   PASS after restart: run still listed
+11:51:03   PASS after restart: run still UP
+11:51:04   PASS after restart: every node still UP (not: [])
+11:51:04   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
+11:51:04   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
+11:51:04   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
+11:51:04    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+11:51:04   PASS vehicle_down returns a job
+11:51:04    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-c8e1a7-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
+11:51:04   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
+11:51:59   PASS vehicle_down job JOB_STATE_SUCCEEDED 
+11:51:59   PASS run_list empty after down
+11:51:59   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+11:51:59   PASS host clean after down
+11:51:59 == core 3: vx-vehicle-03 through vxmcp
+11:52:00   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
+11:52:03   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
+11:52:04    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+11:52:05   PASS vehicle_up returns a job
+11:52:05    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+11:52:06   PASS duplicate vehicle_up returns the running job (job-c8e1a7-000009)
+11:52:06    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (stages gateway): provisions this host's gatew
+11:52:08   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
+11:52:08    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `$VXPERIMENTS/experiments/exp-002-ws` (every stage): provisions this host's gatew
+11:52:08   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
+11:52:24   PASS vehicle_up job JOB_STATE_SUCCEEDED 
+11:52:24   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
+11:52:24   PASS job carries run_id run-c0142f0cd2b3
+11:52:26   PASS run_list holds the one run ['run-c0142f0cd2b3']
+11:52:26   PASS run_list reads the run UP once up succeeded ['RESOURCE_STATE_UP']
+11:52:27   PASS vehicle_status: every node UP (not: []) backends ['NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+11:52:27   PASS vehicle_status: every node has a typed payload (missing: [])
+11:52:27   payloads: cabin1=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1; hpc1=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1; sensor-rr=PAYLOAD_KIND_WASM:$VXPERIMENTS/vehicles/vx-vehicle-03/./capsule/reflector-capsule.wasm; zone-fl=PAYLOAD_KIND_GUEST_BUNDLE:$VXPERIMENTS/vehicles/vx-vehicle-03/./bundle; zone-fr=PAYLOAD_KIND_GUEST_BUNDLE:$VXPERIMENTS/vehicles/vx-vehicle-03/./bundle; zone-rl=PAYLOAD_KIND_CONTAINER:localhost/vxedge/probe:1
+11:52:27   PASS another vehicle's status refused (ERROR_REASON_WRONG_WORKSPACE)
+11:52:31   PASS event tail resumed with no EVENTS_LOST ([])
+11:52:31   PASS events include run.up
+11:52:31   PASS event ids contiguous across 39 events
+11:52:31   PASS run.up carries run_id
+11:52:34   PASS after restart: run still listed
+11:52:34   PASS after restart: run still UP
+11:52:36   PASS after restart: every node still UP (not: [])
+11:52:36   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
+11:52:36   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
+11:52:36   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
+11:52:36    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+11:52:36   PASS vehicle_down returns a job
+11:52:36    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-eb01d0-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
+11:52:36   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
+11:53:30   PASS vehicle_down job JOB_STATE_SUCCEEDED 
+11:53:30   PASS run_list empty after down
+11:53:31   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+11:53:31   PASS host clean after down
+11:53:31 backends covered by core: ['NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+11:53:31 #### core: 0 failure(s)
