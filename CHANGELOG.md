@@ -11,6 +11,11 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Changed
+
+- Every experiment's `run-env.json` records `tool_versions` from the binaries that ran: the version each reports and the sha256 of the file. Four runners used to record the commit of a source checkout, which can differ from the build in `target/`. exp-002, exp-002b, exp-005 and exp-014 now name `vxprobe` where they named its repository `vxagents`.
+- `scripts/lib/check-runners.sh` fails a runner whose `tool_versions` asks a checkout instead of the binary, or whose `tool_version` does not emit valid JSON.
+
 ### Added
 
 - `results/signal-plane-2026-11-03`: the Kuksa signal plane on `vx-vehicle-03`, one VSS signal allowed and denied.

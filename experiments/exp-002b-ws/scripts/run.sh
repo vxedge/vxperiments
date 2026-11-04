@@ -138,6 +138,13 @@ launch_qemu() { # $1=arm  — runner-managed QEMU with the arm's exact flags
     -netdev "$netdev" -device "$device" -pidfile "$pidfile" -daemonize
 }
 
+tool_version() { # $1=binary -> the version it reports and the sha256 of the file that runs
+  local v s
+  v="$("$1" --version 2>/dev/null | awk '{print $2}')" || true
+  s="$(sha256sum "$1" 2>/dev/null | cut -d' ' -f1)" || true
+  printf '{"version": "%s", "sha256": "%s"}' "${v:-unknown}" "${s:-unknown}"
+}
+
 env_metadata() { # $1=arm $2=rep
   cat <<EOF
 { "experiment": "exp-002b", "hypothesis": "H3-decomposition",
@@ -150,9 +157,9 @@ env_metadata() { # $1=arm $2=rep
   "cpu_governor": "$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo unknown)",
   "cpu_pinning": "none",
   "tool_versions": {
-    "vxedge": "$(git -C "$WS/vxedge" rev-parse --short HEAD 2>/dev/null || echo unknown)",
-    "vxagents": "$(git -C "$WS/vxagents" rev-parse --short HEAD 2>/dev/null || echo unknown)",
-    "vxtelemetry": "$(git -C "$WS/vxtelemetry" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+    "vxedge": $(tool_version "$VXEDGE"),
+    "vxprobe": $(tool_version "$VXPROBE"),
+    "vxtelemetry": $(tool_version "$VXTELEMETRY")
   },
   "loadavg_at_start": "$(cut -d' ' -f1-3 /proc/loadavg)",
   "timestamping": "userspace-monotonic",

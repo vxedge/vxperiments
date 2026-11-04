@@ -145,4 +145,31 @@ for nb in notebooks/*.py; do
 done
 find . -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null || true
 
+echo "== tool versions come from the binaries that run =="
+# A run records which tools produced it. Asking a source checkout (`git rev-parse HEAD`) answers
+# a different question: the checkout can sit at any commit while the binary in target/ was built
+# from another, or from uncommitted changes. So `run-env.json`'s `tool_versions` must come from
+# `tool_version`, which asks the binary for its version and hashes the file that runs, and that
+# function must emit valid JSON for a binary that exists and for one that does not.
+probe_bin="$(command -v true)"
+for f in experiments/*/scripts/run.sh; do
+  grep -q '"tool_versions"' "$f" || continue
+  name="$(basename "$(dirname "$(dirname "$f")")")"
+  block="$(sed -n '/"tool_versions"/,/}/p' "$f")"
+  fn="$(sed -n '/^tool_version() {/,/^}/p' "$f")"
+  if grep -q 'rev-parse' <<<"$block"; then
+    printf '  %-16s records a source checkout commit, not the binary\n' "$name"
+    fail=1
+  elif [[ -z "$fn" ]]; then
+    printf '  %-16s has tool_versions but no tool_version()\n' "$name"
+    fail=1
+  elif ! out="$(bash -c "set -euo pipefail; $fn; tool_version '$probe_bin'; echo; tool_version /nonexistent")" \
+      || ! python3 -c 'import json,sys; [json.loads(l) for l in sys.stdin.read().splitlines()]' <<<"$out"; then
+    printf '  %-16s tool_version() does not emit valid JSON: %s\n' "$name" "$out"
+    fail=1
+  else
+    printf '  %-16s ok\n' "$name"
+  fi
+done
+
 exit "$fail"

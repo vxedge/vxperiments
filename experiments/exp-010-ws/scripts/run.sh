@@ -161,6 +161,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
+tool_version() { # $1=binary -> the version it reports and the sha256 of the file that runs
+  local v s
+  v="$("$1" --version 2>/dev/null | awk '{print $2}')" || true
+  s="$(sha256sum "$1" 2>/dev/null | cut -d' ' -f1)" || true
+  printf '{"version": "%s", "sha256": "%s"}' "${v:-unknown}" "${s:-unknown}"
+}
+
 env_metadata() { # $1=load $2=rep $3=position-in-sequence $4=full-sequence -> json on stdout
   cat <<EOF
 {
@@ -179,10 +186,10 @@ env_metadata() { # $1=load $2=rep $3=position-in-sequence $4=full-sequence -> js
   "loadavg_at_start": "$(cut -d' ' -f1-3 /proc/loadavg)",
   "timestamping": "userspace-monotonic (SO_TIMESTAMPING follow-up open)",
   "tool_versions": {
-    "vxedge": "$($VXEDGE --version | awk '{print $2}')",
-    "vxprobe": "$($VXPROBE --version | awk '{print $2}')",
-    "vxtraffic": "$($VXTRAFFIC --version | awk '{print $2}')",
-    "vxtelemetry": "$($VXTELEMETRY --version | awk '{print $2}')"
+    "vxedge": $(tool_version "$VXEDGE"),
+    "vxprobe": $(tool_version "$VXPROBE"),
+    "vxtraffic": $(tool_version "$VXTRAFFIC"),
+    "vxtelemetry": $(tool_version "$VXTELEMETRY")
   }
 }
 EOF
