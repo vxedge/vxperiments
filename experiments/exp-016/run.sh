@@ -9,8 +9,9 @@
 #   loaded    as idle, with vxtraffic sending from zone-rl to info2 on infotainment
 #   cpu       as idle, with two busy loops in a container with no network: CPU load without traffic,
 #             so loaded minus cpu is the traffic's share and cpu minus idle the CPU's
-# The CPU governor is pinned to performance for the whole run and restored at the end: under
-# powersave, a busy host answered faster than an idle one, which measured CPU wake-up, not the slice.
+# The CPU governor is pinned to performance and /dev/cpu_dma_latency held at 2 us for the whole
+# run, both released at the end: under powersave, a busy host answered faster than an idle one,
+# which measured CPU wake-up, not the slice, and the governor pin alone did not stop deep sleep.
 # The order rotates every repetition. Each run crosses the slice both ways (kuksa-perf's sender and
 # receiver share one process), so a number here is never a one-way latency.
 #
@@ -49,7 +50,21 @@ stop() { [ -n "$D" ] && kill "$D" && wait "$D" 2>/dev/null; D=; }
 h() { echo; echo "\$ $*"; }
 ifstat() { ip -s -j link show "vz-$1" | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['stats64']['$2']['packets'])"; }
 . "$here/../../scripts/lib/host_pinning.sh"
-cleanup() { podman rm -f -t 0 vxt-load vxt-perf vxt-cpu >/dev/null 2>&1; restore_cpu_governors; }
+# Holds /dev/cpu_dma_latency at LATENCY_US for the whole run, so no CPU enters an idle state that
+# takes longer to leave; shallow states stay allowed. The hold lasts while the file is open.
+LATENCY_US=${LATENCY_US:-2}
+HOLD=
+hold_cpu_latency() {
+    sudo -n python3 -I -c 'import os, signal, struct, sys
+f = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
+os.write(f, struct.pack("i", int(sys.argv[1])))
+signal.pause()' "$LATENCY_US" &
+    HOLD=$!
+    sleep 1
+    kill -0 "$HOLD" 2>/dev/null || { echo "cpu latency hold failed"; HOLD=; return 1; }
+}
+release_cpu_latency() { [ -n "$HOLD" ] && kill "$HOLD" 2>/dev/null && wait "$HOLD" 2>/dev/null; HOLD=; }
+cleanup() { podman rm -f -t 0 vxt-load vxt-perf vxt-cpu >/dev/null 2>&1; release_cpu_latency; restore_cpu_governors; }
 trap cleanup EXIT
 
 cd "$here"
@@ -64,6 +79,8 @@ govs=$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -
 echo "cpu governors during the run:$govs"
 echo "cpu idle states: $(for d in /sys/devices/system/cpu/cpu0/cpuidle/state*; do printf '%s(%sus) ' "$(cat $d/name)" "$(cat $d/latency)"; done)"
 [ "$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort -u)" = performance ] || { echo "governor not pinned"; exit 1; }
+hold_cpu_latency || exit 1
+echo "cpu latency held at ${LATENCY_US} us for the run (pid $HOLD): idle states slower to leave are not entered"
 echo "vxedge $(git -C "$bin/../.." rev-parse --short HEAD 2>/dev/null || echo unknown), vxperiments $(git rev-parse --short HEAD)"
 sha256sum vehicle.yaml parts.yaml data/*.json
 echo "kuksa-perf, publish runs: $PERF $(podman image inspect -f '{{.Id}}' "$PERF" | cut -c1-19)"

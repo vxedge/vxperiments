@@ -73,7 +73,9 @@ runs so the broker has released the last run's claims.
 ## Limits
 
 - One shared host: the broker, kuksa-perf, the load generator and the bridge share its CPUs. The
-  `cpu` setup separates CPU load from traffic, but the governor pin does not stop CPU sleep states.
+  `cpu` setup separates CPU load from traffic. The governor pin does not stop CPU sleep states, so
+  the run also holds `/dev/cpu_dma_latency` at 2 us, which keeps CPUs out of any state slower to
+  leave, and records each run's deep-idle time to show the hold worked.
 - Timestamps are in userspace, so scheduling delay on either side is inside every number.
 - The numbers belong to this host and this vehicle. kuksa-perf's README sample, a p50 near 0.2 ms on
   other hardware, is not a result here.
