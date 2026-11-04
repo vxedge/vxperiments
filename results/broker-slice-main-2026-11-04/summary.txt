@@ -1,0 +1,26 @@
+median across repetitions, microseconds; [min-max] in brackets
+run                       n                p50                p90                p99  received/sent deep idle ms
+actuate-baseline          5    116.0 [113-119]    137.0 [129-139]    158.0 [150-172]      1250/1500            0
+actuate-cpu               5    133.0 [125-139]    160.0 [148-161]    185.0 [184-191]      1250/1500            0
+actuate-idle              5    127.0 [123-130]    144.0 [139-162]    188.0 [157-243]      1250/1500            0
+actuate-loaded            5    128.0 [121-134]    143.0 [139-159]    158.0 [151-195]      1250/1500            0
+publish-baseline          5       58.0 [55-59]       69.0 [66-70]       87.0 [84-89]    12500/15000            0
+publish-cpu               5       70.0 [68-74]       79.0 [77-87]       88.0 [87-98]    12500/15000            0
+publish-idle              5       66.0 [65-67]       78.0 [77-79]       97.0 [93-99]    12500/15000            0
+publish-loaded            5       67.0 [64-68]       77.0 [74-86]       89.0 [83-99]    12500/15000            0
+scale-g1-k1               3    118.0 [118-122]    137.0 [136-137]    164.0 [158-166]        750/900            0
+scale-g1-k240             3    694.0 [691-703]    812.0 [806-825]    901.0 [894-956]  180000/216000            0
+scale-g16-k1              3    128.0 [123-133]    187.0 [181-191]    256.0 [254-257]    12039/14437            0
+scale-g16-k15             3    130.0 [128-132]    157.0 [155-162]    193.0 [182-202]  180675/216675            0
+
+differences of the medians, microseconds
+publish     idle - baseline p50    +8.0  p90    +9.0  p99   +10.0
+publish      cpu - idle     p50    +4.0  p90    +1.0  p99    -9.0
+publish   loaded - cpu      p50    -3.0  p90    -2.0  p99    +1.0
+publish   loaded - idle     p50    +1.0  p90    -1.0  p99    -8.0
+publish   loaded - baseline p50    +9.0  p90    +8.0  p99    +2.0
+actuate     idle - baseline p50   +11.0  p90    +7.0  p99   +30.0
+actuate      cpu - idle     p50    +6.0  p90   +16.0  p99    -3.0
+actuate   loaded - cpu      p50    -5.0  p90   -17.0  p99   -27.0
+actuate   loaded - idle     p50    +1.0  p90    -1.0  p99   -30.0
+actuate   loaded - baseline p50   +12.0  p90    +6.0  p99    +0.0
