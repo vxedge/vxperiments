@@ -181,6 +181,8 @@ def core(i, restart=True):
     ok, runs = a.call("run_list")
     run_ids = [r["id"] for r in runs.get("runs", [])]
     check(ok and run_ids == [end.get("runId")], f"run_list holds the one run {run_ids}")
+    states = [r["state"] for r in runs.get("runs", [])]
+    check(states == ["RESOURCE_STATE_UP"], f"run_list reads the run UP once up succeeded {states}")
 
     ok, st = a.call("vehicle_status", {"workspace": V03})
     nodes = st.get("nodes", []) if ok else []
@@ -219,6 +221,7 @@ def core(i, restart=True):
         a = agent()
         ok, runs2 = a.call("run_list")
         check(ok and [r["id"] for r in runs2["runs"]] == run_ids, "after restart: run still listed")
+        check([r["state"] for r in runs2["runs"]] == ["RESOURCE_STATE_UP"], "after restart: run still UP")
         ok, st2 = a.call("vehicle_status", {"workspace": V03})
         bad2 = [n.get("spec", {}).get("vxid") for n in st2.get("nodes", [])
                 if n.get("status", {}).get("state") != "RESOURCE_STATE_UP"]

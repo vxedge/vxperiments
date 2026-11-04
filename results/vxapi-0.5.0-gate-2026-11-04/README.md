@@ -39,6 +39,16 @@ Each core run checks, in order:
 - A daemon stopped in the middle of `up` left a half-built vehicle. A new daemon listed the run, and
   `vehicle_down` converged it with nothing left behind: the behaviour the gate asks for.
 
+## Follow-up: vxedge 0.5.1
+
+After the gate, the run state of a half-built vehicle was found to read `RESOURCE_STATE_UP`: a
+daemon stopped in the middle of `up` left the run listed as up. vxedge 0.5.1
+([vxedge#73](https://github.com/vxedge/vxedge/pull/73)) makes it the workspace's rollup. On
+`06b789b`'s daemon, [`halfbuilt-0.5.1.txt`](halfbuilt-0.5.1.txt): `STAGING` while `up` runs, `UP`
+after it, and `DEGRADED` with the daemon stopped during the zone, compute and signal-plane stages,
+each converged by a second `up`; [`core3-0.5.1.txt`](core3-0.5.1.txt): three more core runs, now
+also checking the run reads `UP` before and after a restart.
+
 ## What this does not show
 
 - `exp-001-ws` traffic runs with the gateway stage only, as its campaign does: a full `up` moves the
@@ -63,5 +73,6 @@ export VX_BIN=/path/to/bin VXPERIMENTS=/path/to/vxperiments   # the seven binari
 python3 -I harness/live.py core 10
 python3 -I harness/live.py cancel
 python3 -I harness/live.py libvirt
+python3 -I harness/halfbuilt.py      # run from harness/, needs live.py beside it
 TRIAL=/path/to/exp-001-ws-copy python3 -I harness/live.py traffic
 ```
