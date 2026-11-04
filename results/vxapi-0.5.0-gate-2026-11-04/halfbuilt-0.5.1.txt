@@ -1,0 +1,38 @@
+01:09:22 #### halfbuilt
+01:09:22   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+01:09:22   PASS host clean before start
+01:09:23    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+01:09:33   PASS run_list while up runs: ['RESOURCE_STATE_STAGING']
+01:09:50   PASS run_list once up ends: ['RESOURCE_STATE_UP']
+01:09:50    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+01:10:44 == daemon stopped 3s into up
+01:10:44    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+01:10:49   at the stop: JOB_STATE_RUNNING 40% zone cabin1: starting node 1/1: cabin1 (Container)
+01:10:56   PASS run_list after the daemon stopped: ['RESOURCE_STATE_DEGRADED'], want RESOURCE_STATE_DEGRADED
+01:10:56    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+01:11:16   PASS a second up converges: JOB_STATE_SUCCEEDED
+01:11:22   PASS run_list after it: ['RESOURCE_STATE_UP']
+01:11:22    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+01:12:17   PASS down JOB_STATE_SUCCEEDED
+01:12:17 == daemon stopped 8s into up
+01:12:17    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+01:12:26   at the stop: JOB_STATE_RUNNING 60% compute hpc1: starting node 1/1: hpc1 (Container)
+01:12:34   PASS run_list after the daemon stopped: ['RESOURCE_STATE_DEGRADED'], want RESOURCE_STATE_DEGRADED
+01:12:34    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+01:12:53   PASS a second up converges: JOB_STATE_SUCCEEDED
+01:12:59   PASS run_list after it: ['RESOURCE_STATE_UP']
+01:12:59    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+01:13:54   PASS down JOB_STATE_SUCCEEDED
+01:13:54 == daemon stopped 12s into up
+01:13:54    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+01:14:07   at the stop: JOB_STATE_RUNNING 72% signal plane: kuksa-databroker on hpc1 (up)
+01:14:15   PASS run_list after the daemon stopped: ['RESOURCE_STATE_DEGRADED'], want RESOURCE_STATE_DEGRADED
+01:14:15    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): provisions this host's gateway 
+01:14:33   PASS a second up converges: JOB_STATE_SUCCEEDED
+01:14:40   PASS run_list after it: ['RESOURCE_STATE_UP']
+01:14:40    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `$VXPERIMENTS/vehicles/vx-vehicle-03` (every stage): stops its services, signal pla
+01:15:34   PASS down JOB_STATE_SUCCEEDED
+01:15:34   PASS run_list empty
+01:15:35   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+01:15:35   PASS host clean after down
+01:15:35 #### halfbuilt: 0 failure(s)
