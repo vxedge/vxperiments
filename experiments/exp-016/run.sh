@@ -62,6 +62,7 @@ sudo -n setcap cap_net_admin,cap_sys_admin+ep "$bin/vxedged" || { echo "setcap f
 pin_cpu_governor_performance
 govs=$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -c | tr -s ' ')
 echo "cpu governors during the run:$govs"
+echo "cpu idle states: $(for d in /sys/devices/system/cpu/cpu0/cpuidle/state*; do printf '%s(%sus) ' "$(cat $d/name)" "$(cat $d/latency)"; done)"
 [ "$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort -u)" = performance ] || { echo "governor not pinned"; exit 1; }
 echo "vxedge $(git -C "$bin/../.." rev-parse --short HEAD 2>/dev/null || echo unknown), vxperiments $(git rev-parse --short HEAD)"
 sha256sum vehicle.yaml parts.yaml data/*.json
@@ -79,15 +80,31 @@ h vxedge vehicle status --manifest .; $V vehicle status --manifest .; echo "exit
 h "databroker stays running"; sleep 2
 podman inspect -f 'running={{.State.Running}} restarts={{.RestartCount}} image={{.ImageName}} args={{.Args}}' vx-hpc1-kuksa-databroker
 
+# Time all CPUs spent in idle states with an exit latency of 10 us or more, in ms. Governor
+# pinning does not stop these sleeps, so each run records how much of it the CPUs spent there.
+deep_idle_ms() {
+    python3 -c '
+import glob
+t = 0
+for s in glob.glob("/sys/devices/system/cpu/cpu*/cpuidle/state*"):
+    if int(open(s + "/latency").read()) >= 10:
+        t += int(open(s + "/time").read())
+print(t // 1000)'
+}
+
 # perf <node> <image> <out> <args...>: one kuksa-perf run in a node's namespace.
 perf() {
     local node=$1 image=$2 out=$3
     shift 3
     podman rm -f -t 0 vxt-perf >/dev/null 2>&1
+    local idle0
+    idle0=$(deep_idle_ms)
     timeout $((DURATION + 60)) podman run --rm --name vxt-perf --network "container:vx-$node-infra" \
         -v "$here/data:/data:ro" "$image" --api kuksa.val.v2 --host "http://$BROKER_HOST" --port 55555 \
         --duration "$DURATION" --skip-seconds "$SKIP" "$@" >"$RUN/out/$out.txt" 2>&1
-    echo "exit $? $out: $(grep -E '50% in under|Received:' "$RUN/out/$out.txt" | tr -s ' ' | tr '\n' ' ')"
+    local rc=$?
+    echo "deep idle: $(( $(deep_idle_ms) - idle0 )) ms across all CPUs" >>"$RUN/out/$out.txt"
+    echo "exit $rc $out: $(grep -E '50% in under|Received:|deep idle' "$RUN/out/$out.txt" | tr -s ' ' | tr '\n' ' ')"
     # The databroker releases a finished run's claims on its own sweep, about a second later; a
     # run started sooner finds its signals still claimed and sends nothing.
     sleep 3

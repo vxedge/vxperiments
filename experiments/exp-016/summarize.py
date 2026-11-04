@@ -14,12 +14,16 @@ import sys
 
 PCT = re.compile(r"(\d+)% in under ([\d.]+) ms")
 COUNT = re.compile(r"^\s*(Sent|Received|Skipped):\s*(\d+)", re.M)
+IDLE = re.compile(r"^deep idle: (-?\d+) ms", re.M)
 
 
 def parse(path):
     text = path.read_text(errors="replace")
     pct = {int(p): float(v) * 1000 for p, v in PCT.findall(text)}  # microseconds
     counts = {k: int(v) for k, v in COUNT.findall(text)}
+    idle = IDLE.search(text)
+    if idle:
+        counts["deep_idle_ms"] = int(idle.group(1))
     return pct, counts
 
 
@@ -39,7 +43,7 @@ def main(out):
         runs.setdefault(key, []).append((pct, counts))
 
     print("median across repetitions, microseconds; [min-max] in brackets")
-    print(f"{'run':24} {'n':>2} {'p50':>18} {'p90':>18} {'p99':>18} {'received/sent':>14}")
+    print(f"{'run':24} {'n':>2} {'p50':>18} {'p90':>18} {'p99':>18} {'received/sent':>14} {'deep idle ms':>12}")
     med = {}
     for key, rs in runs.items():
         cells = []
@@ -51,7 +55,9 @@ def main(out):
         sent = sum(r[1].get("Sent", 0) for r in rs)
         recv = sum(r[1].get("Received", 0) for r in rs)
         ratio = f"{recv}/{sent}" if sent else "-"
-        print(f"{key:24} {len(rs):>2} {cells[0]:>18} {cells[1]:>18} {cells[2]:>18} {ratio:>14}")
+        idles = [r[1]["deep_idle_ms"] for r in rs if "deep_idle_ms" in r[1]]
+        idle = f"{statistics.median(idles):.0f}" if idles else "-"
+        print(f"{key:24} {len(rs):>2} {cells[0]:>18} {cells[1]:>18} {cells[2]:>18} {ratio:>14} {idle:>12}")
 
     print()
     print("differences of the medians, microseconds")
