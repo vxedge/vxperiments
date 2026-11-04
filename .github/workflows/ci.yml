@@ -60,11 +60,26 @@ jobs:
         working-directory: vxperiments
         run: |
           set -euo pipefail
-          for ws in experiments/*-ws; do
+          # A workspace is any experiment folder holding a `.vxp` descriptor, whatever its name.
+          # Folders without one are listed, not validated: they are scripts against a reference
+          # vehicle, not packages, until they are migrated.
+          shopt -s nullglob
+          validated=0
+          for ws in experiments/*/; do
+            ws=${ws%/}
+            [ "$ws" = experiments/retired-6.1 ] && continue
+            descriptors=("$ws"/*.vxp)
+            if [ ${#descriptors[@]} -eq 0 ]; then
+              echo "== $ws: no .vxp descriptor, not a workspace yet"
+              continue
+            fi
             echo "== $ws"
             "$VXEDGE" manifest validate --manifest "$ws" --json | tee /tmp/result.json
             jq -e '.valid == true and .kind == "workspace"' /tmp/result.json > /dev/null
+            validated=$((validated + 1))
           done
+          [ "$validated" -gt 0 ] || { echo "error: no workspace validated" >&2; exit 1; }
+          echo "== $validated workspaces validated"
           # The retired §6.1 manifests are provenance, not inputs: they must NOT validate as
           # workspaces, and a day when they do means something resurrected the old schema.
           for m in experiments/retired-6.1/*.yaml; do
