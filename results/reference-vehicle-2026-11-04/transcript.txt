@@ -1,0 +1,40 @@
+# vx-reference-sedan-01, 2026-11-04
+vxedge vxedge 0.5.2
+manifest sha256: 8f4240035114d378 f27d901b61ba04aa 
+## leaks before
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+rc=0
+## up
+[100%] vehicle.up vehicle `vx-reference-sedan-01` up — gateway, 6 zone(s), 1 compute(s), signal plane up on `hpc-ad-01`, 1 service(s)
+vehicle.up: succeeded
+## flows
+PASS  hpc-ad-01 -> fl-camera-sensor 10.120.0.12:9800 (20/20 replies)
+PASS  hpc-ad-01 -> fl-safety-ecu 10.120.0.11:9800 (20/20 replies)
+PASS  hpc-ad-01 -> rr-brake-actuator 10.120.0.41:9800 (20/20 replies)
+PASS  hpc-ad-01 -> rl-radar-sensor 10.120.0.31:9800 (20/20 replies)
+PASS  hpc-ad-01 -> fr-steer-actuator 10.120.0.22:9800 (20/20 replies)
+PASS  hpc-ad-01 -> fr-body-ecu 10.120.0.21:9800 (20/20 replies)
+PASS  OTA root.json served on hpc-ad-01:9900
+rc=0
+## second up
+vehicle.up: succeeded
+snapshot diff: empty
+## daemon restart
+vehicle vx-reference-sedan-01: up (10 resource(s))
+## down
+vehicle.down: succeeded
+## leaks after
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
+rc=0
