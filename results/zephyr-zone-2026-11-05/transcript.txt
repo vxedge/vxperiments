@@ -1,0 +1,35 @@
+# vx-reference-sedan-02: fr-steer-actuator = Zephyr (registry digest), other five zones Linux
+# vxedge vxedge 0.5.3
+# parts
+  - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0
+    digest: sha256:33c9c8d8625bd5c6d1f4d3d0c561fdaa930e057fcd1fb24fb3badb402f25429d
+  - ref: ghcr.io/vxedge/parts/zone/zephyr/stack/probe-bundle:0.1.0
+    digest: sha256:a50f0cb58ed9b041217cc9cdaba7555089d6c73545fcdebe90ecba250fdfe135
+  - ref: localhost/vxedge/probe:1
+# up
+[ 90%] vehicle.up service ota: starting ota service
+[100%] vehicle.up vehicle `vx-reference-sedan-02` up — gateway, 6 zone(s), 1 compute(s), signal plane up on `hpc-ad-01`, 1 service(s)
+vehicle.up: succeeded
+# flows
+PASS  hpc-ad-01 -> fl-camera-sensor 10.120.0.12:9800 (20/20 replies)
+PASS  hpc-ad-01 -> fl-safety-ecu 10.120.0.11:9800 (20/20 replies)
+PASS  hpc-ad-01 -> rr-brake-actuator 10.120.0.41:9800 (20/20 replies)
+PASS  hpc-ad-01 -> rl-radar-sensor 10.120.0.31:9800 (20/20 replies)
+PASS  hpc-ad-01 -> fr-steer-actuator 10.120.0.22:9800 (20/20 replies)
+PASS  hpc-ad-01 -> fr-body-ecu 10.120.0.21:9800 (20/20 replies)
+PASS  OTA root.json served on hpc-ad-01:9900
+# second up
+[100%] vehicle.up vehicle `vx-reference-sedan-02` up — gateway, 6 zone(s), 1 compute(s), signal plane up on `hpc-ad-01`, 1 service(s)
+vehicle.up: succeeded
+snapshot diff: empty
+# down
+[100%] vehicle.down vehicle `vx-reference-sedan-02` down
+vehicle.down: succeeded
+# leaks
+netns: none
+links: none
+containers: none
+qemu: none
+cloud-hypervisor: none
+vxcapsule: none
+nft: none
