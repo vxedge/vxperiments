@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Build what this vehicle needs on this host: vx-vehicle-02's probe and OTA images and OTA store,
-# copied in because a workspace may not reach outside itself. The guest bundle is not built: it is
-# the published, digest-pinned probe-bundle in parts.yaml. Safe to re-run.
+# Build what this vehicle still needs on this host: the OTA store, copied from vx-vehicle-02 (whose
+# build.sh makes it), because a workspace may not reach outside itself. The guest bundles, the probe
+# payload and the OTA image are published parts pinned in parts.yaml and vehicle.yaml. Safe to re-run.
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)

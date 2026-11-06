@@ -1,12 +1,13 @@
 kind: baseline
 id: bl-vx-reference-sedan-01
 
-# The guest bundle is the published, digest-pinned probe-bundle. The probe image is local and per
-# host: run ./build.sh once. `vehicle up` refuses if a part is missing.
+# Every part is published and digest-pinned: the guest bundles and the compute node's probe payload.
+# `vehicle up` refuses if a part is missing.
 parts:
   - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0
     digest: sha256:33c9c8d8625bd5c6d1f4d3d0c561fdaa930e057fcd1fb24fb3badb402f25429d
     kind: bundle
     target_ids: [fn-fl-safety-ecu, fn-fl-camera-sensor, fn-fr-body-ecu, fn-fr-steer-actuator, fn-rl-radar-sensor, fn-rr-brake-actuator]
-  - ref: localhost/vxedge/probe:1
+  - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
+    digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
     target_ids: [fn-hpc-ad-01]
