@@ -18,7 +18,6 @@ All devices share one slice and one /24, so every device can reach every other.
 ## Run it
 
 ```bash
-./build.sh                                # once per host: probe and OTA images, OTA store
 vxedge vehicle up --manifest .
 vxedge vehicle status --manifest .
 ./check-flows.sh                          # central compute reaches all six zones, OTA answers
@@ -27,8 +26,9 @@ vxedge vehicle down --manifest .
 ./check-leaks.sh
 ```
 
-Needs what `vx-vehicle-02` needs. The guest bundle is the published `zone/linux/stack/probe-bundle`
-pinned by digest in `parts.yaml`, fetched into the daemon's cache on first `up`. The run in
+Nothing is built on the host: every guest bundle, the compute node's probe payload, the OTA image and the
+OTA store are published parts pinned by digest (`parts.yaml`, `vehicle.yaml`), fetched on first `up`. Needs
+vxedge 0.8.0 or later, for a published OTA store. The run in
 [`results/reference-vehicle-2026-11-04`](../../results/reference-vehicle-2026-11-04) is the evidence.
 
 ## Limits
