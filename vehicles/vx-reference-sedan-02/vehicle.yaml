@@ -60,7 +60,7 @@ services:
   ota:
     id: ota-01
     type: ota
-    image: { url: localhost/vxedge/ota:1, kind: container }
+    image: { url: ghcr.io/vxedge/parts/svc/ota/app/vxota@sha256:38dc26f33a08dc0af3085e86caa07eb697559200d52c12e3730a7cd2e78e213d, kind: container }
     on: hpc-ad-01
     config: { artifacts: ./ota-store, listen: "0.0.0.0:9900" }
 
