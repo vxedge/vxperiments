@@ -2,7 +2,7 @@
 # The build lives outside the workspace, in VXEDGE_AAOS_HOME (that part's build.sh output); start refuses an
 # image that does not match SHA256SUMS. One instance per host: Cuttlefish's first Ethernet tap and port 9300.
 interface: cvd-etap-01
-start: ./start.sh
-status: ./status.sh
-stop: ./stop.sh
+start: sh start.sh
+status: sh status.sh
+stop: sh stop.sh
 start_timeout_s: 1800
