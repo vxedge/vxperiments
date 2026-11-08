@@ -15,8 +15,8 @@ parts:
   - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
     digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
     target_ids: [fn-hpc-ad-01]
-  - ref: ghcr.io/vxedge/parts/svc/signal/app/vxvhal:0.1.0
-    digest: sha256:313f44bd558be6783287f45fa45c2439d336951e2d65f4ca5c2df63ce6f85423
+  - ref: ghcr.io/vxedge/parts/svc/signal/app/vxvhal:0.1.1
+    digest: sha256:41ee94eaa596c59dafc3e934fe3014b0ee8af3084ac1fb4a94d02644b92c744e
     target_ids: [fn-ivi-gw]
   - ref: ./aaos
     kind: attach
