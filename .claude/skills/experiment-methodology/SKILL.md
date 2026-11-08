@@ -58,5 +58,4 @@ discipline (ARCHITECTURE §12 is the spec; this is the practice).
 ## Reproducibility gate (before any number leaves the repo)
 
 Rerun the exact configuration from its archive's manifest on the same host: medians within
-the original run's IQR ⇒ reproducible. That check is exp-001's "run twice, diff
-distributions" task — apply it to every experiment thereafter.
+the original run's IQR ⇒ reproducible. Apply it to every experiment.

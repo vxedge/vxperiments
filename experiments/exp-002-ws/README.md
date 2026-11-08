@@ -18,10 +18,10 @@ Everything the experiment needs is in this folder: its documents, its campaign
 19 MB of kernel and initramfs, and five sandboxes vendoring it would be 95 MB in git — but
 `parts/linux-probe.sha256` is committed, so a fetched copy is verified rather than trusted.
 
-One thing still reaches outside: `../../scripts/lib/*.sh` (frozen-results protection, CPU
-governor pinning, binary freshness) are shared across every experiment. Vendoring five copies
-would reintroduce exactly the drift that left four of five runners without governor pinning, so
-they stay shared until there is a better home for them — an open decision in `../../TASKS.md`.
+The helpers in `scripts/lib/*.sh` (frozen-results protection, CPU governor pinning, binary
+freshness) are vendored copies of `../../scripts/lib/`, the canonical set every experiment shares.
+CI (`../../scripts/lib/check-runners.sh`) fails when a copy drifts from the canonical one, the
+kind of drift that once left four of five runners without governor pinning.
 
 ## Status: structurally equivalent, not yet numerically equivalent
 

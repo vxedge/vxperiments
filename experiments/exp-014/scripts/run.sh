@@ -87,8 +87,8 @@ REFLECTOR_ADDR=10.114.0.1
 
 # Every declared value an archive records comes from reading vehicle.yaml back, not from a
 # second copy in this script that could silently drift from it — the same trap
-# `services.telemetry.config` restating scrape targets already fell into once
-# (vxedge/TASKS.md), fixed there by reading the source instead of duplicating it. A link's block
+# `services.telemetry.config` restating scrape targets already fell into once in
+# vxedge, fixed there by reading the source instead of duplicating it. A link's block
 # spans from its own `- id:` line to the next one; `awk` collects it, `sed` pulls one field.
 link_block() { # $1=link-id -> that link's YAML lines
   awk -v want="$1" '

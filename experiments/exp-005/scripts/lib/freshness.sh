@@ -8,8 +8,8 @@
 # vxedged; vxota: vxota + vxota-probe) that's a false positive whenever one
 # binary's source changes but a sibling binary that doesn't depend on it
 # hasn't been touched — cargo correctly leaves the sibling un-relinked, but
-# the whole-repo scan flags it anyway. Hit twice running exp-003
-# (vxperiments/TASKS.md has the story). This version walks each crate's
+# the whole-repo scan flags it anyway. Hit twice running exp-003.
+# This version walks each crate's
 # *actual* local path dependencies (parsed straight from its Cargo.toml —
 # single source of truth, no drift risk) instead of guessing.
 #
