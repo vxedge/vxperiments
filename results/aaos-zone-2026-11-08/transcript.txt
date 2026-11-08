@@ -1,0 +1,32 @@
+# vxedged: vxedge main + attach backend (branch attach-backend), release build; vxedge CLI same build
+# AAOS: Cuttlefish aosp_cf_x86_64_auto-userdebug build 16644040 (Android 17, API 37), images checked against aaos/SHA256SUMS
+$ vxedge vehicle up --manifest vehicles/vx-reference-sedan-03
+[ 10%] vehicle.up gateway: bridge, slices, endpoints
+[ 30%] vehicle.up gateway: provisioning bridge + uplink
+[ 30%] vehicle.up gateway: applying slice VLANs + HTB queue tree
+[ 30%] vehicle.up gateway: attaching zone endpoints
+[ 30%] vehicle.up gateway: applying tunnels
+[ 30%] vehicle.up gateway: verifying observed state
+[ 40%] vehicle.up zone 1/8: fl-camera-sensor (up)
+[ 40%] vehicle.up zone fl-camera-sensor: starting node 1/1: fl-camera-sensor (QemuMicrovm)
+[ 42%] vehicle.up zone 2/8: fl-safety-ecu (up)
+[ 42%] vehicle.up zone fl-safety-ecu: starting node 1/1: fl-safety-ecu (QemuMicrovm)
+[ 45%] vehicle.up zone 3/8: fr-body-ecu (up)
+[ 45%] vehicle.up zone fr-body-ecu: starting node 1/1: fr-body-ecu (QemuMicrovm)
+[ 47%] vehicle.up zone 4/8: fr-steer-actuator (up)
+[ 47%] vehicle.up zone fr-steer-actuator: starting node 1/1: fr-steer-actuator (QemuMicrovm)
+[ 50%] vehicle.up zone 5/8: ivi-gw (up)
+[ 50%] vehicle.up zone ivi-gw: starting node 1/1: ivi-gw (Container)
+[ 52%] vehicle.up zone 6/8: rl-radar-sensor (up)
+[ 52%] vehicle.up zone rl-radar-sensor: starting node 1/1: rl-radar-sensor (QemuMicrovm)
+[ 55%] vehicle.up zone 7/8: rr-brake-actuator (up)
+[ 55%] vehicle.up zone rr-brake-actuator: starting node 1/1: rr-brake-actuator (QemuMicrovm)
+[ 57%] vehicle.up zone 8/8: ivi-aaos (up)
+[ 57%] vehicle.up zone ivi-aaos: starting node 1/1: ivi-aaos (Attach)
+[ 60%] vehicle.up compute 1/1: hpc-ad-01 (up)
+[ 60%] vehicle.up compute hpc-ad-01: starting node 1/1: hpc-ad-01 (Container)
+[ 72%] vehicle.up signal plane: kuksa-databroker on ivi-gw (up)
+[ 75%] vehicle.up service ota: up
+[ 90%] vehicle.up service ota: starting ota service
+[100%] vehicle.up vehicle `vx-reference-sedan-03` up — gateway, 8 zone(s), 1 compute(s), signal plane up on `ivi-gw`, 1 service(s)
+vehicle.up: succeeded
