@@ -25,8 +25,8 @@ services:
       # Fixed, pre-seeded store path (script keygen/publish once, idempotent
       # — mirrors how vxparts' guest bundle is a fixed pre-built path, not
       # regenerated per repetition). Same rationale as exp-001/exp-002b's
-      # "host-process" image url: no container runtime integration yet
-      # (vxedge/TASKS.md §3), so this is a v1 process-backend placeholder.
+      # "host-process" image url: no container runtime integration, so this
+      # is a v1 process-backend placeholder.
       artifacts: /tmp/vxota-exp003-store
       listen: 127.0.0.1:9900
 

@@ -77,8 +77,8 @@ check_fresh_bin "$WS/vxtelemetry" "$VXTELEMETRY" "$WS/vxtelemetry"
 #
 # `experiment up --stage gateway`, not the full `up`: staging the zones would move the veth
 # peers into node netns and change the measurement path. Running the agents inside the zones is
-# more faithful and is the direction of travel (TASKS.md), but it is a different measurement and
-# needs its own baseline — mixing it into an equivalence check would confound the two. Staging
+# more faithful, but it is a different measurement and needs its own baseline — mixing it into
+# an equivalence check would confound the two. Staging
 # is what makes that choice expressible to the daemon rather than a reason to bypass it.
 # Everything below runs from the §6.0 workspace: §6.1 manifests stopped being a
 # provisioning input on 2026-07-31, and `vxedge up`/`vxtelemetry` both read the

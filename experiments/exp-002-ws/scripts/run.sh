@@ -5,11 +5,10 @@
 #   cd experiments/exp-002-ws && sudo -E env "PATH=$PATH" ./scripts/run.sh [--quick|--repro]
 #
 # This runner lives inside the sandbox it runs, so the experiment travels with its campaign.
-# One thing still reaches outside it: `scripts/lib/*.sh` (results-dir protection, governor
-# pinning, binary freshness) are shared across every experiment. Vendoring five copies would
-# reintroduce exactly the drift that left four of five runners without governor pinning, so
-# they stay shared until there is a better home for them — the open decision recorded in
-# TASKS.md.
+# Its `scripts/lib/*.sh` (results-dir protection, governor pinning, binary freshness) are
+# vendored copies of the repo's canonical `scripts/lib/`. CI (scripts/lib/check-runners.sh)
+# fails when a copy drifts, the kind of drift that once left four of five runners without
+# governor pinning.
 #
 # --repro: full campaign written to results/exp-002-repro-<date>/ — the frozen
 #          results/exp-002/ dir is never overwritten in place (lib/results_dir.sh).

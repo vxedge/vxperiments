@@ -22,8 +22,10 @@ validation source), §12 (methodology/metrics), §13 (reproducibility).
   moved without its registry row leaves the public numbers stale. The website's figure build
   refuses to draw a CSV that disagrees with `FACTS.md`.
 - One experiment = one hypothesis focus. Name/describe accordingly (e.g. exp-001 → H1).
-- Python for notebooks (§15); charts/CSVs must regenerate headlessly (CI-runnable) so paper
+- Python for notebooks (§15); charts/CSVs must regenerate headlessly (CI-runnable) so published
   figures are reproducible.
+- **Work items are tracked on the maintainers' internal board; the public record of changes is
+  `CHANGELOG.md`.** This repo holds what exists and is shipped, not plans or open work.
 - **The CI validator is a pinned release.** The "workspace validation" job runs the released
   `vxedge` x86_64 binary named in `ci/vxedge-release.txt` (`version=` and `sha256=`), not a build of
   vxedge `main`. CI checks the archive's sha256 against that file and verifies its build provenance

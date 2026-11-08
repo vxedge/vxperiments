@@ -113,8 +113,8 @@ else
 fi
 PROBE_TIMEOUT_MS=1000
 
-# OTA process resource footprint (§12 compute metrics; vxtelemetry/TASKS.md — the sampler
-# vxtelemetry::sample was built for exp-002b and reused here, docs/ROADMAP.md). Two labels,
+# OTA process resource footprint (§12 compute metrics; the sampler vxtelemetry::sample was
+# built for exp-002b and is reused here). Two labels,
 # sampled together: ota-server runs the whole time in both arms (idle in baseline, actively
 # serving the burst artifact in ota-burst); ota-probe only exists in ota-burst, so it simply
 # never appears in baseline's resource-summary.json — not a bug, the expected shape (see
