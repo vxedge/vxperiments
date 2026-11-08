@@ -36,7 +36,8 @@ production Vehicle HAL path over a slice, on x86_64. Not the production instruct
 
 - `vbmeta*.img` are not pinned: Cuttlefish regenerates them at each launch.
 - One AAOS instance per host: Cuttlefish's first tap and port 9300.
-- Checks were run by hand; the 10-of-10 gate follows.
+- Checks were run by hand. The 10-of-10 gate on vxedge 0.9.1 is [`../aaos-gate-2026-11-08`](../aaos-gate-2026-11-08);
+  the first `down`'s failure here was a vxedge bug, fixed in 0.9.1 (attach zones stop last).
 
 ## Files
 

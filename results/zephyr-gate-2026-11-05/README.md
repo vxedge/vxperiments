@@ -29,3 +29,5 @@ binaries it needs (`vxedged`, `vxcapsule`, `vxmcp`) are built from the repositor
   timed, and the run is not a performance result.
 - Only `core` was run. The cancel, libvirt and traffic scenarios of the 0.5.0 gate were not.
 - The daemon ran from a debug build.
+
+Paths in `core10.txt` are shortened to `<vxperiments>`, `$VX_BIN` and `~` (2026-11-08).
