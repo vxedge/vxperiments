@@ -13,6 +13,8 @@ than a repo tag.
 
 ### Changed
 
+- `results/aaos-gate-2026-11-08`: "What this does not show" states what the run is not, without naming later
+  stages.
 - `vx-reference-sedan-03`: the `aaos` adapter's `attach.yaml` runs `sh start.sh`, `sh status.sh` and
   `sh stop.sh`, so the vehicle comes up when vendored or unpacked from a package, which keeps no execute bit.
 - CI's workspace validation runs vxedge 0.6.1 (`ci/vxedge-release.txt`), which computes workspace identities under `vxws/2` and checks each `.vxp` descriptor against its experiment.

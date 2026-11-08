@@ -81,9 +81,9 @@ mapping. Run it with `VX_BIN` (holding `vxedged`, `vxcapsule`, `vxmcp`), `VXEDGE
 
 ## What this does not show
 
-- **Not the production platform.** This is rung 1 of the ladder: the AAOS framework and the production
+- **Not the production platform.** This is the AAOS framework and the production
   Vehicle HAL path, on x86_64 under Cuttlefish. It is not the production instruction set, hypervisor or
-  hardware. Those are the later rungs (`aaos-26q2-arm64-cf`, `aaos-on-qnx-hyp`, `aaos-hil`).
+  hardware.
 - **Only read properties.** The Vehicle HAL check reads two properties. No write path (`SetValues` is
   refused by vxvhal 0.1) and no HMI ran.
 - **Probes, not ECU applications.** The other zone guests are probes, and their flows were not probed here;
