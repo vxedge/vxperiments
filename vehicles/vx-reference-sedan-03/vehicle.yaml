@@ -1,0 +1,87 @@
+kind: vehicle
+id: vx-reference-sedan-03
+class: road
+subtype: car
+
+# vx-reference-sedan-02 plus a cockpit zone, as a production cockpit domain joins the vehicle: an AAOS
+# infotainment guest (`ivi-aaos`, backend attach: AAOS 26Q2 on its own Cuttlefish host stack, its Ethernet tap
+# adopted as the slice port) and the cockpit gateway ECU (`ivi-gw`) that serves its Vehicle HAL from the
+# vehicle's signals: vxvhal and the Kuksa signal plane on one node. The AAOS guest sets 192.168.98.3/24 itself and
+# dials the Vehicle HAL at 192.168.98.1:9300, so `ivi-gw` carries that address beside its vehicle one, and the
+# Vehicle HAL path is slice traffic. One /24 for the vehicle, one for the cockpit, on one slice.
+zones:
+  front-left: {}
+  front-right: {}
+  rear-left: {}
+  rear-right: {}
+  central-hpc: {}
+  cockpit: {}
+
+devices:
+  fl-safety-ecu: { role: ecu, zone: front-left, backend: qemu-microvm }
+  fl-camera-sensor: { role: sensor, zone: front-left, backend: qemu-microvm }
+  fr-body-ecu: { role: ecu, zone: front-right, backend: qemu-microvm }
+  fr-steer-actuator: { role: actuator, zone: front-right, backend: qemu-microvm }
+  rl-radar-sensor: { role: sensor, zone: rear-left, backend: qemu-microvm }
+  rr-brake-actuator: { role: actuator, zone: rear-right, backend: qemu-microvm }
+  hpc-ad-01: { role: hpc, zone: central-hpc, backend: container }
+  ivi-gw: { role: ecu, zone: cockpit, backend: container }
+  ivi-aaos: { role: ecu, zone: cockpit, backend: attach }
+
+functions:
+  fn-fl-safety-ecu: { deployed_on: fl-safety-ecu }
+  fn-fl-camera-sensor: { deployed_on: fl-camera-sensor }
+  fn-fr-body-ecu: { deployed_on: fr-body-ecu }
+  fn-fr-steer-actuator: { deployed_on: fr-steer-actuator }
+  fn-rl-radar-sensor: { deployed_on: rl-radar-sensor }
+  fn-rr-brake-actuator: { deployed_on: rr-brake-actuator }
+  fn-hpc-ad-01: { deployed_on: hpc-ad-01 }
+  fn-ivi-gw: { deployed_on: ivi-gw }
+  fn-ivi-aaos: { deployed_on: ivi-aaos }
+
+links:
+  - id: link-fl-safety-ecu
+    endpoints: [{ node: fl-safety-ecu, port: eth0, ip: 10.120.0.11/24 }]
+    slice: adas
+  - id: link-fl-camera-sensor
+    endpoints: [{ node: fl-camera-sensor, port: eth0, ip: 10.120.0.12/24 }]
+    slice: adas
+  - id: link-fr-body-ecu
+    endpoints: [{ node: fr-body-ecu, port: eth0, ip: 10.120.0.21/24 }]
+    slice: adas
+  - id: link-fr-steer-actuator
+    endpoints: [{ node: fr-steer-actuator, port: eth0, ip: 10.120.0.22/24 }]
+    slice: adas
+  - id: link-rl-radar-sensor
+    endpoints: [{ node: rl-radar-sensor, port: eth0, ip: 10.120.0.31/24 }]
+    slice: adas
+  - id: link-rr-brake-actuator
+    endpoints: [{ node: rr-brake-actuator, port: eth0, ip: 10.120.0.41/24 }]
+    slice: adas
+  - id: link-hpc-ad-01
+    endpoints: [{ node: hpc-ad-01, port: eth0, ip: 10.120.0.50/24 }]
+    slice: adas
+  - id: link-ivi-gw
+    endpoints: [{ node: ivi-gw, port: eth0, ip: [10.120.0.60/24, 192.168.98.1/24] }]
+    slice: adas
+  - id: link-ivi-aaos
+    endpoints: [{ node: ivi-aaos, port: eth1, ip: 192.168.98.3/24, host_interface: cvd-etap-01 }]
+    slice: adas
+
+services:
+  ota:
+    id: ota-01
+    type: ota
+    image: { url: ghcr.io/vxedge/parts/svc/ota/app/vxota@sha256:38dc26f33a08dc0af3085e86caa07eb697559200d52c12e3730a7cd2e78e213d, kind: container }
+    on: hpc-ad-01
+    config:
+      artifacts: ghcr.io/vxedge/parts/svc/ota/config/gate-store@sha256:8ea595fe8642bfba6809320befd7e9373c6eaba9f72e0ddaf3ae54da90180546
+      listen: "0.0.0.0:9900"
+
+signal_plane:
+  kuksa:
+    image:
+      url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+      kind: container
+    on: ivi-gw
+    config: { listen: "0.0.0.0:55555" }
