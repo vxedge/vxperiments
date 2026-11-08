@@ -1,5 +1,5 @@
 # The vxedge release the CI "workspace validation" job downloads and runs.
 # Bump both lines together: version from https://github.com/vxedge/vxedge/releases, sha256 of the
 # x86_64 archive from that release's SHA256SUMS.
-version=0.9.1
-sha256=a452a6b66ec237015386b3f918cf4789bb677560b69e36e42adeb926a6314a6b
+version=0.10.0
+sha256=5359cab228f028b1ea609ce5c8a9202915db4ac312ab923b5ac49b8326bad2bc
