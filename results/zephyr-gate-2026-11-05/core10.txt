@@ -4,13 +4,13 @@
 15:04:54 == core 1: vx-reference-sedan-02 through vxmcp
 15:04:56   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:04:58   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:04:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:04:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:05:00   PASS vehicle_up returns a job
-15:05:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:05:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:05:02   PASS duplicate vehicle_up returns the running job (job-9e3b1a-000000)
-15:05:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:05:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:05:03   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:05:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:05:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:05:03   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:05:14   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:05:14   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -31,7 +31,7 @@
 15:05:27   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:05:27   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:05:27   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:05:27    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:05:27    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:05:27   PASS vehicle_down returns a job
 15:05:27    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-0a17db-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:05:27   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -42,13 +42,13 @@
 15:05:56 == core 2: vx-reference-sedan-02 through vxmcp
 15:05:57   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:06:00   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:06:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:06:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:06:02   PASS vehicle_up returns a job
-15:06:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:06:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:06:03   PASS duplicate vehicle_up returns the running job (job-0a17db-00000a)
-15:06:03    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:06:03    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:06:05   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:06:05    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:06:05    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:06:05   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:06:16   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:06:16   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -69,7 +69,7 @@
 15:06:26   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:06:26   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:06:26   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:06:26    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:06:26    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:06:26   PASS vehicle_down returns a job
 15:06:26    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-eea220-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:06:26   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -80,13 +80,13 @@
 15:06:55 == core 3: vx-reference-sedan-02 through vxmcp
 15:06:56   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:06:59   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:07:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:07:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:07:01   PASS vehicle_up returns a job
-15:07:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:07:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:07:03   PASS duplicate vehicle_up returns the running job (job-eea220-00000a)
-15:07:03    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:07:03    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:07:04   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:07:04    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:07:04    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:07:04   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:07:15   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:07:15   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -107,7 +107,7 @@
 15:07:25   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:07:25   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:07:25   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:07:25    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:07:25    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:07:25   PASS vehicle_down returns a job
 15:07:25    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-a72999-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:07:25   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -118,13 +118,13 @@
 15:07:55 == core 4: vx-reference-sedan-02 through vxmcp
 15:07:56   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:07:58   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:07:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:07:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:08:00   PASS vehicle_up returns a job
-15:08:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:08:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:08:02   PASS duplicate vehicle_up returns the running job (job-a72999-00000a)
-15:08:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:08:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:08:03   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:08:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:08:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:08:03   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:08:14   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:08:14   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -145,7 +145,7 @@
 15:08:25   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:08:25   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:08:25   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:08:25    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:08:25    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:08:25   PASS vehicle_down returns a job
 15:08:25    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-9b4b2f-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:08:25   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -156,13 +156,13 @@
 15:08:54 == core 5: vx-reference-sedan-02 through vxmcp
 15:08:55   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:08:57   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:08:58    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:08:58    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:09:00   PASS vehicle_up returns a job
-15:09:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:09:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:09:01   PASS duplicate vehicle_up returns the running job (job-9b4b2f-00000a)
-15:09:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:09:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:09:03   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:09:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:09:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:09:03   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:09:13   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:09:13   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -183,7 +183,7 @@
 15:09:24   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:09:24   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:09:24   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:09:24    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:09:24    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:09:24   PASS vehicle_down returns a job
 15:09:24    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-3d65c2-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:09:24   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -194,13 +194,13 @@
 15:09:53 == core 6: vx-reference-sedan-02 through vxmcp
 15:09:54   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:09:57   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:09:58    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:09:58    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:09:59   PASS vehicle_up returns a job
-15:09:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:09:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:10:00   PASS duplicate vehicle_up returns the running job (job-3d65c2-00000a)
-15:10:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:10:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:10:02   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:10:02    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:10:02    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:10:02   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:10:13   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:10:13   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -221,7 +221,7 @@
 15:10:25   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:10:25   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:10:25   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:10:25    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:10:25    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:10:25   PASS vehicle_down returns a job
 15:10:25    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-b06e0d-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:10:25   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -232,13 +232,13 @@
 15:10:55 == core 7: vx-reference-sedan-02 through vxmcp
 15:10:56   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:10:58   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:10:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:10:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:11:00   PASS vehicle_up returns a job
-15:11:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:11:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:11:02   PASS duplicate vehicle_up returns the running job (job-b06e0d-00000a)
-15:11:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:11:02    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:11:03   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:11:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:11:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:11:03   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:11:14   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:11:14   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -259,7 +259,7 @@
 15:11:25   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:11:25   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:11:25   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:11:25    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:11:25    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:11:25   PASS vehicle_down returns a job
 15:11:25    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-9a4c5e-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:11:25   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -270,13 +270,13 @@
 15:11:54 == core 8: vx-reference-sedan-02 through vxmcp
 15:11:55   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:11:58   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:11:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:11:59    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:12:00   PASS vehicle_up returns a job
-15:12:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:12:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:12:01   PASS duplicate vehicle_up returns the running job (job-9a4c5e-00000a)
-15:12:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:12:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:12:03   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:12:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:12:03    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:12:03   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:12:14   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:12:14   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -297,7 +297,7 @@
 15:12:26   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:12:26   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:12:26   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:12:26    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:12:26    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:12:26   PASS vehicle_down returns a job
 15:12:26    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-1ee4c8-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:12:26   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -308,13 +308,13 @@
 15:12:55 == core 9: vx-reference-sedan-02 through vxmcp
 15:12:57   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:12:59   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:13:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:13:00    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:13:01   PASS vehicle_up returns a job
-15:13:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:13:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:13:03   PASS duplicate vehicle_up returns the running job (job-1ee4c8-00000a)
-15:13:03    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:13:03    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:13:04   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:13:04    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:13:04    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:13:04   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:13:15   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:13:15   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -335,7 +335,7 @@
 15:13:28   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:13:28   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:13:28   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:13:28    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:13:28    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:13:28   PASS vehicle_down returns a job
 15:13:28    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-f4f7e6-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:13:28   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
@@ -346,13 +346,13 @@
 15:13:57 == core 10: vx-reference-sedan-02 through vxmcp
 15:13:58   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True}
 15:14:00   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
-15:14:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:14:01    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:14:03   PASS vehicle_up returns a job
-15:14:03    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
+15:14:03    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): provisions this host's ga
 15:14:04   PASS duplicate vehicle_up returns the running job (job-f4f7e6-00000a)
-15:14:04    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
+15:14:04    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (stages gateway): provisions this host's
 15:14:06   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
-15:14:06    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `/home/gzup/github/vxedge-wt/vxp-r2/experiments/exp-002-ws` (every stage): provisions this host's gateway
+15:14:06    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage): provisions this host's gateway
 15:14:06   PASS another workspace's up refused while a run is up (ERROR_REASON_WRONG_WORKSPACE)
 15:14:17   PASS vehicle_up job JOB_STATE_SUCCEEDED 
 15:14:17   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
@@ -373,7 +373,7 @@
 15:14:29   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
 15:14:29   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
 15:14:29   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
-15:14:29    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `/home/gzup/github/vxedge-wt/vxp-r2/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
+15:14:29    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down the vehicle at `<vxperiments>/vehicles/vx-reference-sedan-02` (every stage): stops its services, sign
 15:14:29   PASS vehicle_down returns a job
 15:14:29    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-1ab1c6-000000`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
 15:14:29   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)

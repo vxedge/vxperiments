@@ -22,7 +22,7 @@ traffic. `ivi-aaos` starts after every other zone node, so the guest never boots
 
 ## Run it
 
-Needs, on the host: vxedge with the attach backend; `cuttlefish-base` 1.57.13 or later and membership of
+Needs, on the host: vxedge 0.9.1 or later; `cuttlefish-base` 1.57.13 or later and membership of
 `cvdnetwork`; the AAOS build from `vxparts` `zone/aaos/stack/cuttlefish-auto` (its `build.sh`), about 3 GB plus
 about 20 GB of sparse disk images per instance. Start `vxedged` with `VXEDGE_AAOS_HOME` set to that build.
 
@@ -35,7 +35,8 @@ vxedge vehicle down --manifest .
 
 The AAOS read: publish to Kuksa inside `ivi-gw` (`podman run --network container:vx-ivi-gw-infra` with the
 Kuksa CLI) and read `cmd car_service get-property-value PERF_VEHICLE_SPEED` over `adb`.
-`results/aaos-zone-2026-11-08` is the first run.
+`results/aaos-zone-2026-11-08` is the first run, and `results/aaos-gate-2026-11-08` the 10-of-10 vxAPI gate
+(vxedge 0.9.1).
 
 ## The adapter
 
