@@ -37,7 +37,7 @@ exec > "$RUN/transcript.txt" 2>&1
 sudo -n setcap cap_net_admin,cap_sys_admin+ep "$bin/vxedged" || { echo "setcap failed: no sudo timestamp"; exit 1; }
 echo "vxedge $(git -C "$bin/../.." rev-parse --short HEAD 2>/dev/null || echo unknown), vxperiments $(git rev-parse --short HEAD)"
 sha256sum vehicle.yaml parts.yaml
-podman images --no-trunc --format '{{.Repository}}:{{.Tag}} {{.Digest}}' | grep -E 'localhost/(vxedge|vxperiments)'
+podman images --no-trunc --format '{{.Repository}}:{{.Tag}} {{.Digest}}' | grep -E 'localhost/(vxedge|vxperiments)|ghcr.io/vxedge/parts'
 
 h "databroker flags"; "$here/flags.sh"
 h ./check-leaks.sh "(clean state)"; ./check-leaks.sh; echo "exit $?"
@@ -70,7 +70,7 @@ h vxedge vehicle down --manifest . "(again)"; $V vehicle down --manifest . | tai
 h ./check-leaks.sh; ./check-leaks.sh; echo "exit $?"
 
 h "failed up: a foreign container holds the service's name"
-podman create --name vx-hpc1-ota-01 localhost/vxedge/probe:1 >/dev/null
+podman create --name vx-hpc1-ota-01 ghcr.io/vxedge/parts/agent/probe/app/vxprobe@sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d >/dev/null
 $V vehicle up --manifest . | tail -3; echo "exit ${PIPESTATUS[0]}"
 podman rm -f vx-hpc1-ota-01 >/dev/null
 h vxedge vehicle down --manifest . "(after the failed up)"; $V vehicle down --manifest . | tail -2; echo "exit ${PIPESTATUS[0]}"
@@ -78,8 +78,8 @@ h ./check-leaks.sh; ./check-leaks.sh; echo "exit $?"
 
 h "a databroker that exits straight after starting fails the job"
 BAD=$RUN/bad; rm -rf "$BAD"; mkdir -p "$BAD"; cp -a vehicle.yaml parts.yaml bundle ota-store capsule "$BAD/"
-sed -i 's#url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:[0-9a-f]*#url: localhost/vxedge/ota:1#' "$BAD/vehicle.yaml"
-grep -q 'url: localhost/vxedge/ota:1' "$BAD/vehicle.yaml" && echo "bad image in place" || echo "BAD IMAGE NOT IN PLACE"
+sed -i 's#url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:[0-9a-f]*#url: ghcr.io/vxedge/parts/svc/ota/app/vxota@sha256:38dc26f33a08dc0af3085e86caa07eb697559200d52c12e3730a7cd2e78e213d#' "$BAD/vehicle.yaml"
+grep -q 'url: ghcr.io/vxedge/parts/svc/ota/app/vxota@sha256:38dc26f33a08dc0af3085e86caa07eb697559200d52c12e3730a7cd2e78e213d' "$BAD/vehicle.yaml" && echo "bad image in place" || echo "BAD IMAGE NOT IN PLACE"
 $V vehicle up --manifest "$BAD" | tail -2 | cut -c1-160; echo "exit ${PIPESTATUS[0]}"
 $V vehicle status --manifest "$BAD" 2>&1 | grep -E 'kuksa|^vehicle' | cut -c1-110
 $V vehicle down --manifest "$BAD" | tail -1; echo "exit ${PIPESTATUS[0]}"

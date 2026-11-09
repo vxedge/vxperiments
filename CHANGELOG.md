@@ -13,6 +13,12 @@ than a repo tag.
 
 ### Changed
 
+- exp-016 runs the published vxparts parts: `agent/load/app/vxtraffic` 0.1.1 as its load and
+  `agent/load/app/kuksa-perf` 0.1.0 (built from its `tools/perf`), both pulled by digest, the probe
+  part for its zones, and the vxota part for its OTA service. `build.sh` no longer builds either
+  image, and `tools/load` is gone. exp-015's two failure cases use the probe and vxota parts in place
+  of `localhost/vxedge/probe:1` and `ota:1`. Recorded results are unchanged; they name the local
+  builds they were made with.
 - `results/phase-3-gate-2026-11-01`: "What this does not show" names guest kinds generically.
   `vx-vehicle-01`: the header comment no longer lists unbuilt guest images.
 - `results/aaos-gate-2026-11-08`: "What this does not show" states what the run is not, without naming later

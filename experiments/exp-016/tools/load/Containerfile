@@ -1,5 +1,0 @@
-# vxtraffic, the competing load in exp-016's loaded setup: the same generator as H1, built from
-# vxagents by ../../build.sh.
-FROM scratch
-COPY vxtraffic /vxtraffic
-ENTRYPOINT ["/vxtraffic"]
