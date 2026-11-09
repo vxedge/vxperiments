@@ -11,6 +11,10 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Changed
+
+- CI validates every workspace with vxedge 0.12.0 (`ci/vxedge-release.txt`).
+
 ### Added
 
 - `results/exp-001-measurements-2026-11-09`: exp-001 run through vxAPI, with its probe a declared
