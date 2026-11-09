@@ -38,5 +38,5 @@ user's Podman socket. `snapshot.sh` and `check-leaks.sh` read nftables through `
 - `zone-rl` is alone on `infotainment`, so that slice has no allowed flow of its own. Its denied
   flows show frames reaching the bridge port, which is what makes the silence meaningful.
 - `vehicle down` takes about 15 s per container, because Podman waits out the stop timeout.
-- The `v0.2.0` CLI cannot read this workspace: `services` on a vehicle and `localhost/` refs are
-  newer. Use a build of `main`.
+- The probe payload and the OTA service are the published vxparts parts `agent/probe/app/vxprobe`
+  0.1.1 and `svc/ota/app/vxota` 0.1.1, pinned by digest.

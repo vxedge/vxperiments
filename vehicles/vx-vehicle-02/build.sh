@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Build what this vehicle needs on this host: two local images, the OTA store, the guest bundle.
+# Build what this vehicle needs on this host: the OTA store and the guest bundle. The vehicle pulls
+# its probe payload and OTA service from vxparts; the two local images built below
+# (localhost/vxedge/probe:1, ota:1) remain for exp-015 and exp-016 until they move to published parts.
 # Needs the vxagents and vxota checkouts beside vxperiments, the x86_64 musl Rust target, Podman
 # and a static busybox. Safe to re-run.
 set -euo pipefail
