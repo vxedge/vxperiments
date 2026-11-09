@@ -26,7 +26,7 @@ still holds.
 
 ## What this does not show
 
-- The guests are probes. No QNX, Android Automotive or application workload ran, and the compute
+- The guests are probes. No RTOS, Android Automotive or application workload ran, and the compute
   node runs a probe and the OTA server, not Autoware.
 - Slice isolation here comes from VLAN membership on one Linux bridge on one shared host. Nothing
   was timed, so this is a provisioning result, not a measurement.
