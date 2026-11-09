@@ -1,11 +1,12 @@
 kind: baseline
 id: bl-vx-vehicle-02
 
-# Everything here is local and per host: run ./build.sh once. `vehicle up` refuses if a part is
-# missing. The images are recorded by digest in the gate evidence, not here.
+# The probe payload is the published vxparts part, pinned by digest. The guest bundle is
+# local and per host: run ./build.sh once. `vehicle up` refuses if a part is missing.
 parts:
   - ref: ./bundle
     kind: bundle
     target_ids: fn-fl
-  - ref: localhost/vxedge/probe:1
+  - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
+    digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
     target_ids: [fn-fr, fn-rl, fn-hpc]
