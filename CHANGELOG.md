@@ -13,6 +13,8 @@ than a repo tag.
 
 ### Changed
 
+- `results/phase-3-gate-2026-11-01`: "What this does not show" names guest kinds generically.
+  `vx-vehicle-01`: the header comment no longer lists unbuilt guest images.
 - `results/aaos-gate-2026-11-08`: "What this does not show" states what the run is not, without naming later
   stages.
 - `vx-reference-sedan-03`: the `aaos` adapter's `attach.yaml` runs `sh start.sh`, `sh status.sh` and
