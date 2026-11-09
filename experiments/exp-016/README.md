@@ -37,9 +37,9 @@ reached the `adas` ports in the same window, and checks the broker is not reacha
 | What | Image |
 |---|---|
 | databroker 0.7.1 | `ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd` |
-| kuksa-perf at `aa6fba0`, every measured run | built by [`tools/perf`](tools/perf/Containerfile): upstream `main` of 2025-07-28, `--locked` |
+| kuksa-perf at `aa6fba0`, every measured run | `ghcr.io/vxedge/parts/agent/load/app/kuksa-perf:0.1.0@sha256:1e894b9d7de05d41059d711871b17ae3023497933ad88f05f29f903000c7ba73`, the vxparts part built by [`tools/perf`](tools/perf/Containerfile): upstream `main` of 2025-07-28, `--locked`. Runs before it was published used a local build of the same file |
 | kuksa-perf 0.3.2, recorded only | `ghcr.io/eclipse-kuksa/kuksa-databroker-perf@sha256:74ad5bb003e2f541cf9862ba63cecf66cd93badb514f1c6c8b68bcaac29ffd93` |
-| vxtraffic, the load | built from vxagents by [`build.sh`](build.sh) |
+| vxtraffic, the load | `ghcr.io/vxedge/parts/agent/load/app/vxtraffic:0.1.1@sha256:be310378c1f330969072669fb24a991b26c2a991dc02f23c81056c8fc98f2c3c`, the vxparts part (vxagents v0.1.1). Runs before it was published used a local build |
 
 kuksa-perf 0.3.2, from December 2024, is the latest release and a pre-release, and it cannot measure
 databroker 0.7.1 over `kuksa.val.v2`. Its v2 provider publishes without claiming its signals first,

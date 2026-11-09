@@ -26,10 +26,10 @@ DURATION=${DURATION:-30}
 SKIP=${SKIP:-5}
 LOAD_MBPS=${LOAD_MBPS:-600}
 PERF_RELEASE=ghcr.io/eclipse-kuksa/kuksa-databroker-perf@sha256:74ad5bb003e2f541cf9862ba63cecf66cd93badb514f1c6c8b68bcaac29ffd93
-PERF_MAIN=${PERF_MAIN:-localhost/vxperiments/kuksa-perf:aa6fba0}
+PERF_MAIN=${PERF_MAIN:-ghcr.io/vxedge/parts/agent/load/app/kuksa-perf@sha256:1e894b9d7de05d41059d711871b17ae3023497933ad88f05f29f903000c7ba73}
 # Publish runs use PERF: the build of aa6fba0 unless set, because 0.3.2 cannot publish to 0.7.1.
 PERF=${PERF:-$PERF_MAIN}
-LOAD=localhost/vxperiments/vxtraffic:1
+LOAD=ghcr.io/vxedge/parts/agent/load/app/vxtraffic@sha256:be310378c1f330969072669fb24a991b26c2a991dc02f23c81056c8fc98f2c3c
 BROKER_HOST=10.100.0.50
 E=unix://$RUN/d.sock
 V="$bin/vxedge --endpoint $E"
@@ -100,7 +100,7 @@ echo "kuksa-perf release, recorded only: $PERF_RELEASE"
 echo "kuksa-perf, actuate runs: $PERF_MAIN $(podman image inspect -f '{{.Id}}' "$PERF_MAIN" | cut -c1-19)"
 echo "load: $LOAD $(podman image inspect -f '{{.Id}}' "$LOAD" | cut -c1-19), $LOAD_MBPS mbit/s"
 echo "reps $REPS, duration ${DURATION}s, skip ${SKIP}s"
-podman images --no-trunc --format '{{.Repository}}:{{.Tag}} {{.Digest}}' | grep -E 'localhost/(vxedge|vxperiments)'
+podman images --no-trunc --format '{{.Repository}}:{{.Tag}} {{.Digest}}' | grep -E 'localhost/(vxedge|vxperiments)|ghcr.io/vxedge/parts'
 
 h ../../vehicles/vx-vehicle-03/check-leaks.sh "(clean state)"; ../../vehicles/vx-vehicle-03/check-leaks.sh; echo "exit $?"
 start
