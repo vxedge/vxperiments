@@ -17,7 +17,7 @@ container, with central compute, an OTA service and the Kuksa signal plane place
 ## Run it
 
 ```bash
-./build.sh                                # once per host: images, OTA store, bundle, capsule
+./build.sh                                # once per host: OTA store, bundle, capsule
 vxedge vehicle up --manifest .
 vxedge vehicle status --manifest .
 ./check-flows.sh                          # allowed flows first, then denied ones

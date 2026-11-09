@@ -16,7 +16,7 @@ a missing route, so the failure is evidence about the slice.
 ## Run it
 
 ```bash
-./build.sh                                # once per host: images, OTA store, guest bundle
+./build.sh                                # once per host: OTA store, guest bundle
 vxedge vehicle up --manifest .
 vxedge vehicle status --manifest .
 ./check-flows.sh                          # allowed flows first, then denied ones
@@ -32,8 +32,8 @@ user's Podman socket. `snapshot.sh` and `check-leaks.sh` read nftables through `
 
 ## Limits
 
-- The images and the OTA store are local and per host, so a run reproduces for its author. The gate
-  evidence records the image digests.
+- The OTA store and the guest bundle are local and per host; the container images are published parts
+  pinned by digest.
 - The guest only reflects probes, so traffic to `zone-fl` starts elsewhere.
 - `zone-rl` is alone on `infotainment`, so that slice has no allowed flow of its own. Its denied
   flows show frames reaching the bridge port, which is what makes the silence meaningful.

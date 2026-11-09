@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build what this vehicle needs on this host: vx-vehicle-02's images, OTA store and guest bundle,
+# Build what this vehicle needs on this host: vx-vehicle-02's OTA store and guest bundle,
 # copied in because a workspace may not reach outside itself, plus the reflector capsule. Safe to
 # re-run. Needs what vx-vehicle-02's build.sh needs, and rustup's wasm32-wasip2 target.
 set -euo pipefail
