@@ -13,6 +13,10 @@ than a repo tag.
 
 ### Changed
 
+- `vx-vehicle-02` and `vx-vehicle-03` run the published vxparts probe (`agent/probe/app/vxprobe` 0.1.1) and
+  OTA (`svc/ota/app/vxota` 0.1.1) parts, pinned by digest, and live they pass their flow checks (8/8 and 12/12)
+  and vx-vehicle-03's signal checks (5/5). `build.sh` no longer builds `localhost/vxedge/probe:1` or `ota:1`,
+  and `vx-vehicle-02/images` is gone; it still builds the OTA store and the guest bundle.
 - exp-016 runs the published vxparts parts: `agent/load/app/vxtraffic` 0.1.1 as its load and
   `agent/load/app/kuksa-perf` 0.1.0 (built from its `tools/perf`), both pulled by digest, the probe
   part for its zones, and the vxota part for its OTA service. `build.sh` no longer builds either

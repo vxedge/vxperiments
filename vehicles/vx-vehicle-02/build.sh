@@ -1,33 +1,18 @@
 #!/usr/bin/env bash
 # Build what this vehicle needs on this host: the OTA store and the guest bundle. The vehicle pulls
-# its probe payload and OTA service from vxparts; the two local images built below
-# (localhost/vxedge/probe:1, ota:1) remain for exp-015 and exp-016 until they move to published parts.
-# Needs the vxagents and vxota checkouts beside vxperiments, the x86_64 musl Rust target, Podman
-# and a static busybox. Safe to re-run.
+# its probe payload and OTA service from vxparts. Needs the vxota checkout beside vxperiments and
+# the x86_64 musl Rust target (vxota signs the store). Safe to re-run.
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
 root=${VXEDGE_ROOT:-$(cd "$here/../../.." && pwd)}
 target=x86_64-unknown-linux-musl
 
-(cd "$root/vxagents" && cargo build --release --target "$target" -p vxprobe)
 (cd "$root/vxota" && cargo build --release --target "$target" -p vxota)
-vxprobe=$root/vxagents/target/$target/release/vxprobe
 vxota=$root/vxota/target/$target/release/vxota
-
-busybox=$(command -v busybox)
-file -L "$busybox" | grep -q 'statically linked' || {
-    echo "build.sh: $busybox is not static; install busybox-static" >&2
-    exit 1
-}
 
 context=$(mktemp -d)
 trap 'rm -rf "$context"' EXIT
-cp "$vxprobe" "$context/vxprobe"
-cp "$vxota" "$context/vxota"
-cp -L "$busybox" "$context/busybox"
-podman build -q -t localhost/vxedge/probe:1 -f "$here/images/probe.Containerfile" "$context"
-podman build -q -t localhost/vxedge/ota:1 -f "$here/images/ota.Containerfile" "$context"
 
 store=$here/ota-store
 key=$here/.ota-root.key
