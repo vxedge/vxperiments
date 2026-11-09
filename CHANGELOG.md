@@ -11,6 +11,15 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Added
+
+- `results/exp-001-measurements-2026-11-09`: exp-001 run through vxAPI, with its probe a declared
+  `measurements` entry and its load an in-node traffic profile, under run.sh's `--repro` protocol.
+  H1 holds (p99 at 600 mbit/s is 0.93x idle), and the path agrees with each run.sh campaign as
+  closely as run.sh agrees with itself: 10 to 11 of 15 metric x load pairs, against 8 to 12 between
+  run.sh's own campaigns. `experiments/exp-001-ws/scripts/run-measurements.sh` runs it, and
+  `notebooks/compare_exp001_paths.py` compares the two paths.
+
 ### Changed
 
 - `vx-vehicle-02` and `vx-vehicle-03` run the published vxparts probe (`agent/probe/app/vxprobe` 0.1.1) and
