@@ -295,7 +295,7 @@ def rerun(a, cid, st, good):
             f"{m.get('referenceMedian', 0):.6g} IQR {m.get('referenceIqr', 0):.3g} "
             f"within {m.get('withinReferenceIqr', False)}")
     log(f"  within the original's IQR: {c.get('within', 0)} of {len(ms)} (measured, not gated: "
-        f"the host is not tuned for timing)")
+        f"a timing claim needs the methodology gate)")
     return cid2, c
 
 

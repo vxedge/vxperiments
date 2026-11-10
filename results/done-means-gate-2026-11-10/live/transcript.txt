@@ -330,7 +330,7 @@
 10:47:59    loss_pct load_mbps=250    median 0 ref 0 IQR 0 within True
 10:47:59    loss_pct load_mbps=400    median 0 ref 0 IQR 0 within True
 10:47:59    loss_pct saturated        median 0 ref 0 IQR 0 within True
-10:47:59   within the original's IQR: 20 of 20 (measured, not gated: the host is not tuned for timing)
+10:47:59   within the original's IQR: 20 of 20 (measured, not gated: a timing claim needs the methodology gate)
 10:48:00   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
 10:48:00   PASS host clean after
 10:48:00 #### 0 failure(s)
