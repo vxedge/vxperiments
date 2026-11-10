@@ -1,0 +1,344 @@
+{
+ "campaign": {
+  "arms": [
+   {
+    "name": "idle",
+    "parameters": {
+     "load_mbps": {
+      "integer": "0"
+     }
+    }
+   },
+   {
+    "name": "saturated",
+    "parameters": {
+     "load_mbps": {
+      "integer": "600"
+     }
+    }
+   }
+  ],
+  "durationS": 60.0,
+  "profiles": [
+   {
+    "durationS": 20.0,
+    "name": "gate",
+    "repetitions": 3,
+    "warmupS": 5.0
+   },
+   {
+    "durationS": 20.0,
+    "name": "quick",
+    "repetitions": 1,
+    "warmupS": 5.0
+   },
+   {
+    "name": "repro",
+    "repetitions": 5
+   }
+  ],
+  "repetitions": 5,
+  "sweep": [
+   {
+    "parameter": "load_mbps",
+    "values": [
+     {
+      "integer": "0"
+     },
+     {
+      "integer": "100"
+     },
+     {
+      "integer": "250"
+     },
+     {
+      "integer": "400"
+     },
+     {
+      "integer": "600"
+     }
+    ]
+   }
+  ],
+  "warmupS": 10.0
+ },
+ "criteria": [
+  {
+   "group": {
+    "members": [
+     {
+      "comparison": {
+       "lhs": {
+        "metric": {
+         "aggregate": "median",
+         "metric": "p99",
+         "select": {
+          "arm": {
+           "text": "saturated"
+          }
+         }
+        }
+       },
+       "op": "le",
+       "rhs": {
+        "metric": {
+         "aggregate": "median",
+         "factor": 2.0,
+         "metric": "p99",
+         "select": {
+          "arm": {
+           "text": "idle"
+          }
+         }
+        }
+       }
+      },
+      "guards": [],
+      "id": "h1-p99",
+      "text": "median(p99)[arm=saturated] <= 2 x median(p99)[arm=idle]"
+     },
+     {
+      "comparison": {
+       "lhs": {
+        "metric": {
+         "aggregate": "median",
+         "metric": "loss_pct",
+         "select": {
+          "arm": {
+           "text": "saturated"
+          }
+         }
+        }
+       },
+       "op": "le",
+       "rhs": {
+        "metric": {
+         "aggregate": "median",
+         "metric": "loss_pct",
+         "offset": 0.5,
+         "select": {
+          "arm": {
+           "text": "idle"
+          }
+         }
+        }
+       }
+      },
+      "guards": [],
+      "id": "h1-loss",
+      "text": "median(loss_pct)[arm=saturated] <= median(loss_pct)[arm=idle] + 0.5"
+     }
+    ],
+    "rule": "all"
+   },
+   "guards": [],
+   "id": "h1",
+   "text": "all(h1-p99, h1-loss)"
+  }
+ ],
+ "digest": "sha256:8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78",
+ "entities": [
+  {
+   "backend": "",
+   "kind": "host",
+   "logs": [
+    {
+     "path": "$GATE_WORK/rt/traffic-infotainment-load-reflect.log",
+     "stream": "traffic-infotainment-load-reflect"
+    }
+   ],
+   "path": "host",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": [
+    "127.0.0.1:9469"
+   ]
+  },
+  {
+   "backend": "",
+   "kind": "measurement",
+   "logs": [],
+   "path": "measurements/ctl-rtt",
+   "payloads": [],
+   "role": "rtt-probe",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "service",
+   "logs": [
+    {
+     "path": "$GATE_WORK/rt/svc-telemetry.log",
+     "stream": "stdout"
+    }
+   ],
+   "path": "host/services/telemetry",
+   "payloads": [],
+   "role": "telemetry",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "container",
+   "kind": "node",
+   "logs": [],
+   "path": "vx-h1-vehicle/front-left/node-adas-probe-01",
+   "payloads": [
+    {
+     "digest": "",
+     "ref": "local/vxprobe:host-process"
+    }
+   ],
+   "role": "zone-controller",
+   "scrapeTargets": [
+    "10.101.0.2:9801"
+   ]
+  },
+  {
+   "backend": "container",
+   "kind": "node",
+   "logs": [
+    {
+     "path": "$GATE_WORK/rt/traffic-infotainment-load-send.log",
+     "stream": "traffic-infotainment-load-send"
+    },
+    {
+     "path": "$GATE_WORK/rt/traffic-infotainment-load-load.log",
+     "stream": "traffic-infotainment-load-load"
+    }
+   ],
+   "path": "vx-h1-vehicle/rear-left/node-infot-load-01",
+   "payloads": [
+    {
+     "digest": "",
+     "ref": "local/vxtraffic:host-process"
+    }
+   ],
+   "role": "zone-controller",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "link",
+   "logs": [],
+   "path": "vx-h1-vehicle/links/trunk-adas",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "link",
+   "logs": [],
+   "path": "vx-h1-vehicle/links/trunk-infot",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "slice",
+   "logs": [],
+   "path": "vx-h1-vehicle/slices/adas",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "slice",
+   "logs": [],
+   "path": "vx-h1-vehicle/slices/infotainment",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  }
+ ],
+ "entry": "main.yaml",
+ "experimentId": "exp-001",
+ "hypothesis": {
+  "id": "H1",
+  "statement": "The ADAS slice keeps p99 within 2x of idle under infotainment load."
+ },
+ "id": "vxperiments/exp-001",
+ "lockProblems": [],
+ "locked": true,
+ "measurements": [
+  {
+   "entity": "measurements/ctl-rtt",
+   "from": "node-adas-probe-01",
+   "id": "ctl-rtt",
+   "kind": "rtt-probe",
+   "payloadBytes": 64,
+   "ratePps": 1000,
+   "slice": "adas",
+   "to": "internet"
+  }
+ ],
+ "metrics": [
+  {
+   "entity": "measurements/ctl-rtt",
+   "id": "p99",
+   "kind": "gauge",
+   "labels": {
+    "quantile": "0.99"
+   },
+   "ratio": [],
+   "series": "vxprobe_rtt_seconds",
+   "unit": "s"
+  },
+  {
+   "entity": "measurements/ctl-rtt",
+   "id": "lost",
+   "kind": "counter",
+   "labels": {},
+   "ratio": [],
+   "series": "vxprobe_lost_total",
+   "unit": "1"
+  },
+  {
+   "entity": "measurements/ctl-rtt",
+   "id": "sent",
+   "kind": "counter",
+   "labels": {},
+   "ratio": [],
+   "series": "vxprobe_sent_total",
+   "unit": "1"
+  },
+  {
+   "entity": "measurements/ctl-rtt",
+   "factor": 100.0,
+   "id": "loss_pct",
+   "kind": "gauge",
+   "labels": {},
+   "ratio": [
+    "lost",
+    "sent"
+   ],
+   "series": "",
+   "unit": "%"
+  }
+ ],
+ "parameters": [
+  {
+   "binds": "traffic_profiles[infotainment-load].bandwidth_mbps",
+   "default": {
+    "integer": "0"
+   },
+   "max": 1000.0,
+   "min": 0.0,
+   "name": "load_mbps",
+   "type": "integer",
+   "unit": "Mbit/s",
+   "values": []
+  }
+ ],
+ "problems": [],
+ "requires": {
+  "backends": [],
+  "gpu": "none",
+  "kvm": false,
+  "preemptRt": ""
+ },
+ "schema": "vxp/1",
+ "version": "0.1.0"
+}

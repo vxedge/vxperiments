@@ -1,0 +1,623 @@
+{
+ "campaignId": "c-247b4693fcff",
+ "criteria": [
+  {
+   "guards": [],
+   "id": "h1",
+   "members": [
+    {
+     "guards": [],
+     "id": "h1-p99",
+     "lhs": 5.7343e-05,
+     "members": [],
+     "outcome": "VERDICT_OUTCOME_PASS",
+     "reads": [
+      {
+       "aggregate": "median",
+       "complete": true,
+       "metric": "p99",
+       "select": {
+        "arm": {
+         "text": "saturated"
+        }
+       },
+       "trials": [
+        "r1-saturated",
+        "r2-saturated",
+        "r3-saturated"
+       ],
+       "value": 5.7343e-05,
+       "values": [
+        6.2815e-05,
+        5.6255e-05,
+        5.7343e-05
+       ]
+      },
+      {
+       "aggregate": "median",
+       "complete": true,
+       "metric": "p99",
+       "select": {
+        "arm": {
+         "text": "idle"
+        }
+       },
+       "trials": [
+        "r1-idle",
+        "r2-idle",
+        "r3-idle"
+       ],
+       "value": 0.000127422,
+       "values": [
+        7.6351e-05,
+        6.3647e-05,
+        6.3711e-05
+       ]
+      }
+     ],
+     "rhs": 0.000127422,
+     "rule": "le",
+     "why": ""
+    },
+    {
+     "guards": [],
+     "id": "h1-loss",
+     "lhs": 0.0,
+     "members": [],
+     "outcome": "VERDICT_OUTCOME_PASS",
+     "reads": [
+      {
+       "aggregate": "median",
+       "complete": true,
+       "metric": "loss_pct",
+       "select": {
+        "arm": {
+         "text": "saturated"
+        }
+       },
+       "trials": [
+        "r1-saturated",
+        "r2-saturated",
+        "r3-saturated"
+       ],
+       "value": 0.0,
+       "values": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "aggregate": "median",
+       "complete": true,
+       "metric": "loss_pct",
+       "select": {
+        "arm": {
+         "text": "idle"
+        }
+       },
+       "trials": [
+        "r1-idle",
+        "r2-idle",
+        "r3-idle"
+       ],
+       "value": 0.5,
+       "values": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     ],
+     "rhs": 0.5,
+     "rule": "le",
+     "why": ""
+    }
+   ],
+   "outcome": "VERDICT_OUTCOME_PASS",
+   "reads": [],
+   "rule": "all",
+   "why": ""
+  }
+ ],
+ "experimentId": "exp-001",
+ "hypothesis": "H1",
+ "outcome": "VERDICT_OUTCOME_PASS",
+ "trials": [
+  {
+   "archiveDigest": "sha256:2231f1984a4ec40d8fe54cfbacf1aded2dcf7cf9ba70bf35f9738f18668fc456",
+   "arm": "idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 1,
+   "trialId": "r1-idle",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 7.6351e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:cc7eaa4928ea94dd42dc1c298f23c4a092c0a3a5e0764f22fc332263cc835a39",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 1,
+   "trialId": "r1-load_mbps=100",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 6.7583e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:ef9c919bfbbeecf679391fbccb542461f0a35a58ce261f1b29e81eff9089ea88",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 1,
+   "trialId": "r1-load_mbps=250",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 6.0223e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:15615f4f01c241a53b2893320c75b28ef23e8643bcb052a407fdf62e05ffe717",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 1,
+   "trialId": "r1-load_mbps=400",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 5.2799e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:aea4ff37de56e4a94959819c5f539d6c7979eef25937658ad54ce0bfd3168928",
+   "arm": "saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 1,
+   "trialId": "r1-saturated",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 6.2815e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:129e1ab03b04c336c2fa4757389bde9da9d35597586ebe2e0a3850e2e9fa7d59",
+   "arm": "idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 2,
+   "trialId": "r2-idle",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 6.3647e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:d53fa653a4aa439c5cfb862e648d594753f48b74e0ee425e1ae7f3ed144f8ec8",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 2,
+   "trialId": "r2-load_mbps=100",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 6.4799e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:f38a3be38cade53dcab1b256b281519ab90f156e1f0f5d9ab58a8bd1fd45e8fe",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 2,
+   "trialId": "r2-load_mbps=250",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 6.5375e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:6a4f0f237893c04f2061cf8b13d8f56f563dbba4a606a025c02ac871f993c56f",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 2,
+   "trialId": "r2-load_mbps=400",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 5.8751e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:35bea68d32a2a08df074e9d72d6e40d38d9b5e5eb23eb7024e95d418dfb508d6",
+   "arm": "saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 2,
+   "trialId": "r2-saturated",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 5.6255e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:909d87e631a0ac2dd5b0e32d571b2eb56e967e7041d7449a33f84189ea9f8a88",
+   "arm": "idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 3,
+   "trialId": "r3-idle",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 6.3711e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:87f2c5aa164fbfa558cce6e38f50a472df11a82fd38530c4c1bcfd96a9da0c83",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 3,
+   "trialId": "r3-load_mbps=100",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 6.1919e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:a604acb57c3348f3d9d3863b24ebdb3dd9270be9b3cd7b835947ba4cb0ffe580",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 3,
+   "trialId": "r3-load_mbps=250",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 5.7471e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:4f678ed184efd6ead2ff282857b63f8c3abc005fd12a871af346397f85496d11",
+   "arm": "",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 3,
+   "trialId": "r3-load_mbps=400",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 5.7983e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  },
+  {
+   "archiveDigest": "sha256:3c7db58554f9f9363ee769fb6347b698f408ec852b862ca78a31969836c565ed",
+   "arm": "saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 3,
+   "trialId": "r3-saturated",
+   "values": {
+    "loss_pct": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "lost": {
+     "complete": true,
+     "value": 0.0,
+     "why": ""
+    },
+    "p99": {
+     "complete": true,
+     "value": 5.7343e-05,
+     "why": ""
+    },
+    "sent": {
+     "complete": true,
+     "value": 20000.0,
+     "why": ""
+    }
+   }
+  }
+ ]
+}

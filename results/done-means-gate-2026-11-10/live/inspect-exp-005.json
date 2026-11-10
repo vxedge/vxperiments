@@ -1,0 +1,69 @@
+{
+ "criteria": [],
+ "digest": "",
+ "entities": [
+  {
+   "backend": "",
+   "kind": "host",
+   "logs": [],
+   "path": "host",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": [
+    "127.0.0.1:9801",
+    "127.0.0.1:9469"
+   ]
+  },
+  {
+   "backend": "container",
+   "kind": "node",
+   "logs": [],
+   "path": "vx-cold-start-vehicle/front-left/node-cold-probe-01",
+   "payloads": [
+    {
+     "digest": "",
+     "ref": "local/vxprobe:host-process"
+    }
+   ],
+   "role": "zone-controller",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "link",
+   "logs": [],
+   "path": "vx-cold-start-vehicle/links/trunk-cold",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "slice",
+   "logs": [],
+   "path": "vx-cold-start-vehicle/slices/adas",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  }
+ ],
+ "entry": "main.yaml",
+ "experimentId": "exp-005",
+ "id": "exp-005",
+ "lockProblems": [
+  "$VXPERIMENTS/experiments/exp-005/exp-005.vxp is a legacy descriptor, which has no lock and no packed form. Migrate it: rename it to `vxp.yaml` and add `schema: vxp/1`, a `namespace/name` id and an `entry`."
+ ],
+ "locked": false,
+ "measurements": [],
+ "metrics": [],
+ "parameters": [],
+ "problems": [],
+ "requires": {
+  "backends": [],
+  "gpu": "none",
+  "kvm": false,
+  "preemptRt": ""
+ },
+ "schema": "legacy",
+ "version": "0.1.0"
+}

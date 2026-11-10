@@ -1,0 +1,128 @@
+{
+ "criteria": [],
+ "digest": "",
+ "entities": [
+  {
+   "backend": "",
+   "kind": "host",
+   "logs": [
+    {
+     "path": "$GATE_WORK/rt/traffic-adas-probe-send.log",
+     "stream": "traffic-adas-probe-send"
+    },
+    {
+     "path": "$GATE_WORK/rt/traffic-adas-probe-load.log",
+     "stream": "traffic-adas-probe-load"
+    },
+    {
+     "path": "$GATE_WORK/rt/traffic-infotainment-load-send.log",
+     "stream": "traffic-infotainment-load-send"
+    },
+    {
+     "path": "$GATE_WORK/rt/traffic-infotainment-load-load.log",
+     "stream": "traffic-infotainment-load-load"
+    }
+   ],
+   "path": "host",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": [
+    "127.0.0.1:9801",
+    "127.0.0.1:9469"
+   ]
+  },
+  {
+   "backend": "container",
+   "kind": "node",
+   "logs": [
+    {
+     "path": "$GATE_WORK/rt/traffic-adas-probe-reflect.log",
+     "stream": "traffic-adas-probe-reflect"
+    }
+   ],
+   "path": "vx-h2-vehicle/front-left/node-adas-probe-01",
+   "payloads": [
+    {
+     "digest": "",
+     "ref": "local/vxprobe:host-process"
+    }
+   ],
+   "role": "zone-controller",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "container",
+   "kind": "node",
+   "logs": [
+    {
+     "path": "$GATE_WORK/rt/traffic-infotainment-load-reflect.log",
+     "stream": "traffic-infotainment-load-reflect"
+    }
+   ],
+   "path": "vx-h2-vehicle/rear-left/node-infot-load-01",
+   "payloads": [
+    {
+     "digest": "",
+     "ref": "local/vxtraffic:host-process"
+    }
+   ],
+   "role": "zone-controller",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "link",
+   "logs": [],
+   "path": "vx-h2-vehicle/links/ue-adas",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "link",
+   "logs": [],
+   "path": "vx-h2-vehicle/links/ue-infot",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "slice",
+   "logs": [],
+   "path": "vx-h2-vehicle/slices/adas",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  },
+  {
+   "backend": "",
+   "kind": "slice",
+   "logs": [],
+   "path": "vx-h2-vehicle/slices/infotainment",
+   "payloads": [],
+   "role": "",
+   "scrapeTargets": []
+  }
+ ],
+ "entry": "main.yaml",
+ "experimentId": "exp-010",
+ "id": "exp-010",
+ "lockProblems": [
+  "$VXPERIMENTS/experiments/exp-010-ws/exp-010.vxp is a legacy descriptor, which has no lock and no packed form. Migrate it: rename it to `vxp.yaml` and add `schema: vxp/1`, a `namespace/name` id and an `entry`."
+ ],
+ "locked": false,
+ "measurements": [],
+ "metrics": [],
+ "parameters": [],
+ "problems": [],
+ "requires": {
+  "backends": [],
+  "gpu": "none",
+  "kvm": false,
+  "preemptRt": ""
+ },
+ "schema": "legacy",
+ "version": "0.1.0"
+}

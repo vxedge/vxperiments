@@ -1,0 +1,381 @@
+{
+ "estimatedS": 3000.0,
+ "points": 6,
+ "problems": [
+  {
+   "detail": "experiment `exp-001`, `campaign.sweep.load_mbps[5]`: 1200 is outside [0, 1000]",
+   "reason": "ERROR_REASON_PARAMETER_INVALID",
+   "subject": "exp-001"
+  }
+ ],
+ "profile": "",
+ "repetitions": 5,
+ "trials": [
+  {
+   "arm": "idle",
+   "durationS": 60.0,
+   "id": "r1-idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r1-load_mbps=100",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r1-load_mbps=250",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r1-load_mbps=400",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "saturated",
+   "durationS": 60.0,
+   "id": "r1-saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r1-load_mbps=1200",
+   "parameters": {
+    "load_mbps": {
+     "integer": "1200"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "idle",
+   "durationS": 60.0,
+   "id": "r2-idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r2-load_mbps=100",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r2-load_mbps=250",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r2-load_mbps=400",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "saturated",
+   "durationS": 60.0,
+   "id": "r2-saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r2-load_mbps=1200",
+   "parameters": {
+    "load_mbps": {
+     "integer": "1200"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "idle",
+   "durationS": 60.0,
+   "id": "r3-idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r3-load_mbps=100",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r3-load_mbps=250",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r3-load_mbps=400",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "saturated",
+   "durationS": 60.0,
+   "id": "r3-saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r3-load_mbps=1200",
+   "parameters": {
+    "load_mbps": {
+     "integer": "1200"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "idle",
+   "durationS": 60.0,
+   "id": "r4-idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 4,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r4-load_mbps=100",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 4,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r4-load_mbps=250",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 4,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r4-load_mbps=400",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 4,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "saturated",
+   "durationS": 60.0,
+   "id": "r4-saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 4,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r4-load_mbps=1200",
+   "parameters": {
+    "load_mbps": {
+     "integer": "1200"
+    }
+   },
+   "repetition": 4,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "idle",
+   "durationS": 60.0,
+   "id": "r5-idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 5,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r5-load_mbps=100",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 5,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r5-load_mbps=250",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 5,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r5-load_mbps=400",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 5,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "saturated",
+   "durationS": 60.0,
+   "id": "r5-saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 5,
+   "warmupS": 10.0
+  },
+  {
+   "arm": "",
+   "durationS": 60.0,
+   "id": "r5-load_mbps=1200",
+   "parameters": {
+    "load_mbps": {
+     "integer": "1200"
+    }
+   },
+   "repetition": 5,
+   "warmupS": 10.0
+  }
+ ],
+ "vxmcpBudget": {
+  "maxCampaignS": 28800.0,
+  "maxTrials": 100,
+  "why": null,
+  "within": true
+ }
+}
