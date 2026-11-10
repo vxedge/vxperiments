@@ -22,7 +22,7 @@ than a repo tag.
 
 ### Changed
 
-- CI validates every workspace with vxedge 0.12.0 (`ci/vxedge-release.txt`).
+- CI validates every workspace with vxedge 0.13.0 (`ci/vxedge-release.txt`).
 - `vx-vehicle-02` and `vx-vehicle-03` run the published vxparts probe (`agent/probe/app/vxprobe` 0.1.1) and
   OTA (`svc/ota/app/vxota` 0.1.1) parts, pinned by digest, and live they pass their flow checks (8/8 and 12/12)
   and vx-vehicle-03's signal checks (5/5). `build.sh` no longer builds `localhost/vxedge/probe:1` or `ota:1`,
