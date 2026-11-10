@@ -13,6 +13,14 @@ than a repo tag.
 
 ### Added
 
+- `notebooks/criteria/`: the notebooks' acceptance rules for exp-001, 002, 002b, 003 and 014, as
+  typed intent (metrics, criteria and guards) that `vxedge results verdict` judges.
+  `scripts/verdict-parity.sh` judges every full published dataset that holds samples, 13
+  campaigns, and checks each criterion's outcome against the notebook's verdict. CI runs it on
+  the archives from the Zenodo record, each checked against `notebooks/criteria/SHA256SUMS`. All
+  13 agree. exp-005 and exp-010 are not covered, as their archives hold probe summaries rather
+  than samples, and neither are the quick-profile sets.
+
 - `results/exp-001-measurements-2026-11-09`: exp-001 run through vxAPI, with its probe a declared
   `measurements` entry and its load an in-node traffic profile, under run.sh's `--repro` protocol.
   H1 holds (p99 at 600 mbit/s is 0.93x idle), and the path agrees with each run.sh campaign as
@@ -22,7 +30,7 @@ than a repo tag.
 
 ### Changed
 
-- CI validates every workspace with vxedge 0.13.0 (`ci/vxedge-release.txt`).
+- CI validates every workspace with vxedge 0.14.0 (`ci/vxedge-release.txt`).
 - `vx-vehicle-02` and `vx-vehicle-03` run the published vxparts probe (`agent/probe/app/vxprobe` 0.1.1) and
   OTA (`svc/ota/app/vxota` 0.1.1) parts, pinned by digest, and live they pass their flow checks (8/8 and 12/12)
   and vx-vehicle-03's signal checks (5/5). `build.sh` no longer builds `localhost/vxedge/probe:1` or `ota:1`,
