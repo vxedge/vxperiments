@@ -1,0 +1,8 @@
+# A generic platform for the attach backend: the published linux-probe guest on plain QEMU/KVM, over a tap the
+# host prepares once (../README.md), standing in for a platform that brings its own host stack. The bundle lives
+# in ./bundle (fetched by ../build.sh); start refuses one that does not match SHA256SUMS.
+interface: at-ivi1
+start: sh start.sh
+status: sh status.sh
+stop: sh stop.sh
+start_timeout_s: 120

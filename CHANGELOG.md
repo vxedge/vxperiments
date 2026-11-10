@@ -27,7 +27,14 @@ than a repo tag.
   the archives from the Zenodo record, each checked against `notebooks/criteria/SHA256SUMS`. All
   13 agree. exp-005 and exp-010 are not covered, as their archives hold probe summaries rather
   than samples, and neither are the quick-profile sets.
-
+- `vehicles/vx-vehicle-04`: one vehicle on every node backend (qemu-microvm, cloud-hypervisor, libvirt,
+  wasm-capsule, attach, container), with four nodes pinned to their own CPU. Every part is published and
+  pinned by digest except `./ivi`, a generic attach adapter that boots the published linux-probe bundle on
+  plain QEMU over a tap the host prepares once, plus a FreeRTOS ECU (`zone/freertos/stack/probe-bundle`).
+  `check-flows.sh` runs 15 checks.
+- `results/all-backends-gate-2026-11-10`: the vxAPI core gate on `vx-vehicle-04`, 10 of 10 on vxedge 0.14.0,
+  461 checks, 0 failed. Every backend came up, each pinned node's threads were confined to its CPU, and all 15
+  flow checks passed, after `up` and again after a daemon restart.
 - `results/exp-001-measurements-2026-11-09`: exp-001 run through vxAPI, with its probe a declared
   `measurements` entry and its load an in-node traffic profile, under run.sh's `--repro` protocol.
   H1 holds (p99 at 600 mbit/s is 0.93x idle), and the path agrees with each run.sh campaign as

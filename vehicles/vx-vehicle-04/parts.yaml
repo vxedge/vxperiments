@@ -1,0 +1,24 @@
+kind: baseline
+id: bl-vx-vehicle-04
+
+# Every part is published and pinned by digest, except the attach adapter ./ivi, which pins the guest bundle it
+# boots in its own SHA256SUMS. `vehicle up` refuses if a part is missing.
+parts:
+  - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0
+    digest: sha256:33c9c8d8625bd5c6d1f4d3d0c561fdaa930e057fcd1fb24fb3badb402f25429d
+    kind: bundle
+    target_ids: [fn-fl, fn-fr, fn-rr]
+  - ref: ghcr.io/vxedge/parts/zone/freertos/stack/probe-bundle:0.1.0
+    digest: sha256:78edb6cc4fe7f8a477e581d9389d672ab0e60e028a81dc458b88872d70bb7d3b
+    kind: bundle
+    target_ids: [fn-rtos]
+  - ref: ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule:0.1.0
+    digest: sha256:4392871714b302e17dc9f81518d4768093bbfbddac6dbc9c10a517a9f286654d
+    kind: wasm
+    target_ids: [fn-sns]
+  - ref: ./ivi
+    kind: attach
+    target_ids: [fn-ivi]
+  - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
+    digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
+    target_ids: [fn-rl, fn-hpc]

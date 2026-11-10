@@ -1,0 +1,81 @@
+kind: vehicle
+id: vx-vehicle-04
+class: road
+subtype: car
+
+# One vehicle on every node backend vxedge has: qemu-microvm, cloud-hypervisor, libvirt, wasm-capsule, attach
+# and container, on one gateway with two slices, plus a FreeRTOS ECU on qemu-microvm. Four nodes are pinned to
+# their own CPU (`realtime.pinned_cpus`), one per pinning backend, so a run can check where each node's threads may run. Every part is published and
+# pinned by digest, except the attach adapter (./ivi), which boots the same published guest bundle on plain
+# QEMU over a tap the host prepares once, as a platform's own host stack would.
+zones:
+  front-left: {}
+  front-right: {}
+  rear-left: {}
+  rear-right: {}
+  cabin: {}
+  central: {}
+
+devices:
+  zone-fl: { role: zone-controller, zone: front-left, backend: qemu-microvm, realtime: { pinned_cpus: [4] } }
+  zone-fr: { role: zone-controller, zone: front-right, backend: cloud-hypervisor, realtime: { pinned_cpus: [5] } }
+  zone-rr: { role: zone-controller, zone: rear-right, backend: libvirt, realtime: { pinned_cpus: [6] } }
+  sensor-rr: { role: sensor, zone: rear-right, backend: wasm-capsule, realtime: { pinned_cpus: [7] } }
+  ivi1: { role: ecu, zone: cabin, backend: attach }
+  ecu-rtos: { role: ecu, zone: front-left, backend: qemu-microvm }
+  zone-rl: { role: zone-controller, zone: rear-left, backend: container }
+  hpc1: { role: hpc, zone: central, backend: container }
+
+functions:
+  fn-fl: { deployed_on: zone-fl }
+  fn-fr: { deployed_on: zone-fr }
+  fn-rr: { deployed_on: zone-rr }
+  fn-sns: { deployed_on: sensor-rr }
+  fn-ivi: { deployed_on: ivi1 }
+  fn-rtos: { deployed_on: ecu-rtos }
+  fn-rl: { deployed_on: zone-rl }
+  fn-hpc: { deployed_on: hpc1 }
+
+links:
+  - id: link-fl
+    endpoints: [{ node: zone-fl, port: eth0, ip: 10.100.0.11/24 }]
+    slice: adas
+  - id: link-fr
+    endpoints: [{ node: zone-fr, port: eth0, ip: 10.100.0.12/24 }]
+    slice: adas
+  - id: link-ivi
+    endpoints: [{ node: ivi1, port: eth0, ip: 10.100.0.13/24, host_interface: at-ivi1 }]
+    slice: adas
+  - id: link-rtos
+    endpoints: [{ node: ecu-rtos, port: eth0, ip: 10.100.0.15/24 }]
+    slice: adas
+  - id: link-sns
+    endpoints: [{ node: sensor-rr, port: eth0, ip: 10.100.0.14/24 }]
+    slice: adas
+  - id: link-rr
+    endpoints: [{ node: zone-rr, port: eth0, ip: 10.100.0.21/24 }]
+    slice: adas
+  - id: link-rl
+    endpoints: [{ node: zone-rl, port: eth0, ip: 10.100.0.31/24 }]
+    slice: infotainment
+  - id: link-hpc
+    endpoints: [{ node: hpc1, port: eth0, ip: 10.100.0.50/24 }]
+    slice: adas
+
+services:
+  ota:
+    id: ota-01
+    type: ota
+    image: { url: ghcr.io/vxedge/parts/svc/ota/app/vxota@sha256:38dc26f33a08dc0af3085e86caa07eb697559200d52c12e3730a7cd2e78e213d, kind: container }
+    on: hpc1
+    config:
+      artifacts: ghcr.io/vxedge/parts/svc/ota/config/gate-store@sha256:8ea595fe8642bfba6809320befd7e9373c6eaba9f72e0ddaf3ae54da90180546
+      listen: "0.0.0.0:9900"
+
+signal_plane:
+  kuksa:
+    image:
+      url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+      kind: container
+    on: hpc1
+    config: { listen: "0.0.0.0:55555" }
