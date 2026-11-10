@@ -62,8 +62,9 @@ median against original median (original IQR):
 
 Loss was 0, and every trial of the original sent 20 000 probes. A dry run of the same harness an hour earlier, on
 builds of the fixes below, landed 16 of 20: four p99 points fell outside IQRs of 1 to 8 µs. Three
-20 s repetitions on a host not tuned for timing do not support an IQR claim either way. The
-methodology gate (exp-001's `repro` profile, 10 of 10 runs, on a quiet host) is still to run.
+20 s repetitions do not support an IQR claim either way. That claim is the methodology gate's:
+exp-001's `repro` profile, 10 of 10 runs, on a quiet host with the `performance` governor. It is
+still to run.
 
 ## Found and fixed during the gate
 
