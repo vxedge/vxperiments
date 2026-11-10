@@ -13,6 +13,13 @@ than a repo tag.
 
 ### Added
 
+- `scenarios/urban-stop-line/`: the first reference scenario, written for vxedge. It is an
+  OpenDRIVE road and an OpenSCENARIO storyboard in which a lead vehicle brakes to a stop line,
+  with three storyboard parameters (`EgoTargetSpeed`, `LeadGap`, `LeadDeceleration`) and their
+  bounds. `scripts/scenario-proof.sh` vendors it and `vx-reference-sedan-01` into a throwaway
+  package, and checks that the package validates, locks and packs to the same digest twice. CI
+  runs it.
+
 - `notebooks/criteria/`: the notebooks' acceptance rules for exp-001, 002, 002b, 003 and 014, as
   typed intent (metrics, criteria and guards) that `vxedge results verdict` judges.
   `scripts/verdict-parity.sh` judges every full published dataset that holds samples, 13
@@ -30,7 +37,7 @@ than a repo tag.
 
 ### Changed
 
-- CI validates every workspace with vxedge 0.14.1 (`ci/vxedge-release.txt`).
+- CI validates every workspace with vxedge 0.15.0 (`ci/vxedge-release.txt`).
 - `vx-vehicle-02` and `vx-vehicle-03` run the published vxparts probe (`agent/probe/app/vxprobe` 0.1.1) and
   OTA (`svc/ota/app/vxota` 0.1.1) parts, pinned by digest, and live they pass their flow checks (8/8 and 12/12)
   and vx-vehicle-03's signal checks (5/5). `build.sh` no longer builds `localhost/vxedge/probe:1` or `ota:1`,
