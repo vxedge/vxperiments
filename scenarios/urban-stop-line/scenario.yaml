@@ -1,0 +1,20 @@
+# A reusable reference scenario (decision X-8): vendor it into a package with
+# `vxedge pkg vendor <path to this folder>`, then name it in the experiment with
+# `scenario: urban-stop-line` and give the ego an `actors` vehicle of that package.
+kind: road
+id: straight-200m
+network: assets/straight-200m.xodr
+---
+kind: scenario
+id: urban-stop-line
+road: straight-200m
+storyboard: assets/urban-stop-line.xosc
+simulator: esmini
+clock: { tick_ms: 10, mode: synchronous }
+seed: 42
+actors:
+  Ego: { vehicle: vx-reference-sedan-01 }
+parameters:
+  EgoTargetSpeed: { unit: m/s, min: 0, max: 22.2 }
+  LeadGap: { unit: m, min: 10, max: 80 }
+  LeadDeceleration: { unit: m/s2, min: 1, max: 8 }

@@ -95,3 +95,7 @@ jobs:
         # checked against notebooks/criteria/SHA256SUMS before it is read.
         working-directory: vxperiments
         run: scripts/verdict-parity.sh --fetch
+      - name: Scenario proof
+        # A package carrying the reference scenario validates, locks and packs to one digest.
+        working-directory: vxperiments
+        run: scripts/scenario-proof.sh
