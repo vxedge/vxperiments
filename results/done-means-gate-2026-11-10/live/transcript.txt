@@ -1,0 +1,336 @@
+10:33:03 #### done-means ['all']
+10:33:03   vxedged: (no --version) sha256 0176ce05ebe47224
+10:33:03   vxedge: vxedge 0.15.1 sha256 f448c42db52d2f7a
+10:33:03   vxmcp: vxmcp 0.4.1 sha256 4ba81eabbd071aaf
+10:33:03   vxtelemetry: vxtelemetry 0.6.0 sha256 4ebfdfaa7e7f400e
+10:33:03   vxprobe: vxprobe 0.2.0 sha256 ad9bf07738850de1
+10:33:03   vxtraffic: vxtraffic 0.2.0 sha256 94c139c3297b3d8d
+10:33:03   PASS author side: the good signature does not verify the tampered package (error: `cosign` refused `$GATE_WORK/p)
+10:33:03   package sha256:8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78, tampered sha256:f016367c68eede3353680717c91fe866541f2c7bd0e2dc3ba6e68fc4aa9406b0, signer sha256:7868e1cd0a9f
+10:33:04   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+10:33:04   PASS host clean before start
+10:33:05 == step 1: catalogue and inspect
+10:33:05   PASS package_list answers a typed list
+10:33:06   PASS package_inspect exp-001-ws: exp-001 0.1.0 
+10:33:06   PASS package_inspect exp-002-ws: exp-002 0.1.0 
+10:33:06   PASS package_inspect exp-002b-ws: exp-002b 0.1.0 
+10:33:06   PASS package_inspect exp-003-ws: exp-003 0.1.0 
+10:33:06   PASS package_inspect exp-005: exp-005 0.1.0 
+10:33:06   PASS package_inspect exp-010-ws: exp-010 0.1.0 
+10:33:06   PASS package_inspect exp-014: exp-014 0.1.0 
+10:33:06   PASS package_inspect pkg: vxperiments/exp-001 0.1.0 
+10:33:06   PASS gate package: hypothesis H1
+10:33:06   PASS gate package: load_mbps with bounds and binds {'binds': 'traffic_profiles[infotainment-load].bandwidth_mbps', 'default': {'integer': '0'}, 'max': 1000.0, 'min': 0.0, 'name': 'load_mbps', 'type': 'integer', 'unit': 'Mbit/s', 'values': []}
+10:33:06   PASS gate package: four typed metrics
+10:33:06   PASS gate package: criterion h1, a group of two comparisons
+10:33:06   PASS gate package: arms idle and saturated
+10:33:06   PASS gate package: profiles gate, quick and repro
+10:33:06   PASS gate package: measurements and entities typed (9 entities)
+10:33:06 == step 2: pull, signature, plan
+10:33:06    ? package_pull asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Pull the package `localhost:5000/vxperiments/exp-001@sha256:f016367c68eede3353680717c91fe866541f2c7bd0e2dc3ba6e68fc4aa9406b0` from i
+10:33:06   PASS tampered sha256:f016367c68ee refused (ERROR_REASON_SIGNATURE_INVALID)
+10:33:06   PASS nothing fetched or cached for it
+10:33:06   PASS no pull job created
+10:33:06    ? package_pull asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Pull the package `localhost:5000/vxperiments/exp-001@sha256:8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78` from i
+10:33:06   PASS signed sha256:8baa744076e3 pulled JOB_STATE_SUCCEEDED $GATE_WORK/cache/packages/8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78.vxp
+10:33:06   PASS package_list holds it, locked [{'digest': 'sha256:8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78', 'hasLock': True, 'id': 'vxperiments/exp-001', 'sizeBytes': '13824', 'version': '0.1.0'}]
+10:33:06   PASS package_inspect by digest: locked True
+10:33:06 == step 3: plan, bounds
+10:33:06   PASS campaign_plan by path: 25 trials, no problems (25, [])
+10:33:06   PASS campaign_plan sha256:8baa744076e3: 25 trials, no problems (25, [])
+10:33:06   PASS campaign_plan gate profile: 15 trials (15)
+10:33:06   PASS out-of-bounds sweep value refused at plan time: [('ERROR_REASON_PARAMETER_INVALID', 'experiment `exp-001`, `campaign.sweep.load_mbps[5]`: 1200 is outside [0, 1000]')]
+10:33:06   PASS campaign_start of it refused before any question (ERROR_REASON_PARAMETER_INVALID)
+10:33:06   PASS no campaign recorded
+10:33:06 == steps 3-4: campaign original, profile gate, request_id gate-1794303186
+10:33:06    ? campaign_start asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Run the campaign `sha256:8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78` declares, with profile `gate`: 15 trials 
+10:33:06   PASS campaign_start returns a job job-f5aee3-000001 
+10:33:06    ? campaign_start asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Run the campaign `sha256:8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78` declares, with profile `gate`: 15 trials 
+10:33:06   PASS retried request_id returns the same job (job-f5aee3-000001 )
+10:33:06    ? campaign_start asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Run the campaign `sha256:8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78` declares, with profile `gate`: 15 trials 
+10:33:06   PASS another campaign refused BUSY naming c-247b4693fcff (ERROR_REASON_BUSY)
+10:33:07    r1-idle: TRIAL_STATE_RUNNING provision
+10:33:07    r1-load_mbps=100: TRIAL_STATE_PENDING 
+10:33:07    r1-load_mbps=250: TRIAL_STATE_PENDING 
+10:33:07    r1-load_mbps=400: TRIAL_STATE_PENDING 
+10:33:07    r1-saturated: TRIAL_STATE_PENDING 
+10:33:07    r2-idle: TRIAL_STATE_PENDING 
+10:33:07    r2-load_mbps=100: TRIAL_STATE_PENDING 
+10:33:07    r2-load_mbps=250: TRIAL_STATE_PENDING 
+10:33:07    r2-load_mbps=400: TRIAL_STATE_PENDING 
+10:33:07    r2-saturated: TRIAL_STATE_PENDING 
+10:33:07    r3-idle: TRIAL_STATE_PENDING 
+10:33:07    r3-load_mbps=100: TRIAL_STATE_PENDING 
+10:33:07    r3-load_mbps=250: TRIAL_STATE_PENDING 
+10:33:07    r3-load_mbps=400: TRIAL_STATE_PENDING 
+10:33:07    r3-saturated: TRIAL_STATE_PENDING 
+10:33:09    r1-idle: TRIAL_STATE_RUNNING warmup
+10:33:14    r1-idle: TRIAL_STATE_RUNNING measure
+10:33:36    r1-idle: TRIAL_STATE_RUNNING teardown
+10:33:37    r1-idle: TRIAL_STATE_SUCCEEDED teardown
+10:33:37    r1-load_mbps=100: TRIAL_STATE_RUNNING provision
+10:33:39    r1-load_mbps=100: TRIAL_STATE_RUNNING warmup
+10:33:44    r1-load_mbps=100: TRIAL_STATE_RUNNING measure
+10:34:05    r1-load_mbps=100: TRIAL_STATE_RUNNING cooldown
+10:34:06    r1-load_mbps=100: TRIAL_STATE_SUCCEEDED teardown
+10:34:06    r1-load_mbps=250: TRIAL_STATE_RUNNING provision
+10:34:09    r1-load_mbps=250: TRIAL_STATE_RUNNING warmup
+10:34:14    r1-load_mbps=250: TRIAL_STATE_RUNNING measure
+10:34:35    r1-load_mbps=250: TRIAL_STATE_RUNNING teardown
+10:34:36    r1-load_mbps=250: TRIAL_STATE_SUCCEEDED teardown
+10:34:36    r1-load_mbps=400: TRIAL_STATE_RUNNING provision
+10:34:38    r1-load_mbps=400: TRIAL_STATE_RUNNING warmup
+10:34:43    r1-load_mbps=400: TRIAL_STATE_RUNNING measure
+10:35:05    r1-load_mbps=400: TRIAL_STATE_SUCCEEDED teardown
+10:35:05    r1-saturated: TRIAL_STATE_RUNNING provision
+10:35:08    r1-saturated: TRIAL_STATE_RUNNING warmup
+10:35:13    r1-saturated: TRIAL_STATE_RUNNING measure
+10:35:34    r1-saturated: TRIAL_STATE_RUNNING cooldown
+10:35:35    r1-saturated: TRIAL_STATE_SUCCEEDED teardown
+10:35:35    r2-idle: TRIAL_STATE_RUNNING provision
+10:35:37    r2-idle: TRIAL_STATE_RUNNING warmup
+10:35:42    r2-idle: TRIAL_STATE_RUNNING measure
+10:36:04    r2-idle: TRIAL_STATE_RUNNING teardown
+10:36:05    r2-idle: TRIAL_STATE_SUCCEEDED teardown
+10:36:05    r2-load_mbps=100: TRIAL_STATE_RUNNING provision
+10:36:07    r2-load_mbps=100: TRIAL_STATE_RUNNING warmup
+10:36:12    r2-load_mbps=100: TRIAL_STATE_RUNNING measure
+10:36:33    r2-load_mbps=100: TRIAL_STATE_RUNNING cooldown
+10:36:34    r2-load_mbps=100: TRIAL_STATE_SUCCEEDED teardown
+10:36:34    r2-load_mbps=250: TRIAL_STATE_RUNNING provision
+10:36:37    r2-load_mbps=250: TRIAL_STATE_RUNNING warmup
+10:36:42    r2-load_mbps=250: TRIAL_STATE_RUNNING measure
+10:37:03    r2-load_mbps=250: TRIAL_STATE_RUNNING teardown
+10:37:04    r2-load_mbps=250: TRIAL_STATE_SUCCEEDED teardown
+10:37:04    r2-load_mbps=400: TRIAL_STATE_RUNNING provision
+10:37:06    r2-load_mbps=400: TRIAL_STATE_RUNNING warmup
+10:37:11    r2-load_mbps=400: TRIAL_STATE_RUNNING measure
+10:37:33    r2-load_mbps=400: TRIAL_STATE_RUNNING teardown
+10:37:34    r2-load_mbps=400: TRIAL_STATE_SUCCEEDED teardown
+10:37:34    r2-saturated: TRIAL_STATE_RUNNING provision
+10:37:36    r2-saturated: TRIAL_STATE_RUNNING warmup
+10:37:41    r2-saturated: TRIAL_STATE_RUNNING measure
+10:38:03    r2-saturated: TRIAL_STATE_RUNNING teardown
+10:38:04    r2-saturated: TRIAL_STATE_SUCCEEDED teardown
+10:38:04    r3-idle: TRIAL_STATE_RUNNING provision
+10:38:06    r3-idle: TRIAL_STATE_RUNNING warmup
+10:38:11    r3-idle: TRIAL_STATE_RUNNING measure
+10:38:33    r3-idle: TRIAL_STATE_SUCCEEDED teardown
+10:38:33    r3-load_mbps=100: TRIAL_STATE_RUNNING provision
+10:38:36    r3-load_mbps=100: TRIAL_STATE_RUNNING warmup
+10:38:41    r3-load_mbps=100: TRIAL_STATE_RUNNING measure
+10:39:02    r3-load_mbps=100: TRIAL_STATE_RUNNING cooldown
+10:39:03    r3-load_mbps=100: TRIAL_STATE_SUCCEEDED teardown
+10:39:03    r3-load_mbps=250: TRIAL_STATE_RUNNING provision
+10:39:05    r3-load_mbps=250: TRIAL_STATE_RUNNING warmup
+10:39:10    r3-load_mbps=250: TRIAL_STATE_RUNNING measure
+10:39:32    r3-load_mbps=250: TRIAL_STATE_RUNNING cooldown
+10:39:33    r3-load_mbps=250: TRIAL_STATE_SUCCEEDED teardown
+10:39:33    r3-load_mbps=400: TRIAL_STATE_RUNNING provision
+10:39:36    r3-load_mbps=400: TRIAL_STATE_RUNNING warmup
+10:39:41    r3-load_mbps=400: TRIAL_STATE_RUNNING measure
+10:40:02    r3-load_mbps=400: TRIAL_STATE_RUNNING teardown
+10:40:03    r3-load_mbps=400: TRIAL_STATE_SUCCEEDED teardown
+10:40:03    r3-saturated: TRIAL_STATE_RUNNING provision
+10:40:05    r3-saturated: TRIAL_STATE_RUNNING warmup
+10:40:10    r3-saturated: TRIAL_STATE_RUNNING measure
+10:40:32    r3-saturated: TRIAL_STATE_SUCCEEDED teardown
+10:40:32   PASS campaign c-247b4693fcff CAMPAIGN_STATE_SUCCEEDED ['TRIAL_STATE_SUCCEEDED']
+10:40:32   PASS every trial has an archive and its sha256
+10:40:32   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+10:40:32   PASS host clean after the campaign
+10:40:32 == step 4: live phases against archive windows
+10:40:32   PASS r1-idle: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r1-idle: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 659-1029 ms after its marker
+10:40:32   PASS r1-load_mbps=100: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r1-load_mbps=100: followed ['provision', 'warmup', 'measure', 'cooldown', 'teardown'], each seen 730-1399 ms after its marker
+10:40:32   PASS r1-load_mbps=250: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r1-load_mbps=250: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 685-1443 ms after its marker
+10:40:32   PASS r1-load_mbps=400: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r1-load_mbps=400: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 797-1167 ms after its marker
+10:40:32   PASS r1-saturated: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r1-saturated: followed ['provision', 'warmup', 'measure', 'cooldown', 'teardown'], each seen 554-1455 ms after its marker
+10:40:32   PASS r2-idle: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r2-idle: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 515-887 ms after its marker
+10:40:32   PASS r2-load_mbps=100: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r2-load_mbps=100: followed ['provision', 'warmup', 'measure', 'cooldown', 'teardown'], each seen 556-1236 ms after its marker
+10:40:32   PASS r2-load_mbps=250: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r2-load_mbps=250: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 508-1265 ms after its marker
+10:40:32   PASS r2-load_mbps=400: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r2-load_mbps=400: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 590-961 ms after its marker
+10:40:32   PASS r2-saturated: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r2-saturated: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 718-1299 ms after its marker
+10:40:32   PASS r3-idle: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r3-idle: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 801-1158 ms after its marker
+10:40:32   PASS r3-load_mbps=100: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r3-load_mbps=100: followed ['provision', 'warmup', 'measure', 'cooldown', 'teardown'], each seen 553-1474 ms after its marker
+10:40:32   PASS r3-load_mbps=250: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r3-load_mbps=250: followed ['provision', 'warmup', 'measure', 'cooldown', 'teardown'], each seen 551-1323 ms after its marker
+10:40:32   PASS r3-load_mbps=400: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r3-load_mbps=400: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 686-1442 ms after its marker
+10:40:32   PASS r3-saturated: archive phases in order ['provision', 'warmup', 'measure', 'cooldown', 'teardown']
+10:40:32   PASS r3-saturated: followed ['provision', 'warmup', 'measure', 'teardown'], each seen 580-1164 ms after its marker
+10:40:32   worst lag between a marker and seeing it live: 1474 ms (1 s watch windows)
+10:40:32 == step 5: typed verdict
+10:40:32   PASS result_verdict VERDICT_OUTCOME_PASS equals the recorded VERDICT_OUTCOME_PASS
+10:40:32   PASS criterion h1-p99: VERDICT_OUTCOME_PASS, [3, 3] trial values per read
+10:40:32   PASS criterion h1-loss: VERDICT_OUTCOME_PASS, [3, 3] trial values per read
+10:40:32 == step 7: fetch, re-hash, rerun from the archive
+10:40:32   PASS result_list names the campaign's 15 archives
+10:40:32    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:129e1ab03b04c336c2fa4757389bde9da9d35597586ebe2e0a3850e2e9fa7d59` from vxedged and write it to 
+10:40:32   PASS sha256:129e1ab03b04: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:32    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:15615f4f01c241a53b2893320c75b28ef23e8643bcb052a407fdf62e05ffe717` from vxedged and write it to 
+10:40:32   PASS sha256:15615f4f01c2: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:32    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:2231f1984a4ec40d8fe54cfbacf1aded2dcf7cf9ba70bf35f9738f18668fc456` from vxedged and write it to 
+10:40:32   PASS sha256:2231f1984a4e: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:32    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:35bea68d32a2a08df074e9d72d6e40d38d9b5e5eb23eb7024e95d418dfb508d6` from vxedged and write it to 
+10:40:32   PASS sha256:35bea68d32a2: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:32    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:3c7db58554f9f9363ee769fb6347b698f408ec852b862ca78a31969836c565ed` from vxedged and write it to 
+10:40:32   PASS sha256:3c7db58554f9: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:32    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:4f678ed184efd6ead2ff282857b63f8c3abc005fd12a871af346397f85496d11` from vxedged and write it to 
+10:40:32   PASS sha256:4f678ed184ef: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:32    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:6a4f0f237893c04f2061cf8b13d8f56f563dbba4a606a025c02ac871f993c56f` from vxedged and write it to 
+10:40:32   PASS sha256:6a4f0f237893: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:32    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:87f2c5aa164fbfa558cce6e38f50a472df11a82fd38530c4c1bcfd96a9da0c83` from vxedged and write it to 
+10:40:33   PASS sha256:87f2c5aa164f: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:33    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:909d87e631a0ac2dd5b0e32d571b2eb56e967e7041d7449a33f84189ea9f8a88` from vxedged and write it to 
+10:40:33   PASS sha256:909d87e631a0: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:33    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:a604acb57c3348f3d9d3863b24ebdb3dd9270be9b3cd7b835947ba4cb0ffe580` from vxedged and write it to 
+10:40:33   PASS sha256:a604acb57c33: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:33    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:aea4ff37de56e4a94959819c5f539d6c7979eef25937658ad54ce0bfd3168928` from vxedged and write it to 
+10:40:33   PASS sha256:aea4ff37de56: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:33    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:cc7eaa4928ea94dd42dc1c298f23c4a092c0a3a5e0764f22fc332263cc835a39` from vxedged and write it to 
+10:40:33   PASS sha256:cc7eaa4928ea: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:33    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:d53fa653a4aa439c5cfb862e648d594753f48b74e0ee425e1ae7f3ed144f8ec8` from vxedged and write it to 
+10:40:33   PASS sha256:d53fa653a4aa: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:33    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:ef9c919bfbbeecf679391fbccb542461f0a35a58ce261f1b29e81eff9089ea88` from vxedged and write it to 
+10:40:33   PASS sha256:ef9c919bfbbe: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:33    ? result_fetch asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Download the results archive `sha256:f38a3be38cade53dcab1b256b281519ab90f156e1f0f5d9ab58a8bd1fd45e8fe` from vxedged and write it to 
+10:40:33   PASS sha256:f38a3be38cad: fetched, re-hashed True, workspace identity True, package digest sha256:8baa744076e3
+10:40:33   PASS the package inside the archive packs to the package that ran (sha256:8baa744076e3)
+10:40:33 == steps 3-4: campaign rerun, profile gate, request_id rerun-1794303633
+10:40:33    ? campaign_start asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Run the campaign `$GATE_WORK/from-archive` declar
+10:40:33   PASS campaign_start returns a job job-f5aee3-0000f2 
+10:40:33    ? campaign_start asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Run the campaign `$GATE_WORK/from-archive` declar
+10:40:33   PASS retried request_id returns the same job (job-f5aee3-0000f2 )
+10:40:33    ? campaign_start asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Run the campaign `$GATE_WORK/from-archive` declar
+10:40:33   PASS another campaign refused BUSY naming c-e8c84a341c5f (ERROR_REASON_BUSY)
+10:40:34    r1-idle: TRIAL_STATE_RUNNING provision
+10:40:34    r1-load_mbps=100: TRIAL_STATE_PENDING 
+10:40:34    r1-load_mbps=250: TRIAL_STATE_PENDING 
+10:40:34    r1-load_mbps=400: TRIAL_STATE_PENDING 
+10:40:34    r1-saturated: TRIAL_STATE_PENDING 
+10:40:34    r2-idle: TRIAL_STATE_PENDING 
+10:40:34    r2-load_mbps=100: TRIAL_STATE_PENDING 
+10:40:34    r2-load_mbps=250: TRIAL_STATE_PENDING 
+10:40:34    r2-load_mbps=400: TRIAL_STATE_PENDING 
+10:40:34    r2-saturated: TRIAL_STATE_PENDING 
+10:40:34    r3-idle: TRIAL_STATE_PENDING 
+10:40:34    r3-load_mbps=100: TRIAL_STATE_PENDING 
+10:40:34    r3-load_mbps=250: TRIAL_STATE_PENDING 
+10:40:34    r3-load_mbps=400: TRIAL_STATE_PENDING 
+10:40:34    r3-saturated: TRIAL_STATE_PENDING 
+10:40:36    r1-idle: TRIAL_STATE_RUNNING warmup
+10:40:41    r1-idle: TRIAL_STATE_RUNNING measure
+10:41:03    r1-idle: TRIAL_STATE_RUNNING teardown
+10:41:04    r1-idle: TRIAL_STATE_SUCCEEDED teardown
+10:41:04    r1-load_mbps=100: TRIAL_STATE_RUNNING provision
+10:41:06    r1-load_mbps=100: TRIAL_STATE_RUNNING warmup
+10:41:11    r1-load_mbps=100: TRIAL_STATE_RUNNING measure
+10:41:32    r1-load_mbps=100: TRIAL_STATE_RUNNING cooldown
+10:41:33    r1-load_mbps=100: TRIAL_STATE_SUCCEEDED teardown
+10:41:33    r1-load_mbps=250: TRIAL_STATE_RUNNING provision
+10:41:36    r1-load_mbps=250: TRIAL_STATE_RUNNING warmup
+10:41:41    r1-load_mbps=250: TRIAL_STATE_RUNNING measure
+10:42:02    r1-load_mbps=250: TRIAL_STATE_RUNNING teardown
+10:42:03    r1-load_mbps=250: TRIAL_STATE_SUCCEEDED teardown
+10:42:03    r1-load_mbps=400: TRIAL_STATE_RUNNING provision
+10:42:05    r1-load_mbps=400: TRIAL_STATE_RUNNING warmup
+10:42:10    r1-load_mbps=400: TRIAL_STATE_RUNNING measure
+10:42:31    r1-load_mbps=400: TRIAL_STATE_RUNNING cooldown
+10:42:32    r1-load_mbps=400: TRIAL_STATE_SUCCEEDED teardown
+10:42:32    r1-saturated: TRIAL_STATE_RUNNING provision
+10:42:35    r1-saturated: TRIAL_STATE_RUNNING warmup
+10:42:40    r1-saturated: TRIAL_STATE_RUNNING measure
+10:43:01    r1-saturated: TRIAL_STATE_RUNNING cooldown
+10:43:02    r1-saturated: TRIAL_STATE_SUCCEEDED teardown
+10:43:02    r2-idle: TRIAL_STATE_RUNNING provision
+10:43:04    r2-idle: TRIAL_STATE_RUNNING warmup
+10:43:09    r2-idle: TRIAL_STATE_RUNNING measure
+10:43:31    r2-idle: TRIAL_STATE_RUNNING teardown
+10:43:32    r2-idle: TRIAL_STATE_SUCCEEDED teardown
+10:43:32    r2-load_mbps=100: TRIAL_STATE_RUNNING provision
+10:43:34    r2-load_mbps=100: TRIAL_STATE_RUNNING warmup
+10:43:39    r2-load_mbps=100: TRIAL_STATE_RUNNING measure
+10:44:01    r2-load_mbps=100: TRIAL_STATE_RUNNING teardown
+10:44:02    r2-load_mbps=100: TRIAL_STATE_SUCCEEDED teardown
+10:44:02    r2-load_mbps=250: TRIAL_STATE_RUNNING provision
+10:44:04    r2-load_mbps=250: TRIAL_STATE_RUNNING warmup
+10:44:09    r2-load_mbps=250: TRIAL_STATE_RUNNING measure
+10:44:30    r2-load_mbps=250: TRIAL_STATE_RUNNING cooldown
+10:44:31    r2-load_mbps=250: TRIAL_STATE_SUCCEEDED teardown
+10:44:31    r2-load_mbps=400: TRIAL_STATE_RUNNING provision
+10:44:34    r2-load_mbps=400: TRIAL_STATE_RUNNING warmup
+10:44:39    r2-load_mbps=400: TRIAL_STATE_RUNNING measure
+10:45:00    r2-load_mbps=400: TRIAL_STATE_RUNNING cooldown
+10:45:01    r2-load_mbps=400: TRIAL_STATE_SUCCEEDED teardown
+10:45:01    r2-saturated: TRIAL_STATE_RUNNING provision
+10:45:03    r2-saturated: TRIAL_STATE_RUNNING warmup
+10:45:08    r2-saturated: TRIAL_STATE_RUNNING measure
+10:45:30    r2-saturated: TRIAL_STATE_RUNNING cooldown
+10:45:31    r2-saturated: TRIAL_STATE_SUCCEEDED teardown
+10:45:31    r3-idle: TRIAL_STATE_RUNNING provision
+10:45:34    r3-idle: TRIAL_STATE_RUNNING warmup
+10:45:39    r3-idle: TRIAL_STATE_RUNNING measure
+10:46:00    r3-idle: TRIAL_STATE_RUNNING teardown
+10:46:01    r3-idle: TRIAL_STATE_SUCCEEDED teardown
+10:46:01    r3-load_mbps=100: TRIAL_STATE_RUNNING provision
+10:46:03    r3-load_mbps=100: TRIAL_STATE_RUNNING warmup
+10:46:08    r3-load_mbps=100: TRIAL_STATE_RUNNING measure
+10:46:29    r3-load_mbps=100: TRIAL_STATE_RUNNING cooldown
+10:46:30    r3-load_mbps=100: TRIAL_STATE_SUCCEEDED teardown
+10:46:30    r3-load_mbps=250: TRIAL_STATE_RUNNING provision
+10:46:33    r3-load_mbps=250: TRIAL_STATE_RUNNING warmup
+10:46:38    r3-load_mbps=250: TRIAL_STATE_RUNNING measure
+10:46:59    r3-load_mbps=250: TRIAL_STATE_RUNNING cooldown
+10:47:00    r3-load_mbps=250: TRIAL_STATE_SUCCEEDED teardown
+10:47:00    r3-load_mbps=400: TRIAL_STATE_RUNNING provision
+10:47:02    r3-load_mbps=400: TRIAL_STATE_RUNNING warmup
+10:47:07    r3-load_mbps=400: TRIAL_STATE_RUNNING measure
+10:47:29    r3-load_mbps=400: TRIAL_STATE_RUNNING teardown
+10:47:30    r3-load_mbps=400: TRIAL_STATE_SUCCEEDED teardown
+10:47:30    r3-saturated: TRIAL_STATE_RUNNING provision
+10:47:32    r3-saturated: TRIAL_STATE_RUNNING warmup
+10:47:37    r3-saturated: TRIAL_STATE_RUNNING measure
+10:47:58    r3-saturated: TRIAL_STATE_RUNNING cooldown
+10:47:59    r3-saturated: TRIAL_STATE_SUCCEEDED teardown
+10:47:59   PASS campaign c-e8c84a341c5f CAMPAIGN_STATE_SUCCEEDED ['TRIAL_STATE_SUCCEEDED']
+10:47:59   PASS every trial has an archive and its sha256
+10:47:59   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+10:47:59   PASS host clean after the rerun
+10:47:59 == step 6: compare the rerun with the original
+10:47:59   PASS result_compare: 20 metric x point pairs, 3 trials a side; outcome VERDICT_OUTCOME_PASS against VERDICT_OUTCOME_PASS
+10:47:59    p99      idle             median 6.4351e-05 ref 6.3711e-05 IQR 1.27e-05 within True
+10:47:59    p99      load_mbps=100    median 6.2143e-05 ref 6.4799e-05 IQR 5.66e-06 within True
+10:47:59    p99      load_mbps=250    median 6.1663e-05 ref 6.0223e-05 IQR 7.9e-06 within True
+10:47:59    p99      load_mbps=400    median 5.6223e-05 ref 5.7983e-05 IQR 5.95e-06 within True
+10:47:59    p99      saturated        median 5.6959e-05 ref 5.7343e-05 IQR 6.56e-06 within True
+10:47:59    lost     idle             median 0 ref 0 IQR 0 within True
+10:47:59    lost     load_mbps=100    median 0 ref 0 IQR 0 within True
+10:47:59    lost     load_mbps=250    median 0 ref 0 IQR 0 within True
+10:47:59    lost     load_mbps=400    median 0 ref 0 IQR 0 within True
+10:47:59    lost     saturated        median 0 ref 0 IQR 0 within True
+10:47:59    sent     idle             median 20000 ref 20000 IQR 0 within True
+10:47:59    sent     load_mbps=100    median 20000 ref 20000 IQR 0 within True
+10:47:59    sent     load_mbps=250    median 20000 ref 20000 IQR 0 within True
+10:47:59    sent     load_mbps=400    median 20000 ref 20000 IQR 0 within True
+10:47:59    sent     saturated        median 20000 ref 20000 IQR 0 within True
+10:47:59    loss_pct idle             median 0 ref 0 IQR 0 within True
+10:47:59    loss_pct load_mbps=100    median 0 ref 0 IQR 0 within True
+10:47:59    loss_pct load_mbps=250    median 0 ref 0 IQR 0 within True
+10:47:59    loss_pct load_mbps=400    median 0 ref 0 IQR 0 within True
+10:47:59    loss_pct saturated        median 0 ref 0 IQR 0 within True
+10:47:59   within the original's IQR: 20 of 20 (measured, not gated: the host is not tuned for timing)
+10:48:00   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | nft: none
+10:48:00   PASS host clean after
+10:48:00 #### 0 failure(s)

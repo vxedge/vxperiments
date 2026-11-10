@@ -1,0 +1,195 @@
+{
+ "estimatedS": 825.0,
+ "points": 5,
+ "problems": [],
+ "profile": "gate",
+ "repetitions": 3,
+ "trials": [
+  {
+   "arm": "idle",
+   "durationS": 20.0,
+   "id": "r1-idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r1-load_mbps=100",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r1-load_mbps=250",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r1-load_mbps=400",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "saturated",
+   "durationS": 20.0,
+   "id": "r1-saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 1,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "idle",
+   "durationS": 20.0,
+   "id": "r2-idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r2-load_mbps=100",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r2-load_mbps=250",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r2-load_mbps=400",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "saturated",
+   "durationS": 20.0,
+   "id": "r2-saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 2,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "idle",
+   "durationS": 20.0,
+   "id": "r3-idle",
+   "parameters": {
+    "load_mbps": {
+     "integer": "0"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r3-load_mbps=100",
+   "parameters": {
+    "load_mbps": {
+     "integer": "100"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r3-load_mbps=250",
+   "parameters": {
+    "load_mbps": {
+     "integer": "250"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "",
+   "durationS": 20.0,
+   "id": "r3-load_mbps=400",
+   "parameters": {
+    "load_mbps": {
+     "integer": "400"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 5.0
+  },
+  {
+   "arm": "saturated",
+   "durationS": 20.0,
+   "id": "r3-saturated",
+   "parameters": {
+    "load_mbps": {
+     "integer": "600"
+    }
+   },
+   "repetition": 3,
+   "warmupS": 5.0
+  }
+ ],
+ "vxmcpBudget": {
+  "maxCampaignS": 28800.0,
+  "maxTrials": 100,
+  "why": null,
+  "within": true
+ }
+}

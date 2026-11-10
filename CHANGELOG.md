@@ -13,6 +13,13 @@ than a repo tag.
 
 ### Added
 
+- `results/done-means-gate-2026-11-10/`: the vxperiment upgrade's done-means steps 1 to 7 run
+  live through `vxmcp` 0.4.1 and vxedge 0.15.1. A signed, locked exp-001 package is pulled by
+  digest, and a tampered copy is refused. Bounds are refused at plan time, and a retry returns
+  its campaign. Live phases match the archives, and the verdict is typed. The archives are
+  fetched and re-hashed, and the campaign is rerun from an archive's package. 94 checks, 0
+  failures. Comparing against the published frozen reference through vxAPI is still open.
+
 - `scenarios/urban-stop-line/`: the first reference scenario, written for vxedge. It is an
   OpenDRIVE road and an OpenSCENARIO storyboard in which a lead vehicle brakes to a stop line,
   with three storyboard parameters (`EgoTargetSpeed`, `LeadGap`, `LeadDeceleration`) and their

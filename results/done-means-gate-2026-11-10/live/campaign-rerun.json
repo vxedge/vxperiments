@@ -1,0 +1,166 @@
+{
+ "caller": "vxmcp:done-means-gate",
+ "campaignId": "c-e8c84a341c5f",
+ "experimentId": "exp-001",
+ "finishedUnixMs": "1794304079309",
+ "jobId": "job-f5aee3-0000f2",
+ "packageDigest": "sha256:8baa744076e31a01e74e74c9be3036d63bce6ed7298d906152fd0d018847ed78",
+ "profile": "gate",
+ "resultsDir": "$GATE_WORK/from-archive/results/c-e8c84a341c5f",
+ "startedUnixMs": "1794303633052",
+ "state": "CAMPAIGN_STATE_SUCCEEDED",
+ "trials": [
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r1-idle.zip",
+   "arm": "idle",
+   "error": "",
+   "id": "r1-idle",
+   "phase": "teardown",
+   "repetition": 1,
+   "sha256": "394bb3c5405f323c77720b807a44d3c293934a325859c666869589181545cdcd",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r1-load_mbps=100.zip",
+   "arm": "",
+   "error": "",
+   "id": "r1-load_mbps=100",
+   "phase": "teardown",
+   "repetition": 1,
+   "sha256": "710dba79df2821b3699a85dd76c128ebad1b3647c33b69b67469c781b41edf3a",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r1-load_mbps=250.zip",
+   "arm": "",
+   "error": "",
+   "id": "r1-load_mbps=250",
+   "phase": "teardown",
+   "repetition": 1,
+   "sha256": "5cf50c53adffa92e2f523b5a5db4ea963ca1df5319a0367cbd71fa7dea9f7072",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r1-load_mbps=400.zip",
+   "arm": "",
+   "error": "",
+   "id": "r1-load_mbps=400",
+   "phase": "teardown",
+   "repetition": 1,
+   "sha256": "7f8c3a59e440b715fd34acbe91a9c463b09472185717163e7dc0c523b6ebdc46",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r1-saturated.zip",
+   "arm": "saturated",
+   "error": "",
+   "id": "r1-saturated",
+   "phase": "teardown",
+   "repetition": 1,
+   "sha256": "5a60f0d7a7795895c96427a56b0d33255ad1880a56c2b7a8ea15c25b115905c2",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r2-idle.zip",
+   "arm": "idle",
+   "error": "",
+   "id": "r2-idle",
+   "phase": "teardown",
+   "repetition": 2,
+   "sha256": "d3e4eb2e9e52667afd6d5b8700f39d6ce22b1a0ed5f6f057730f399bbea1fde3",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r2-load_mbps=100.zip",
+   "arm": "",
+   "error": "",
+   "id": "r2-load_mbps=100",
+   "phase": "teardown",
+   "repetition": 2,
+   "sha256": "b21d0a654b99c5a427870a5c0d54f013450f4918a44d3ca0b77cd000e636f171",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r2-load_mbps=250.zip",
+   "arm": "",
+   "error": "",
+   "id": "r2-load_mbps=250",
+   "phase": "teardown",
+   "repetition": 2,
+   "sha256": "dbc265f25be25db824b199a89887ff583dcf91df0c8a790b1fc8cd1e7e3eb0e9",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r2-load_mbps=400.zip",
+   "arm": "",
+   "error": "",
+   "id": "r2-load_mbps=400",
+   "phase": "teardown",
+   "repetition": 2,
+   "sha256": "65c33c2ca62bbe3ebb37bc497eb778ce3e8cb120873ebe1a54dcb3ecbcef7803",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r2-saturated.zip",
+   "arm": "saturated",
+   "error": "",
+   "id": "r2-saturated",
+   "phase": "teardown",
+   "repetition": 2,
+   "sha256": "8ae09bbb329b1345ee26fc60dba7e30c1c4728fbbd4b22704a9447e9267854e7",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r3-idle.zip",
+   "arm": "idle",
+   "error": "",
+   "id": "r3-idle",
+   "phase": "teardown",
+   "repetition": 3,
+   "sha256": "f752c197c09876b645ff97df877307e5bb35fb09abe517d7f41116bef39057a3",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r3-load_mbps=100.zip",
+   "arm": "",
+   "error": "",
+   "id": "r3-load_mbps=100",
+   "phase": "teardown",
+   "repetition": 3,
+   "sha256": "806038d45754b4e97aabae436e3db9287c09a7a1e51fd49adacb3f33b3bb9a4f",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r3-load_mbps=250.zip",
+   "arm": "",
+   "error": "",
+   "id": "r3-load_mbps=250",
+   "phase": "teardown",
+   "repetition": 3,
+   "sha256": "e4ed2943bb7892c0e7202a40cdcdc584a7e5dac75784cede88514e2322785d66",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r3-load_mbps=400.zip",
+   "arm": "",
+   "error": "",
+   "id": "r3-load_mbps=400",
+   "phase": "teardown",
+   "repetition": 3,
+   "sha256": "774283d9111f7bd870f1f207b5608eacf91a4f8ce324b2904f193d50223d6ddb",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  },
+  {
+   "archive": "$GATE_WORK/from-archive/results/c-e8c84a341c5f/r3-saturated.zip",
+   "arm": "saturated",
+   "error": "",
+   "id": "r3-saturated",
+   "phase": "teardown",
+   "repetition": 3,
+   "sha256": "f28828eac40dbff3bc2c0a333f594ef26bc2b692f202aafaa3f1f9ee62bacae3",
+   "state": "TRIAL_STATE_SUCCEEDED"
+  }
+ ],
+ "unlocked": false,
+ "verdict": "VERDICT_OUTCOME_PASS"
+}
