@@ -8,6 +8,10 @@ parts:
     digest: sha256:33c9c8d8625bd5c6d1f4d3d0c561fdaa930e057fcd1fb24fb3badb402f25429d
     kind: bundle
     target_ids: [fn-fl, fn-fr, fn-rr]
+  - ref: ghcr.io/vxedge/parts/zone/freertos/stack/probe-bundle:0.1.0
+    digest: sha256:78edb6cc4fe7f8a477e581d9389d672ab0e60e028a81dc458b88872d70bb7d3b
+    kind: bundle
+    target_ids: [fn-rtos]
   - ref: ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule:0.1.0
     digest: sha256:4392871714b302e17dc9f81518d4768093bbfbddac6dbc9c10a517a9f286654d
     kind: wasm

@@ -1,7 +1,7 @@
 # vx-vehicle-04: every node backend on one vehicle
 
-Seven devices on one gateway, one for each node backend vxedge has, plus a container on a second slice as
-the denied-flow sender:
+Eight devices on one gateway: one for each node backend vxedge has, a FreeRTOS ECU, and a container on a
+second slice as the denied-flow sender:
 
 | Device | Backend | Slice | Address | Pinned CPU | Part |
 |---|---|---|---|---|---|
@@ -10,6 +10,7 @@ the denied-flow sender:
 | `zone-rr` | `libvirt` | adas | 10.100.0.21 | 6 | the same bundle |
 | `sensor-rr` | `wasm-capsule` | adas | 10.100.0.14 | 7 | `zone/wasm/app/reflector-capsule` 0.1.0 |
 | `ivi1` | `attach` | adas | 10.100.0.13 | none | `./ivi`, the same bundle on plain QEMU |
+| `ecu-rtos` | `qemu-microvm` | adas | 10.100.0.15 | none | `zone/freertos/stack/probe-bundle` 0.1.0 (FreeRTOS) |
 | `zone-rl` | `container` | infotainment | 10.100.0.31 | none | `agent/probe/app/vxprobe` 0.1.1 |
 | `hpc1` | `container` | adas | 10.100.0.50 | none | the same probe, with OTA and the Kuksa databroker |
 
@@ -35,7 +36,7 @@ to the host.
 ```sh
 ./build.sh                 # once per host: fetches ivi/bundle by digest and checks it
 vxedge vehicle up --manifest .
-./check-flows.sh           # 13 checks: hpc1 reaches every backend; zone-rl reaches none
+./check-flows.sh           # 15 checks: hpc1 reaches every node on adas; zone-rl reaches none
 vxedge vehicle down --manifest .
 ./check-leaks.sh
 ```

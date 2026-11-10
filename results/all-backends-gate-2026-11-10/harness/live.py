@@ -152,7 +152,7 @@ def platform(when, backends):
     p = subprocess.run([f"{V03}/check-flows.sh"], capture_output=True, text=True, timeout=900)
     lines = [l for l in (p.stdout + p.stderr).splitlines() if l.startswith(("PASS", "FAIL"))]
     log(f"  [{when}] flows: " + " | ".join(lines))
-    check(p.returncode == 0 and len(lines) == 13 and all(l.startswith("PASS") for l in lines),
+    check(p.returncode == 0 and len(lines) == 15 and all(l.startswith("PASS") for l in lines),
           f"[{when}] check-flows.sh: {len(lines)} checks, rc={p.returncode}")
 
 

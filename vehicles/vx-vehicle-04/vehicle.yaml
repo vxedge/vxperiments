@@ -4,8 +4,8 @@ class: road
 subtype: car
 
 # One vehicle on every node backend vxedge has: qemu-microvm, cloud-hypervisor, libvirt, wasm-capsule, attach
-# and container, on one gateway with two slices. Four nodes are pinned to their own CPU (`realtime.pinned_cpus`),
-# one per pinning backend, so a run can check where each node's threads may run. Every part is published and
+# and container, on one gateway with two slices, plus a FreeRTOS ECU on qemu-microvm. Four nodes are pinned to
+# their own CPU (`realtime.pinned_cpus`), one per pinning backend, so a run can check where each node's threads may run. Every part is published and
 # pinned by digest, except the attach adapter (./ivi), which boots the same published guest bundle on plain
 # QEMU over a tap the host prepares once, as a platform's own host stack would.
 zones:
@@ -22,6 +22,7 @@ devices:
   zone-rr: { role: zone-controller, zone: rear-right, backend: libvirt, realtime: { pinned_cpus: [6] } }
   sensor-rr: { role: sensor, zone: rear-right, backend: wasm-capsule, realtime: { pinned_cpus: [7] } }
   ivi1: { role: ecu, zone: cabin, backend: attach }
+  ecu-rtos: { role: ecu, zone: front-left, backend: qemu-microvm }
   zone-rl: { role: zone-controller, zone: rear-left, backend: container }
   hpc1: { role: hpc, zone: central, backend: container }
 
@@ -31,6 +32,7 @@ functions:
   fn-rr: { deployed_on: zone-rr }
   fn-sns: { deployed_on: sensor-rr }
   fn-ivi: { deployed_on: ivi1 }
+  fn-rtos: { deployed_on: ecu-rtos }
   fn-rl: { deployed_on: zone-rl }
   fn-hpc: { deployed_on: hpc1 }
 
@@ -43,6 +45,9 @@ links:
     slice: adas
   - id: link-ivi
     endpoints: [{ node: ivi1, port: eth0, ip: 10.100.0.13/24, host_interface: at-ivi1 }]
+    slice: adas
+  - id: link-rtos
+    endpoints: [{ node: ecu-rtos, port: eth0, ip: 10.100.0.15/24 }]
     slice: adas
   - id: link-sns
     endpoints: [{ node: sensor-rr, port: eth0, ip: 10.100.0.14/24 }]
