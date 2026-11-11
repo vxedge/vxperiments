@@ -33,7 +33,7 @@ Zenodo, [10.5281/zenodo.23804197](https://doi.org/10.5281/zenodo.23804197); the 
 
 | Path | What |
 |---|---|
-| `experiments/<id>/` | One workspace per experiment: `main.yaml`, `vehicle.yaml`, `parts.yaml`, a `.vxp` marker, `scripts/run.sh`, and its own README |
+| `experiments/<id>/` | One workspace per experiment: `main.yaml`, `vehicle.yaml`, `parts.yaml`, a descriptor, `scripts/run.sh`, and its own README. exp-001 is a `vxp/1` package (`vxp.yaml`, `vxp.lock`) whose campaign runs through vxAPI; the others still have a legacy `<id>.vxp` descriptor |
 | `vehicles/` | Shared vehicle manifests |
 | `notebooks/` | One analysis script per experiment (`analyze_expNNN.py`) |
 | `results/` | Frozen summaries (`*-summary.md` / `.csv`) and reproducibility checks |

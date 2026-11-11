@@ -60,22 +60,31 @@ jobs:
         working-directory: vxperiments
         run: |
           set -euo pipefail
-          # A workspace is any experiment folder holding a `.vxp` descriptor, whatever its name.
-          # Folders without one are listed, not validated: they are scripts against a reference
-          # vehicle, not packages, until they are migrated.
+          # A workspace is any experiment folder holding a descriptor: a `vxp/1` `vxp.yaml`, or a
+          # legacy `<name>.vxp`. Folders without one are listed, not validated: they are scripts
+          # against a reference vehicle, not packages, until they are migrated.
           shopt -s nullglob
           validated=0
           for ws in experiments/*/; do
             ws=${ws%/}
             [ "$ws" = experiments/retired-6.1 ] && continue
-            descriptors=("$ws"/*.vxp)
+            descriptors=("$ws"/vxp.yam[l] "$ws"/*.vxp)   # a pattern, so nullglob drops a missing one
             if [ ${#descriptors[@]} -eq 0 ]; then
-              echo "== $ws: no .vxp descriptor, not a workspace yet"
+              echo "== $ws: no descriptor, not a workspace yet"
               continue
             fi
             echo "== $ws"
             "$VXEDGE" manifest validate --manifest "$ws" --json | tee /tmp/result.json
             jq -e '.valid == true and .kind == "workspace"' /tmp/result.json > /dev/null
+            if [ -f "$ws/vxp.yaml" ]; then
+              # A `vxp/1` package: its lock matches, and packing it twice gives one digest.
+              "$VXEDGE" --chdir "$ws" pkg validate
+              rm -rf /tmp/pack-a /tmp/pack-b && mkdir -p /tmp/pack-a /tmp/pack-b
+              a=$("$VXEDGE" --chdir "$ws" pkg pack --out /tmp/pack-a | sed -n 's/^digest //p')
+              b=$("$VXEDGE" --chdir "$ws" pkg pack --out /tmp/pack-b | sed -n 's/^digest //p')
+              [ -n "$a" ] && [ "$a" = "$b" ] || { echo "error: $ws packs to $a and $b" >&2; exit 1; }
+              echo "   package digest $a"
+            fi
             validated=$((validated + 1))
           done
           [ "$validated" -gt 0 ] || { echo "error: no workspace validated" >&2; exit 1; }

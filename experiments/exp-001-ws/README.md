@@ -1,11 +1,44 @@
-# exp-001 (workspace form)
+# exp-001: ADAS slice isolation under infotainment load (H1)
 
-## This is a sandbox
+## The package
 
-Everything the experiment needs is in this folder: its documents, its campaign
-(`scripts/run.sh`), its loadables (`parts/`), its analysis helpers (`tools/`), and its results.
-`scripts/lib/` is vendored so the folder is zip-portable; `../../scripts/lib/` stays the
-canonical copy and CI asserts the two are byte-identical, so vendoring cannot drift silently.
+This folder is the `vxp/1` package `vxedge/exp-001`, version 0.2.0 (`vxp.yaml`). Its catalogue
+alias is `exp-001`. `vxp.lock` records the digest of every file it holds, and `pkg pack` gives the
+same package digest each time.
+
+`main.yaml` holds the experiment and everything that used to live in `scripts/run.sh` and
+`../../notebooks/analyze_exp001.py`:
+
+| What | Where it was | Where it is |
+|---|---|---|
+| Load sweep 0, 100, 250, 400, 600 Mbit/s | `LOADS_MBPS` in `run.sh` | `campaign.sweep`, through the `load_mbps` parameter, which binds `traffic_profiles[infotainment-load].bandwidth_mbps` |
+| 5 repetitions, 10 s of load, then a 60 s probe window | `REPS`, `WARMUP_S`, `PROBE_S` in `run.sh` | `campaign.repetitions`, `warmup_s`, `duration_s`, and the `repro` profile |
+| The probe at 1000 pps, inside `node-adas-probe-01` | `vxprobe send` under `ip netns exec` | `measurements.ctl-rtt`, through the `probe_pps` parameter |
+| H1: p99 at 600 Mbit/s within 2x of idle, loss within 0.5 points | `H1_P99_FACTOR` and the loss check in the notebook | `hypothesis`, `metrics` and `criteria` |
+
+Its criteria give the notebook's verdict, `h1=pass` with the same values, on all five published
+exp-001 campaigns (`../../scripts/verdict-parity.sh`, run by CI).
+
+Run it through vxAPI, from inside this folder:
+
+```bash
+vxedge campaign plan --profile repro          # the 25 trials, checked; touches nothing
+vxedge campaign start --profile repro         # one archive per trial, then the verdict
+```
+
+The `quick` profile checks the pipeline only and is never reported. It runs one repetition of the
+five loads with `run.sh --quick`'s 3 s and 12 s windows. Unlike `run.sh --quick`, it keeps all five
+loads and 1000 pps, because a profile changes only repetitions and windows.
+
+Nothing here is fetched: both parts are host processes (`local/vxprobe:host-process`,
+`local/vxtraffic:host-process`), and `vehicle.yaml` is this experiment's own, not a copy of a
+reference vehicle.
+
+## The bash campaign
+
+`scripts/` holds the campaign runners that came before the package's campaign. `.vxpignore` keeps
+them out of the package. `scripts/lib/` is vendored; `../../scripts/lib/` stays the canonical copy,
+and CI asserts the two are byte-identical.
 
 ```bash
 cd experiments/exp-001-ws

@@ -13,6 +13,14 @@ than a repo tag.
 
 ### Added
 
+- `experiments/exp-001-ws` is the `vxp/1` package `vxedge/exp-001` 0.2.0, locked (X9.2). Its
+  `main.yaml` now holds what `scripts/run.sh` and `notebooks/analyze_exp001.py` held: the load
+  sweep, repetitions and windows as `campaign` with `quick` and `repro` profiles, the probe as
+  `measurements.ctl-rtt`, `load_mbps` and `probe_pps` as parameters bound to the fields they set,
+  and H1's acceptance rule as `hypothesis`, `metrics` and `criteria`, selected by load. It runs with
+  `vxedge campaign start --profile repro`. `.vxpignore` keeps `scripts/` out of the package. The
+  legacy `exp-001.vxp` descriptor is replaced by `vxp.yaml`.
+
 - `results/done-means-gate-2026-11-10/`: the vxperiment upgrade's done-means steps 1 to 7 run
   live through `vxmcp` 0.4.1 and vxedge 0.15.1. A signed, locked exp-001 package is pulled by
   digest, and a tampered copy is refused. Bounds are refused at plan time, and a retry returns
@@ -51,7 +59,13 @@ than a repo tag.
 
 ### Changed
 
-- CI validates every workspace with vxedge 0.15.0 (`ci/vxedge-release.txt`).
+- Verdict parity judges the five exp-001 campaigns with the package's own criteria, not
+  `notebooks/criteria/exp-001.yaml`. All 13 datasets still give the notebooks' verdicts.
+- CI's workspace validation reads `vxp.yaml` packages as well as legacy `.vxp` descriptors. For a
+  package it also checks that the lock matches and that packing twice gives one digest.
+- `experiments/exp-001-ws/scripts/run-measurements.sh` runs its copy on `method`, since the package's
+  `campaign` replaces it, and no longer adds the probe, which `main.yaml` now declares.
+- CI validates every workspace with vxedge 0.16.0 (`ci/vxedge-release.txt`).
 - `vx-vehicle-02` and `vx-vehicle-03` run the published vxparts probe (`agent/probe/app/vxprobe` 0.1.1) and
   OTA (`svc/ota/app/vxota` 0.1.1) parts, pinned by digest, and live they pass their flow checks (8/8 and 12/12)
   and vx-vehicle-03's signal checks (5/5). `build.sh` no longer builds `localhost/vxedge/probe:1` or `ota:1`,

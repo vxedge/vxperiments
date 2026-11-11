@@ -1,0 +1,18 @@
+schema: vxp-lock/1
+package:
+  id: vxedge/exp-001
+  version: 0.2.0
+locked_with: 0.16.0
+files:
+  .vxpignore: sha256:07978949e28ffa95b5c3f2e5d7b2edcebefdabe98ff0215573bbe599ad34dd5d
+  README.md: sha256:1fce452ee1d00a27aad4729a1680e3e11ec18147e81bce48c62d9f889b6c4e13
+  assets/README.md: sha256:d8055764bc6fa3075c9e5bfa9569f218a854f758c4b3e7d3d95cf618be4e5e2e
+  main.yaml: sha256:e3956d717d3d7a828be3f3fca626c07d56e3263b71e138f63fdcf4b896239b73
+  parts.yaml: sha256:84c5987f848f889ac705e9f7892cc8ceebfcfc54d2643d0737eecabaf111c642
+  parts/README.md: sha256:9a9d1a5e197901e7467d345bcd525b5f2c5a2fa1677bfe5fc9e04851e2142c79
+  tools/README.md: sha256:44aef51b3bc2f327ded10268fff43887ac1ca88a0a4bdaefcb8a7e9f512f3faf
+  vehicle.yaml: sha256:88b21967ed41a286de31a3574530579a25b11abfaab971d2ae79ca9d176c958a
+  vxp.yaml: sha256:a57dbac9f7feecc36de7d45db3e781bf4989e59905c3bf51de172dba9b3439f9
+parts: []
+images: []
+vendored: []
