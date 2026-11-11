@@ -34,6 +34,22 @@ Nothing here is fetched: both parts are host processes (`local/vxprobe:host-proc
 `local/vxtraffic:host-process`), and `vehicle.yaml` is this experiment's own, not a copy of a
 reference vehicle.
 
+### Compared with the frozen campaign
+
+`../../results/exp-001/campaign.json` records the frozen exp-001 campaign: each of its 25
+archives, the trial it is, and its sha256. A trial's id is the one this package's campaign gives
+the same point: `r<n>-defaults` at 0 Mbit/s, which is `load_mbps`'s default, and
+`r<n>-load_mbps=<load>` at the other loads. The archives are the published ones, from the Zenodo
+record that `../../scripts/verdict-parity.sh --fetch` reads (`exp-001.tgz`), unpacked into
+`../../results/exp-001/`. Then a new campaign is compared with the frozen one through vxAPI:
+
+```bash
+vxedge campaign compare <campaign id> exp-001 --reference-workspace <this repo>
+```
+
+vxedged reads each archive the record names from that folder and refuses one whose sha256
+differs (`ERROR_REASON_CHECKSUM_MISMATCH`). This needs vxedge 0.17.0 or later.
+
 ## The bash campaign
 
 `scripts/` holds the campaign runners that came before the package's campaign. `.vxpignore` keeps

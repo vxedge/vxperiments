@@ -2,10 +2,10 @@ schema: vxp-lock/1
 package:
   id: vxedge/exp-001
   version: 0.2.0
-locked_with: 0.16.0
+locked_with: 0.17.0
 files:
   .vxpignore: sha256:07978949e28ffa95b5c3f2e5d7b2edcebefdabe98ff0215573bbe599ad34dd5d
-  README.md: sha256:1fce452ee1d00a27aad4729a1680e3e11ec18147e81bce48c62d9f889b6c4e13
+  README.md: sha256:ea3777744993cff6593bf0cee17dd769c984aa1785fcfc3cc0cad5c01c49b720
   assets/README.md: sha256:d8055764bc6fa3075c9e5bfa9569f218a854f758c4b3e7d3d95cf618be4e5e2e
   main.yaml: sha256:e3956d717d3d7a828be3f3fca626c07d56e3263b71e138f63fdcf4b896239b73
   parts.yaml: sha256:84c5987f848f889ac705e9f7892cc8ceebfcfc54d2643d0737eecabaf111c642
