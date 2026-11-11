@@ -30,13 +30,6 @@ traffic_profiles:
     bandwidth_mbps: 400          # load_mbps binds this; the campaign sweeps 0..600
     payload_bytes: 1200
 
-telemetry:
-  prometheus:
-    scrape_targets:
-      # vxprobe's exporter now runs inside node-adas-probe-01's own netns (docs/ROADMAP.md),
-      # so it's reachable at the zone's real address, not host loopback.
-      - "10.101.0.2:9801"        # vxprobe live exporter
-
 results:
   artifact_dir: results/exp-001
   upload: false
