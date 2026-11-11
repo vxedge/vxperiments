@@ -26,7 +26,8 @@ unchanged.
 a scratch copy of [`experiments/exp-001-ws`](../../experiments/exp-001-ws) built by the harness:
 - [`harness/exp-001-intent.yaml`](harness/exp-001-intent.yaml) replaces its `method` block. It
   carries exp-001's hypothesis, its `load_mbps` parameter bound to the infotainment load, the four
-  metrics and the H1 criteria from [`notebooks/criteria/exp-001.yaml`](../../notebooks/criteria/exp-001.yaml),
+  metrics and the H1 criteria then in `notebooks/criteria/exp-001.yaml` (now held by the package
+  [`experiments/exp-001-ws`](../../experiments/exp-001-ws), selected by load rather than by arm),
   the probe as a declared measurement, a telemetry service, and the campaign. The campaign is the
   `idle` and `saturated` arms, a five-point load sweep, and the profiles `quick`, `repro` and
   `gate`.
