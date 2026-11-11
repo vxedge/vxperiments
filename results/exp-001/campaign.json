@@ -1,0 +1,257 @@
+{
+  "campaign_id": "exp-001",
+  "experiment_id": "exp-001",
+  "state": "succeeded",
+  "trials": [
+    {
+      "id": "r1-defaults",
+      "repetition": 1,
+      "parameters": {
+        "load_mbps": 0
+      },
+      "state": "succeeded",
+      "archive": "rep1-load0.zip",
+      "sha256": "2aa4bb7af92dac9553c1931bf7276c8d4b5b6fe1aa6300ab3a3e2d09c340fc4b"
+    },
+    {
+      "id": "r1-load_mbps=100",
+      "repetition": 1,
+      "parameters": {
+        "load_mbps": 100
+      },
+      "state": "succeeded",
+      "archive": "rep1-load100.zip",
+      "sha256": "01eedf7dce1341815f7e2da9f974e83c3e6d27890bdbe782bfb3be8562170ad8"
+    },
+    {
+      "id": "r1-load_mbps=250",
+      "repetition": 1,
+      "parameters": {
+        "load_mbps": 250
+      },
+      "state": "succeeded",
+      "archive": "rep1-load250.zip",
+      "sha256": "bbf6f0baf3a6eda13b61ad2b8564745fc8afc0c4bcc88f34467746289a91552d"
+    },
+    {
+      "id": "r1-load_mbps=400",
+      "repetition": 1,
+      "parameters": {
+        "load_mbps": 400
+      },
+      "state": "succeeded",
+      "archive": "rep1-load400.zip",
+      "sha256": "d648b507b60727353c43fddf6196cecba35d8b610449d1b720142e93b6404d65"
+    },
+    {
+      "id": "r1-load_mbps=600",
+      "repetition": 1,
+      "parameters": {
+        "load_mbps": 600
+      },
+      "state": "succeeded",
+      "archive": "rep1-load600.zip",
+      "sha256": "b1d41f2325de7512c5ed21ae2d24c303ef16af2a9bca1124a1c211ca5a4bb2e5"
+    },
+    {
+      "id": "r2-defaults",
+      "repetition": 2,
+      "parameters": {
+        "load_mbps": 0
+      },
+      "state": "succeeded",
+      "archive": "rep2-load0.zip",
+      "sha256": "6389ad299479ee7217922818e64e515423668dc99bcf5ea983b58ca473f60e14"
+    },
+    {
+      "id": "r2-load_mbps=100",
+      "repetition": 2,
+      "parameters": {
+        "load_mbps": 100
+      },
+      "state": "succeeded",
+      "archive": "rep2-load100.zip",
+      "sha256": "f981c8e1687faadc27ae0e70061d049bc5fd2fabb6ec3e97b5d3b5bbf9089725"
+    },
+    {
+      "id": "r2-load_mbps=250",
+      "repetition": 2,
+      "parameters": {
+        "load_mbps": 250
+      },
+      "state": "succeeded",
+      "archive": "rep2-load250.zip",
+      "sha256": "de77ffe4f27dfef72a6833f39b4c4ea4690332e664dce638c6227f3b36eda999"
+    },
+    {
+      "id": "r2-load_mbps=400",
+      "repetition": 2,
+      "parameters": {
+        "load_mbps": 400
+      },
+      "state": "succeeded",
+      "archive": "rep2-load400.zip",
+      "sha256": "6e5389a040a88c82bb6901f268b667356e13f6947b3d256a3662d1f5f2a50b4c"
+    },
+    {
+      "id": "r2-load_mbps=600",
+      "repetition": 2,
+      "parameters": {
+        "load_mbps": 600
+      },
+      "state": "succeeded",
+      "archive": "rep2-load600.zip",
+      "sha256": "eb2b9e9056d13ae8957803397097b537820c8ef24e280ca86fd9ec827a314912"
+    },
+    {
+      "id": "r3-defaults",
+      "repetition": 3,
+      "parameters": {
+        "load_mbps": 0
+      },
+      "state": "succeeded",
+      "archive": "rep3-load0.zip",
+      "sha256": "4911f6645c69a0f43809c02f60c79498c831934dcd1a2427c225a24b7171ff96"
+    },
+    {
+      "id": "r3-load_mbps=100",
+      "repetition": 3,
+      "parameters": {
+        "load_mbps": 100
+      },
+      "state": "succeeded",
+      "archive": "rep3-load100.zip",
+      "sha256": "48985da8b0aca894020d76fee31a6971d662c990c57d551ea5ba2e5dde39d9e1"
+    },
+    {
+      "id": "r3-load_mbps=250",
+      "repetition": 3,
+      "parameters": {
+        "load_mbps": 250
+      },
+      "state": "succeeded",
+      "archive": "rep3-load250.zip",
+      "sha256": "e078def4ebbcfd6f96b30209f245b114b5057aa28b4ba0daec9970b93e2b3f80"
+    },
+    {
+      "id": "r3-load_mbps=400",
+      "repetition": 3,
+      "parameters": {
+        "load_mbps": 400
+      },
+      "state": "succeeded",
+      "archive": "rep3-load400.zip",
+      "sha256": "735be9adadafad3760a5618da1e7fcc976de782116eb8381c6562bc5e7a440fe"
+    },
+    {
+      "id": "r3-load_mbps=600",
+      "repetition": 3,
+      "parameters": {
+        "load_mbps": 600
+      },
+      "state": "succeeded",
+      "archive": "rep3-load600.zip",
+      "sha256": "08d6a5217355c4a70e713f3640fb7398a0ea65bde2dbee29c01b7cb6a42d8add"
+    },
+    {
+      "id": "r4-defaults",
+      "repetition": 4,
+      "parameters": {
+        "load_mbps": 0
+      },
+      "state": "succeeded",
+      "archive": "rep4-load0.zip",
+      "sha256": "9fb935aca4342640f56bc7c63e2250854f224790db50b5037a48ef696fd98fa9"
+    },
+    {
+      "id": "r4-load_mbps=100",
+      "repetition": 4,
+      "parameters": {
+        "load_mbps": 100
+      },
+      "state": "succeeded",
+      "archive": "rep4-load100.zip",
+      "sha256": "27a7e753ec895ee7a42f5523efd1490018a212a89cd8643e215f38fbc7c2eb76"
+    },
+    {
+      "id": "r4-load_mbps=250",
+      "repetition": 4,
+      "parameters": {
+        "load_mbps": 250
+      },
+      "state": "succeeded",
+      "archive": "rep4-load250.zip",
+      "sha256": "16fc23a1bbfd08ab062bad9f394c2424dd1ad68eb6c17bb915d178ddd2896b03"
+    },
+    {
+      "id": "r4-load_mbps=400",
+      "repetition": 4,
+      "parameters": {
+        "load_mbps": 400
+      },
+      "state": "succeeded",
+      "archive": "rep4-load400.zip",
+      "sha256": "599d4efb1b4b930abb30fe2882109430c8ae7139a291d65a6b5b184cffc486cb"
+    },
+    {
+      "id": "r4-load_mbps=600",
+      "repetition": 4,
+      "parameters": {
+        "load_mbps": 600
+      },
+      "state": "succeeded",
+      "archive": "rep4-load600.zip",
+      "sha256": "075b53b38e056f935ae64ac3526bb75cf2e38c0a9dbab10a79d420e0ee89270f"
+    },
+    {
+      "id": "r5-defaults",
+      "repetition": 5,
+      "parameters": {
+        "load_mbps": 0
+      },
+      "state": "succeeded",
+      "archive": "rep5-load0.zip",
+      "sha256": "539760352ba672c06e05fd95129cd5cd2797f2e447d1122da7eb9ede3a88b259"
+    },
+    {
+      "id": "r5-load_mbps=100",
+      "repetition": 5,
+      "parameters": {
+        "load_mbps": 100
+      },
+      "state": "succeeded",
+      "archive": "rep5-load100.zip",
+      "sha256": "e66d702ca8b769d2a4fe0be0e3f7516f511edf1d4a3fdf741f475c899a676c70"
+    },
+    {
+      "id": "r5-load_mbps=250",
+      "repetition": 5,
+      "parameters": {
+        "load_mbps": 250
+      },
+      "state": "succeeded",
+      "archive": "rep5-load250.zip",
+      "sha256": "47cda2ddc8d1af7079724624db817324135ff4d80d907e42cb1cf6618e27f1bd"
+    },
+    {
+      "id": "r5-load_mbps=400",
+      "repetition": 5,
+      "parameters": {
+        "load_mbps": 400
+      },
+      "state": "succeeded",
+      "archive": "rep5-load400.zip",
+      "sha256": "df0cdf970f9ae073671ed634cc4e13efdc88946080e3088b7ef59294d8b86481"
+    },
+    {
+      "id": "r5-load_mbps=600",
+      "repetition": 5,
+      "parameters": {
+        "load_mbps": 600
+      },
+      "state": "succeeded",
+      "archive": "rep5-load600.zip",
+      "sha256": "690d3d2d67192cae7f671d5ec63b43949c820c28b787b60e097fa3c5396fa4bb"
+    }
+  ]
+}

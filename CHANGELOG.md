@@ -13,6 +13,12 @@ than a repo tag.
 
 ### Added
 
+- `results/exp-001/campaign.json` records the frozen exp-001 campaign for vxAPI. It lists each of
+  the 25 published archives (Zenodo `exp-001.tgz`), its sha256, and the trial it is, named as the
+  exp-001 package's campaign names that point. `vxedge campaign compare <id> exp-001
+  --reference-workspace <this repo>` then compares a new campaign with the frozen one, which
+  needs vxedge 0.17.0. The record adds no number, and every published number is unchanged.
+
 - `experiments/exp-001-ws` is the `vxp/1` package `vxedge/exp-001` 0.2.0, locked (X9.2). Its
   `main.yaml` now holds what `scripts/run.sh` and `notebooks/analyze_exp001.py` held: the load
   sweep, repetitions and windows as `campaign` with `quick` and `repro` profiles, the probe as
@@ -59,6 +65,7 @@ than a repo tag.
 
 ### Changed
 
+- CI validates the workspaces with vxedge 0.17.0.
 - Verdict parity judges the five exp-001 campaigns with the package's own criteria, not
   `notebooks/criteria/exp-001.yaml`. All 13 datasets still give the notebooks' verdicts.
 - CI's workspace validation reads `vxp.yaml` packages as well as legacy `.vxp` descriptors. For a
