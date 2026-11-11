@@ -1,9 +1,9 @@
 # dataset (a folder of the Zenodo record)	criteria	--name pattern	expected outcome per criterion, from the notebook's own verdict
-exp-001	exp-001.yaml	rep{repetition}-load{load_mbps}	h1=pass
-exp-001-repro-2026-07-31	exp-001.yaml	rep{repetition}-load{load_mbps}	h1=pass
-exp-001-repro-2026-08-03	exp-001.yaml	rep{repetition}-load{load_mbps}	h1=pass
-exp-001-repro-2026-10-13	exp-001.yaml	rep{repetition}-load{load_mbps}	h1=pass
-exp-001-repro-2026-10-13-run2	exp-001.yaml	rep{repetition}-load{load_mbps}	h1=pass
+exp-001	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
+exp-001-repro-2026-07-31	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
+exp-001-repro-2026-08-03	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
+exp-001-repro-2026-10-13	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
+exp-001-repro-2026-10-13-run2	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
 exp-002	exp-002.yaml	rep{repetition}-{arm}	h3=pass
 exp-002-repro-2026-08-05	exp-002.yaml	rep{repetition}-{arm}	h3=pass
 exp-002b	exp-002b.yaml	rep{repetition}-{arm}	transport=pass machine=fail vhost-net=pass management=pass

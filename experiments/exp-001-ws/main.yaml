@@ -27,13 +27,8 @@ traffic_profiles:
   infotainment-load:
     source: node-infot-load-01   # component id; lowering qualifies it
     target: internet             # uplink-side sink (fire-and-forget)
-    bandwidth_mbps: 400          # nominal; the campaign sweeps 0..600
+    bandwidth_mbps: 400          # load_mbps binds this; the campaign sweeps 0..600
     payload_bytes: 1200
-
-method:
-  duration_s: 60
-  repetitions: 5
-  warmup_s: 10
 
 telemetry:
   prometheus:
@@ -45,3 +40,63 @@ telemetry:
 results:
   artifact_dir: results/exp-001
   upload: false
+
+# Typed intent (ARCHITECTURE.md §6.0.3). This replaces what scripts/run.sh and
+# notebooks/analyze_exp001.py held: the load sweep, repetitions and windows, the probe rate, and
+# H1's acceptance rule (H1_P99_FACTOR = 2.0 and the 0.5-point loss margin).
+hypothesis: { id: H1, statement: The ADAS slice keeps p99 within 2x of idle under infotainment load. }
+
+# The only values a caller may change between trials.
+parameters:
+  load_mbps: { type: integer, unit: Mbit/s, default: 0, min: 0, max: 1000,
+               binds: "traffic_profiles[infotainment-load].bandwidth_mbps" }
+  probe_pps: { type: integer, unit: 1/s, default: 1000, min: 10, max: 5000,
+               binds: "measurements[ctl-rtt].rate_pps" }
+
+# The probe run.sh started by hand with `ip netns exec`: MeasurementService runs it inside
+# node-adas-probe-01, towards a reflector the daemon places across the shaped uplink.
+measurements:
+  ctl-rtt: { kind: rtt-probe, from: node-adas-probe-01, to: internet, slice: adas, rate_pps: 1000 }
+
+# vxtelemetry collects each trial's archive.
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
+
+metrics:
+  - { id: p99, kind: gauge, unit: s, entity: measurements/ctl-rtt, series: vxprobe_rtt_seconds,
+      labels: { quantile: "0.99" } }
+  - { id: lost, kind: counter, unit: "1", entity: measurements/ctl-rtt, series: vxprobe_lost_total }
+  - { id: sent, kind: counter, unit: "1", entity: measurements/ctl-rtt, series: vxprobe_sent_total }
+  - { id: loss_pct, kind: gauge, unit: "%", entity: measurements/ctl-rtt, ratio: [lost, sent],
+      factor: 100 }
+
+# H1 holds when, at the highest load, the median p99 is within 2x of idle's and the median loss
+# is no more than 0.5 points above idle's. Trials are selected by load, not by arm, so the same
+# criteria judge the frozen campaigns, whose archives name no arm.
+criteria:
+  - id: h1
+    all:
+      - id: h1-p99
+        lhs: { metric: p99, aggregate: median, select: { load_mbps: 600 } }
+        op: le
+        rhs: { metric: p99, aggregate: median, select: { load_mbps: 0 }, factor: 2.0 }
+      - id: h1-loss
+        lhs: { metric: loss_pct, aggregate: median, select: { load_mbps: 600 } }
+        op: le
+        rhs: { metric: loss_pct, aggregate: median, select: { load_mbps: 0 }, offset: 0.5 }
+
+# run.sh --repro: 5 repetitions of five loads, 10 s of load before a 60 s probe window.
+# `quick` checks the pipeline only and is never reported: one repetition with run.sh --quick's
+# 3 s and 12 s windows.
+campaign:
+  sweep: { load_mbps: [0, 100, 250, 400, 600] }
+  repetitions: 5
+  warmup_s: 10
+  duration_s: 60
+  profiles:
+    quick: { repetitions: 1, warmup_s: 3, duration_s: 12 }
+    repro: { repetitions: 5 }

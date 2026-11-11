@@ -7,6 +7,8 @@
 #   VXEDGE_BUILD=<dir with vxedge, vxedged> VXAGENTS_BUILD=<dir with vxprobe, vxtraffic> \
 #     ./scripts/run-measurements.sh <out-dir>
 #
+# main.yaml declares the probe as `measurements.ctl-rtt` and the protocol as its `campaign`, which
+# `vxedge campaign start --profile repro` runs; this script is the hand-driven form it replaced.
 # Needs vxedged with cap_net_admin and cap_sys_admin (setcap, see the vxedge README) and the
 # `performance` CPU governor set beforehand, as run.sh sets it. Writes one vxprobe summary per point
 # (`rep<r>-load<l>.summary.json`) and a transcript. ../../notebooks/compare_exp001_paths.py compares
@@ -20,12 +22,14 @@ RUN=${RUN:-/run/user/$(id -u)/exp-001m}; W=$RUN/ws; E=unix://$RUN/d.sock; V="$bi
 exec >> "$O/transcript.txt" 2>&1
 echo "== exp-001 through measurements $(date -Is) reps=$REPS loads=(${LOADS[*]}) kernel=$(uname -r) governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null)"
 rm -rf "$RUN"; mkdir -p "$W"
-cp -a "$here/main.yaml" "$here/vehicle.yaml" "$here/parts.yaml" "$here/exp-001.vxp" "$here/parts" "$here/assets" "$W/"
+cp -a "$here/main.yaml" "$here/vehicle.yaml" "$here/parts.yaml" "$here/vxp.yaml" "$here/parts" "$here/assets" "$W/"
 python3 - "$W/main.yaml" <<'PY'
-import sys
+import re, sys
 p = sys.argv[1]; s = open(p).read()
-s = s.replace("method:\n  duration_s: 60", "method:\n  duration_s: 74   # the load's window: warmup + probe + 4, as run.sh")
-s += "\nmeasurements:\n  ctl-rtt: { kind: rtt-probe, from: node-adas-probe-01, to: internet, slice: adas, rate_pps: 1000 }\n"
+# This script drives the points itself, so its copy runs on `method`, which `campaign` replaces.
+s, n = re.subn(r"\ncampaign:\n(  .*\n)+", "\n", s)
+assert n == 1, "main.yaml has no campaign block"
+s += "\nmethod:\n  duration_s: 74   # the load's window: warmup + probe + 4, as run.sh\n"
 open(p, "w").write(s)
 PY
 "$bin/vxedged" --listen "$E" --runtime-dir "$RUN/rt" --vxprobe-bin "$agents/vxprobe" --vxtraffic-bin "$agents/vxtraffic" >> "$O/vxedged.log" 2>&1 &

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Verdict parity (X6.2): vxedge's verdict engine must give the notebooks' verdicts on every full
 # published dataset whose archives hold samples. Each row of notebooks/criteria/parity.tsv names a
-# dataset, the notebook's acceptance rule written as typed intent, how its archive names map to
-# trials, and the outcome the notebook reached per criterion.
+# dataset, the notebook's acceptance rule written as typed intent (a file in notebooks/criteria/, or
+# the package that now holds it), how its archive names map to trials, and the outcome the notebook
+# reached per criterion.
 #
 #   VXEDGE=/path/to/vxedge scripts/verdict-parity.sh           # archives under results/
 #   VXEDGE=/path/to/vxedge scripts/verdict-parity.sh --fetch   # archives from the Zenodo record
@@ -30,7 +31,10 @@ while IFS=$'\t' read -r dataset criteria pattern expected; do
     (cd "$archives" && grep " $dataset.tgz\$" "$OLDPWD/notebooks/criteria/SHA256SUMS" | sha256sum -c --quiet -)
     tar -C "$archives" --no-same-owner -xzf "$archives/$dataset.tgz"
   fi
-  got=$("$vxedge" results verdict --json --experiment "notebooks/criteria/$criteria" \
+  # A criteria entry with a `/` is a package folder from the repo root; a bare name is a file in
+  # notebooks/criteria/.
+  case $criteria in */*) experiment=$criteria ;; *) experiment=notebooks/criteria/$criteria ;; esac
+  got=$("$vxedge" results verdict --json --experiment "$experiment" \
     --name "$pattern" "$archives/$dataset" |
     jq -r '[.criteria[] | "\(.id)=\(.outcome)"] | join(" ")')
   checked=$((checked + 1))
