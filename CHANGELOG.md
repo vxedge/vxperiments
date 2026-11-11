@@ -11,6 +11,13 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Fixed
+
+- The exp-001 and exp-014 packages no longer list the probe's own exporter under
+  `telemetry.prometheus.scrape_targets`. Their probe is a vxAPI measurement, whose samples come
+  from vxedged's exporter, which the daemon adds to every run. Nothing answered the old target,
+  so every trial recorded a gap for the probe node.
+
 ### Added
 
 - `experiments/exp-014` is the `vxp/1` package `vxedge/exp-014` 0.2.0, locked (X9.2). Its

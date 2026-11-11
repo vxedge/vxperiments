@@ -28,11 +28,6 @@ network:
 # No `traffic_profiles`: each arm is one probe on an otherwise idle topology, not offered load —
 # there is nothing here for a background flow to compete with, which is the point.
 
-telemetry:
-  prometheus:
-    scrape_targets:
-      - "127.0.0.1:9801"   # vxprobe live exporter
-
 results:
   artifact_dir: results/exp-014
   upload: false
