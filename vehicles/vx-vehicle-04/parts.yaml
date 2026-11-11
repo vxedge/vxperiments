@@ -12,6 +12,14 @@ parts:
     digest: sha256:78edb6cc4fe7f8a477e581d9389d672ab0e60e028a81dc458b88872d70bb7d3b
     kind: bundle
     target_ids: [fn-rtos]
+  - ref: ghcr.io/vxedge/parts/zone/freertos/firmware/probe-mps2:0.1.0
+    digest: sha256:6fb60c11acf8585941ded39195a033541e7e3556c4ebaf0124e74d6f14adc8b6
+    kind: bundle
+    target_ids: [fn-mcu-frt]
+  - ref: ghcr.io/vxedge/parts/zone/zephyr/firmware/probe-mps2:0.1.0
+    digest: sha256:b07ecf8206c918fa9f5e02f99aa003d40dc06fb6b42b14b992cee884b8227e08
+    kind: bundle
+    target_ids: [fn-mcu-zep]
   - ref: ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule:0.1.0
     digest: sha256:4392871714b302e17dc9f81518d4768093bbfbddac6dbc9c10a517a9f286654d
     kind: wasm
