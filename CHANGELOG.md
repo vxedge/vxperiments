@@ -13,6 +13,15 @@ than a repo tag.
 
 ### Added
 
+- `experiments/exp-014` is the `vxp/1` package `vxedge/exp-014` 0.2.0, locked (X9.2). Its
+  `main.yaml` now holds what `scripts/run.sh` and `notebooks/analyze_exp014.py` held: the six arms
+  as `campaign.arms`, each setting a `device` parameter that binds the probe's `from`, the
+  repetitions and windows with `quick` and `repro` profiles, the probe as `measurements.probe`
+  with `probe_pps`, and the hop rule as `metrics` and `criteria`. It runs with
+  `vxedge campaign start --profile repro`. A campaign trial brings up all six devices, where
+  `run.sh` brought up one arm at a time; the README says so. `.vxpignore` keeps `scripts/` out of
+  the package, and `vxp.yaml` replaces `exp-014.vxp`.
+
 - `results/exp-001/campaign.json` records the frozen exp-001 campaign for vxAPI. It lists each of
   the 25 published archives (Zenodo `exp-001.tgz`), its sha256, and the trial it is, named as the
   exp-001 package's campaign names that point. `vxedge campaign compare <id> exp-001
@@ -66,6 +75,9 @@ than a repo tag.
 ### Changed
 
 - CI validates the workspaces with vxedge 0.17.0.
+- Verdict parity judges exp-014's published campaign with the package's own criteria.
+  `notebooks/criteria/exp-001.yaml` and `exp-014.yaml` are removed: the packages hold those rules
+  now, and nothing reads the copies.
 - Verdict parity judges the five exp-001 campaigns with the package's own criteria, not
   `notebooks/criteria/exp-001.yaml`. All 13 datasets still give the notebooks' verdicts.
 - CI's workspace validation reads `vxp.yaml` packages as well as legacy `.vxp` descriptors. For a

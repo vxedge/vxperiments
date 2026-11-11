@@ -11,4 +11,4 @@ exp-002b-repro-2026-08-05	exp-002b.yaml	rep{repetition}-{arm}	transport=pass mac
 exp-003	exp-003.yaml	rep{repetition}-{arm}	h4=pass
 exp-003-repro-2026-08-03	exp-003.yaml	rep{repetition}-{arm}	h4=pass
 exp-003-repro-2026-10-30	exp-003.yaml	rep{repetition}-{arm}	h4=pass
-exp-014-repro-2026-08-05	exp-014.yaml	rep{repetition}-{arm}	hops=pass
+exp-014-repro-2026-08-05	experiments/exp-014	rep{repetition}-{arm}	hops=pass
