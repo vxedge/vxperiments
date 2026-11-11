@@ -25,14 +25,9 @@ network:
       vlan: 101
       qos: { min_rate_mbps: 50, max_rate_mbps: 600, priority: 1 }
 
-# No `traffic_profiles`: like exp-002, the six arms are probed sequentially on an otherwise idle
-# topology by the campaign runner rather than declared as offered load — there is nothing here
-# for a background flow to compete with, which is the point.
+# No `traffic_profiles`: each arm is one probe on an otherwise idle topology, not offered load —
+# there is nothing here for a background flow to compete with, which is the point.
 
-method:
-  duration_s: 60
-  repetitions: 5
-  warmup_s: 10
 
 telemetry:
   prometheus:
@@ -42,3 +37,68 @@ telemetry:
 results:
   artifact_dir: results/exp-014
   upload: false
+
+# Typed intent (ARCHITECTURE.md §6.0.3). This replaces what scripts/run.sh and
+# notebooks/analyze_exp014.py held: the six arms, repetitions and windows, the probe rate, and the
+# hop rule (each chain hop raises the median p50 by more than the star arms' spread, at least 1 µs).
+
+# Which position the probe sends from: each arm is one of the six devices. `probe_pps` is the
+# probe's rate.
+parameters:
+  device: { type: string, default: star-fl, values: [star-fl, star-fr, star-rl, chain-fl, chain-fr, chain-rl],
+            binds: "measurements[probe].from" }
+  probe_pps: { type: integer, unit: 1/s, default: 1000, min: 10, max: 5000,
+               binds: "measurements[probe].rate_pps" }
+
+# The probe run.sh started by hand with `ip netns exec`: MeasurementService runs it inside the
+# arm's device, towards a reflector the daemon places across the shared uplink.
+measurements:
+  probe: { kind: rtt-probe, from: star-fl, to: internet, slice: adas, rate_pps: 1000 }
+
+# vxtelemetry collects each trial's archive.
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
+
+metrics:
+  - { id: p50, kind: gauge, unit: s, entity: measurements/probe, series: vxprobe_rtt_seconds,
+      labels: { quantile: "0.5" } }
+  - { id: lost, kind: counter, unit: "1", entity: measurements/probe, series: vxprobe_lost_total }
+  - { id: sent, kind: counter, unit: "1", entity: measurements/probe, series: vxprobe_sent_total }
+  - { id: loss_pct, kind: gauge, unit: "%", entity: measurements/probe, ratio: [lost, sent],
+      factor: 100 }
+
+# Each hop along the chain raises the median p50 by more than the star arms' own spread (at
+# least 1 µs): the hop rule of the notebook, written as typed intent.
+criteria:
+  - id: hops
+    all:
+      - id: fr-over-fl
+        op: gt
+        lhs: { diff: [{ metric: p50, aggregate: median, select: { arm: chain-fr } }, { metric: p50, aggregate: median, select: { arm: chain-fl } }] }
+        rhs: { max: [{ diff: [{ max: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }, { min: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }] }, { value: 0.000001, unit: s }] }
+      - id: rl-over-fr
+        op: gt
+        lhs: { diff: [{ metric: p50, aggregate: median, select: { arm: chain-rl } }, { metric: p50, aggregate: median, select: { arm: chain-fr } }] }
+        rhs: { max: [{ diff: [{ max: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }, { min: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }] }, { value: 0.000001, unit: s }] }
+
+# run.sh --repro: 5 repetitions of the six arms, 10 s before a 60 s probe window. `quick` checks
+# the pipeline only and is never reported: one repetition with run.sh --quick's 2 s and 10 s
+# windows (a profile changes repetitions and windows only, so it keeps 1000 pps).
+campaign:
+  arms:
+    star-fl: { device: star-fl }
+    star-fr: { device: star-fr }
+    star-rl: { device: star-rl }
+    chain-fl: { device: chain-fl }
+    chain-fr: { device: chain-fr }
+    chain-rl: { device: chain-rl }
+  repetitions: 5
+  warmup_s: 10
+  duration_s: 60
+  profiles:
+    quick: { repetitions: 1, warmup_s: 2, duration_s: 10 }
+    repro: { repetitions: 5 }

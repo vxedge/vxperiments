@@ -7,6 +7,45 @@ only declared variable across the six arms is which harness each position is wir
 (`vehicle.yaml`'s per-link `impairments`/`harness`), so the campaign runner probes each
 sequentially on an otherwise idle topology.
 
+## The package
+
+This folder is the `vxp/1` package `vxedge/exp-014`, version 0.2.0 (`vxp.yaml`). Its catalogue
+alias is `exp-014`. `vxp.lock` records the digest of every file it holds, and `.vxpignore` keeps
+`scripts/` out of it.
+
+`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
+`../../notebooks/analyze_exp014.py`:
+
+| What | Where it was | Where it is |
+|---|---|---|
+| The six arms, one per device | `ARMS` in `run.sh` | `campaign.arms`, each setting the `device` parameter, which binds `measurements[probe].from` |
+| 5 repetitions, 10 s, then a 60 s probe window | `REPS`, `WARM_S`, `PROBE_S` in `run.sh` | `campaign.repetitions`, `warmup_s`, `duration_s`, and the `repro` profile |
+| The probe at 1000 pps, inside the arm's device | `vxprobe send` under `ip netns exec` | `measurements.probe`, through the `probe_pps` parameter |
+| The hop rule: each chain hop raises the median p50 by more than the star arms' spread, at least 1 µs | the notebook's verdict | `metrics` and `criteria` |
+
+Its criteria give the notebook's verdict, `hops=pass` with the same values, on the published
+campaign (`../../scripts/verdict-parity.sh`, run by CI).
+
+Run it through vxAPI, from inside this folder:
+
+```bash
+vxedge campaign plan --profile repro          # the 30 trials, checked; touches nothing
+vxedge campaign start --profile repro         # one archive per trial, then the verdict
+```
+
+The `quick` profile checks the pipeline only and is never reported: one repetition of the six
+arms with `run.sh --quick`'s 2 s and 10 s windows. Unlike `run.sh --quick`, it keeps 1000 pps,
+because a profile changes only repetitions and windows.
+
+**One difference from `run.sh`:** a campaign trial brings up the whole vehicle, so all six
+devices are up during every arm, idle except the one probed. `run.sh` brought up one arm's device
+at a time. The probe still runs inside the probed device's own network namespace and crosses its
+link, so the hop it measures is the same.
+
+## The bash campaign
+
+The hand-driven form the package replaced, kept until `scripts/` is removed:
+
 ```bash
 cd experiments/exp-014
 sudo -E env "PATH=$PATH" ./scripts/run.sh --quick   # pipeline validation
@@ -76,11 +115,11 @@ deliberately left open rather than asserted here.
 
 | Path | `kind` | What it owns |
 |---|---|---|
-| `exp-014.vxp` | — | identity, version, entry point, host requirements |
-| `main.yaml` | `experiment` | the one shared slice, method, telemetry |
+| `vxp.yaml`, `vxp.lock` | — | the package: identity, version, requirements, and the digest of every file |
+| `main.yaml` | `experiment` | the one shared slice, telemetry, the probe, parameters, metrics, criteria and campaign |
 | `vehicle.yaml` | `vehicle` | the six devices, their addresses, and the star/chain harness comparison |
 | `parts.yaml` | `baseline` | the identical probe payload every arm carries |
-| `scripts/run.sh` | — | the campaign: zone up/probe/zone down per arm, sequentially |
+| `scripts/run.sh` | — | the bash campaign the package replaced: zone up/probe/zone down per arm, sequentially |
 | `scripts/lib/` | — | vendored: `freshness.sh`, `host_pinning.sh`, `results_dir.sh` |
 | `results/` | — | archives, one per (repetition, arm) |
 
