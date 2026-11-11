@@ -77,7 +77,8 @@ than a repo tag.
 - CI validates the workspaces with vxedge 0.17.0.
 - Verdict parity judges exp-014's published campaign with the package's own criteria.
   `notebooks/criteria/exp-001.yaml` and `exp-014.yaml` are removed: the packages hold those rules
-  now, and nothing reads the copies.
+  now, and nothing reads the copies. The done-means gate's README points at the exp-001 package
+  for the criteria it used.
 - Verdict parity judges the five exp-001 campaigns with the package's own criteria, not
   `notebooks/criteria/exp-001.yaml`. All 13 datasets still give the notebooks' verdicts.
 - CI's workspace validation reads `vxp.yaml` packages as well as legacy `.vxp` descriptors. For a
