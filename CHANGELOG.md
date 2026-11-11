@@ -20,6 +20,15 @@ than a repo tag.
 
 ### Added
 
+- `vehicles/vx-vehicle-04` has two microcontroller ECUs on vxedge's `qemu-mcu` backend (0.16.0): `ecu-mcu-frt`
+  runs the FreeRTOS firmware `zone/freertos/firmware/probe-mps2` 0.1.0 and is pinned to CPU 8, and `ecu-mcu-zep`
+  runs the Zephyr firmware `zone/zephyr/firmware/probe-mps2` 0.1.0, both on QEMU's `mps2-an385` (Cortex-M3) and
+  on `adas`. The vehicle again has a node on every backend, ten in all, and `check-flows.sh` has 19 checks.
+- `results/all-backends-gate-2026-11-11`: the vxAPI core gate through vxmcp on that vehicle, 10 of 10 on vxedge
+  0.17.0 and vxmcp 0.4.3, with 501 checks and 0 failed. On top of the 2026-11-10 gate, both qemu-mcu nodes report
+  `armv7m` under `tcg`, the pinned one keeps its threads on its CPU, and `hpc1` reaches both while the
+  `infotainment` container reaches neither. Functional only, never timed.
+
 - `experiments/exp-014` is the `vxp/1` package `vxedge/exp-014` 0.2.0, locked (X9.2). Its
   `main.yaml` now holds what `scripts/run.sh` and `notebooks/analyze_exp014.py` held: the six arms
   as `campaign.arms`, each setting a `device` parameter that binds the probe's `from`, the

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Check the allowed and denied flows of a running vx-vehicle-04: central compute reaches a node of every backend
-# and the FreeRTOS ECU on `adas`, and the container on `infotainment` reaches none of them. Exits non-zero on any failure. Only the
-# container nodes can send, so the other backends are probed as targets. A denied flow must show frames
-# reaching the bridge, so the silence means the slice held, not that nothing was sent.
+# Check the allowed and denied flows of a running vx-vehicle-04: central compute reaches a node of every backend,
+# the FreeRTOS ECU and both qemu-mcu ECUs on `adas`, and the container on `infotainment` reaches none of them.
+# Exits non-zero on any failure. Only the container nodes can send, so the other backends are probed as
+# targets. A denied flow must show frames reaching the bridge, so the silence means the slice held, not that
+# nothing was sent.
 set -uo pipefail
 
 failures=0
@@ -40,7 +41,7 @@ denied() {
     else pass "denied zone-rl -> $2 $1:9800 (0 replies, $sent frames reached the bridge)"; fi
 }
 
-targets="10.100.0.11:qemu-microvm 10.100.0.12:cloud-hypervisor 10.100.0.21:libvirt 10.100.0.14:wasm-capsule 10.100.0.13:attach 10.100.0.15:freertos"
+targets="10.100.0.11:qemu-microvm 10.100.0.12:cloud-hypervisor 10.100.0.21:libvirt 10.100.0.14:wasm-capsule 10.100.0.13:attach 10.100.0.15:freertos 10.100.0.16:qemu-mcu-freertos 10.100.0.17:qemu-mcu-zephyr"
 
 # Guests answer once their kernels are up: allow each a minute.
 for t in $targets; do
