@@ -36,6 +36,8 @@ results:
 # notebooks/analyze_exp014.py held: the six arms, repetitions and windows, the probe rate, and the
 # hop rule (each chain hop raises the median p50 by more than the star arms' spread, at least 1 µs).
 
+hypothesis: { id: topology, statement: "Each hop of a daisy-chained harness raises latency by more than a star harness varies across positions." }
+
 # Which position the probe sends from: each arm is one of the six devices. `probe_pps` is the
 # probe's rate.
 parameters:
