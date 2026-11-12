@@ -13,12 +13,29 @@ than a repo tag.
 
 ## [0.2.1] - 2026-11-12
 
-exp-010 (H2, real S-NSSAI slicing against static VLAN mapping) joins the catalogue as a package.
-Its probe runs from the ADAS slice's 5G UE, and H2 is judged against exp-001's frozen campaign.
-exp-005 0.2.1 gives its `quick` profile the scripts' 10 s steady window. Both need vxedge 0.20.0.
+exp-010 (H2, real S-NSSAI slicing against static VLAN mapping) and exp-002 (H3, virtual-ECU
+packaging) join the catalogue as packages. exp-010's probe runs from the ADAS slice's 5G UE, and H2
+is judged against exp-001's frozen campaign; it needs vxedge 0.20.0. exp-002 probes each packaging
+of one ECU from the host, one arm up at a time, and its VM arms boot the published probe bundle; it
+needs vxedge 0.21.0. exp-005 0.2.1 gives its `quick` profile the scripts' 10 s steady window.
 exp-001 and exp-014 are unchanged at 0.2.0. No published number changes.
 
 ### Added
+
+- `experiments/exp-002-ws` is the `vxp/1` package `vxedge/exp-002` 0.2.0, locked (X9.2). Its
+  `main.yaml` holds what `scripts/run.sh` and `notebooks/analyze_exp002.py` held:
+  - The three arms (container, microVM, full VM) are `campaign.arms`, with `quick` and `repro`
+    profiles. Each brings its device up alone through `isolate` (vxedge 0.21.0), as `run.sh`
+    brought one arm up at a time.
+  - The probe is `measurements.probe`, `from: host` to the arm's address, as `run.sh` probed from
+    the uplink's VLAN. A VM arm's reflector is its guest's own, which the probe bundle 0.1.1
+    declares (`org.vxedge.reflector: udp/9800`), and the probe waits for it to answer.
+  - H3's rule is typed intent: some VM arm's median p50 outside the container arm's IQR, at least
+    1 µs. `notebooks/criteria/exp-002.yaml` is removed, and verdict parity reads the package.
+  - The VM arms pin `ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle` 0.1.1 by digest, in
+    place of a locally fetched bundle; `tools/fetch-parts.sh` and `parts/linux-probe.sha256` are
+    removed.
+  - `vxp.yaml` replaces `exp-002.vxp`, and `.vxpignore` keeps `scripts/` out of the package.
 
 - `experiments/exp-010-ws` is the `vxp/1` package `vxedge/exp-010` 0.2.0, locked (X9.2). Its
   `main.yaml` holds what `scripts/run.sh` and `notebooks/analyze_exp010.py` held:
@@ -39,8 +56,7 @@ exp-001 and exp-014 are unchanged at 0.2.0. No published number changes.
 
 - exp-005 0.2.1: its `quick` profile gives the steady window `run.sh --quick`'s 10 s (vxedge
   0.20.0 profile window lengths), and it requires vxedge 0.20.0.
-- CI validates the workspaces with vxedge 0.20.0. It moved through 0.19.0, which adds
-  cross-campaign criteria.
+- CI validates the workspaces with vxedge 0.21.0. It moved through 0.19.0 and 0.20.0.
 
 ## [0.2.0] - 2026-11-12
 

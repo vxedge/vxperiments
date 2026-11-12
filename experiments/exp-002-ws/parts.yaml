@@ -1,16 +1,15 @@
 kind: baseline
 id: bl-exp-002
 
-# The H3 control: one payload, three packagings. The container arm runs vxprobe as a host
-# process (`local/…` names nothing in a registry, so there is nothing to pin); the two VM arms
-# boot the *same* guest bundle, so any difference between them is the packaging and not the
-# software.
+# The H3 control: one payload, three packagings. The container arm's reflector is vxprobe, which
+# the daemon runs in the node's namespace (`local/…` names nothing in a registry, so there is
+# nothing to pin); the two VM arms boot the *same* published guest bundle, so any difference
+# between them is the packaging and not the software. Its part declares the reflector its guest
+# runs (`org.vxedge.reflector: udp/9800`), which is what lets a measurement aim at it.
 parts:
   - ref: local/vxprobe:host-process
     target_ids: reflector-cont
-  # Sandbox-local: `./tools/fetch-parts.sh` populates it and verifies it against
-  # `parts/linux-probe.sha256`. A local ref needs no registry digest — it is content-hashed
-  # into the workspace identity (§13) and into the results archive.
-  - ref: ./parts/linux-probe
+  - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle
     kind: bundle
+    digest: sha256:dce921197fa93f7a6bd306b1748b93785e329e443504bd2113a98ccfad52c5e6   # 0.1.1
     target_ids: [reflector-microvm, reflector-libvirt]

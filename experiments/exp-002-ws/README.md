@@ -1,80 +1,64 @@
-# exp-002 (workspace form)
+# exp-002
 
-The §6.0 workspace that replaces `../retired-6.1/exp-002.yaml` (H3: virtual-ECU packaging vs
-zone-to-gateway latency). Run it from **inside this directory**:
+## The package
 
-```bash
-cd experiments/exp-002-ws
-./tools/fetch-parts.sh                                   # once: populate + verify parts/
-sudo -E env "PATH=$PATH" ./scripts/run.sh --quick        # pipeline validation
-sudo -E env "PATH=$PATH" ./scripts/run.sh --repro        # the campaign
-```
+This folder is the `vxp/1` package `vxedge/exp-002`, version 0.2.0 (`vxp.yaml`). Its catalogue
+alias is `exp-002`. `vxp.lock` records the digest of every file it holds and the guest bundle it
+pins, and `.vxpignore` keeps `scripts/` out of it.
 
-## This is a sandbox
+`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
+`../../notebooks/analyze_exp002.py`:
 
-Everything the experiment needs is in this folder: its documents, its campaign
-(`scripts/run.sh`), its loadables (`parts/`, fetched and digest-verified by
-`tools/fetch-parts.sh`), and its results. The guest bundle is fetched rather than committed —
-19 MB of kernel and initramfs, and five sandboxes vendoring it would be 95 MB in git — but
-`parts/linux-probe.sha256` is committed, so a fetched copy is verified rather than trusted.
+| What | Where it was | Where it is |
+|---|---|---|
+| Three arms: container, microVM, full VM, one up at a time | `ARMS`, `DEVICE_OF`, `zone up --vxid` in `run.sh` | `campaign.arms`, through `arm_device`, which binds `isolate` |
+| The probe from the host to each arm at 1000 pps | `vxprobe send` from the host on `vxup0p.101` | `measurements.probe` (`from: host`), through `arm_target` and `probe_pps` |
+| Waiting for a VM arm's reflector | `wait_reflector` in `run.sh` | the measurement, which waits for its reflector to answer |
+| 5 repetitions, 10 s warmup, then a 60 s probe window | `REPS`, `WARM_S`, `PROBE_S` in `run.sh` | `campaign.repetitions`, `warmup_s`, `duration_s`, and the `repro` profile |
+| H3: some arm's median p50 outside the container arm's IQR, at least 1 µs | the notebook's verdict | `hypothesis`, `metrics` and `criteria` |
 
-The helpers in `scripts/lib/*.sh` (frozen-results protection, CPU governor pinning, binary
-freshness) are vendored copies of `../../scripts/lib/`, the canonical set every experiment shares.
-CI (`../../scripts/lib/check-runners.sh`) fails when a copy drifts from the canonical one, the
-kind of drift that once left four of five runners without governor pinning.
-
-## Status: structurally equivalent, not yet numerically equivalent
-
-`../retired-6.1/exp-002.yaml` stays authoritative until a campaign run reproduces the frozen H3 numbers
-through this workspace. Phase-1 results reproduce at the `v0.1.0` tag regardless.
-
-**Verified** — this workspace and the frozen manifest produce identical gateway, node, traffic
-and 5G plans:
+The VM arms boot the published guest bundle `zone/linux/stack/probe-bundle` 0.1.1, pinned by
+digest in `parts.yaml`. Its part declares the UDP reflector its guest runs on port 9800, so the
+measurement aims at it and starts nothing in the guest (vxedge 0.21.0). Run it through vxAPI, from
+inside this folder:
 
 ```bash
-# One planning path, so there is nothing left to diff: validating the workspace runs the same
-# cross-file checks and model invariants `up` runs.
-vxedge manifest validate --manifest experiments/exp-002-ws --json
+vxedge campaign plan --profile repro     # the 15 trials; touches nothing
+vxedge campaign start --profile repro    # one archive per trial, then H3's verdict
 ```
 
-The plan-equivalence check that signed this migration off used `plan-diff`, which compared the
-§6.0 and §6.1 planning paths. Both the example and §6.1's planning path are gone (2026-07-31),
-so the result is recorded here rather than re-runnable: **IDENTICAL** — same interface names,
-vlans, slices, addresses, bundles and backends.
+The `quick` profile checks the pipeline only and is never reported: one repetition with
+`run.sh --quick`'s 2 s and 10 s windows, at 1000 pps (`run.sh --quick` probed at 500).
 
-**Not verified**: p50/p95/p99 equivalence against the frozen campaign, which needs a full run on
-a provisioning-capable host (root, or passwordless sudo for `ip`/`bridge`/`tc`, plus KVM).
+The host needs KVM for the VM arms, and the libvirt arm needs vxedged's user in the `libvirt`
+group, with the part cache readable by libvirt's qemu user (see `ARCHITECTURE.md` §9).
 
-## What migrating this needed
+Verdict parity: the published exp-002 archives (`exp-002.tgz`, `exp-002-repro-2026-08-05.tgz`)
+give the notebook's H3 verdict through this package (`../../scripts/verdict-parity.sh`).
 
-exp-002 was the experiment §6.0 could not express, and it took two schema changes and two
-fixes to get here:
+## Before the package
+
+`scripts/run.sh` is the bash runner the campaign replaced, kept until X9.3 removes it. It brought
+the gateway up, put `10.101.0.1/24` on the uplink's VLAN by hand, then brought each arm's device up
+alone and probed it from the host. The package does the same through vxAPI.
+
+The workspace form needed two schema changes and two fixes before this:
 
 - **Endpoint addresses.** The three arms share one VLAN and one subnet; the *address* is what
-  tells them apart, and it is how the probe reaches each arm separately. §6.0's endpoints were
-  bare strings with nowhere to put one. They now take an object form —
-  `{ node: node-cont-01, port: eth0, ip: 10.101.0.11/24 }` — alongside the bare form, which
-  stays right whenever no fixed address is needed.
-- **Interface names stopped being positional.** `vz0`/`vz1`/`vz2` were assigned in traversal
-  order, and exp-002 declares its arms `cont, microvm, libvirt` while §6.0 sorts them to
-  `cont, libvirt, microvm` — so two arms swapped interfaces between the two schema paths, and
-  the campaign would have measured libvirt while reporting microvm. Names are now derived from
-  the device id (`vz-node-c-32cc` for `node-cont-01`), so order decides nothing.
-- **A VM's guest bundle was unreachable.** The zone planner looked up a device's software by
-  *function id equals device id*, which is true in §6.1 and false here — so every libvirt and
-  qemu-microvm arm planned as a VM with no bundle to boot. It now resolves through
-  `deployed_on`, which is what the function layer is for.
-- **`zone up` could not select one arm.** A zone is a *region*, and all three arms sit in
-  `front-left`, so region-only selection could start only all three at once — the concurrent
-  guest CPU contention that invalidated exp-002b's first campaign. `zone up --vxid` now accepts
-  a device id as well, which is what `scripts/run-exp-002.sh` uses to hold one arm up at a time.
+  tells them apart. Endpoints take an object form, `{ node: node-cont-01, port: eth0, ip:
+  10.101.0.11/24 }`.
+- **Interface names stopped being positional.** Names are derived from the device id
+  (`vz-node-c-32cc` for `node-cont-01`), so order decides nothing.
+- **A VM's guest bundle resolves through `deployed_on`**, not by function id equals device id.
+- **One device up at a time.** `zone up --vxid` took a device id, which `run.sh` used to hold
+  one arm up at a time. The package does it with `isolate`.
 
 ## Structure
 
 | File | `kind` | What it owns |
 |---|---|---|
-| `exp-002.vxp` | — | identity, version, entry point, host requirements |
-| `main.yaml` | `experiment` | the test: slice + QoS, method, telemetry, results |
+| `vxp.yaml` | — | identity, version, entry point, host requirements |
+| `main.yaml` | `experiment` | the test: slice + QoS, the probe, the arms, H3 and its criteria |
 | `vehicle.yaml` | `vehicle` | the system under test: three packagings of one ECU, and their addresses |
 | `parts.yaml` | `baseline` | the identical payload each arm carries |
 

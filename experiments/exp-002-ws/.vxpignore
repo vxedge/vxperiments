@@ -1,0 +1,3 @@
+# scripts/ holds the bash campaign runner that came before the package's campaign: a host recipe,
+# not package content. The campaign, its parameters and its criteria are in main.yaml.
+scripts/
