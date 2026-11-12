@@ -1,0 +1,18 @@
+kind: baseline
+id: bl-exp-017
+
+# vx-vehicle-03's parts, all published and pinned by digest: the probe guest bundle on the two VM
+# zones, the reflector capsule on the wasm zone, and the vxprobe payload on the three container
+# nodes. The reference vehicle builds its bundle and capsule per host; a package cannot reach them.
+parts:
+  - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle
+    kind: bundle
+    digest: sha256:dce921197fa93f7a6bd306b1748b93785e329e443504bd2113a98ccfad52c5e6   # 0.1.1
+    target_ids: [fn-fl, fn-fr]
+  - ref: ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule
+    kind: wasm
+    digest: sha256:4392871714b302e17dc9f81518d4768093bbfbddac6dbc9c10a517a9f286654d   # 0.1.0
+    target_ids: fn-rr
+  - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
+    digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
+    target_ids: [fn-rl, fn-cab, fn-hpc]

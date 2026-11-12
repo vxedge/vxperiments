@@ -1,0 +1,31 @@
+schema: vxp-lock/1
+package:
+  id: vxedge/exp-017
+  version: 0.2.0
+locked_with: 0.22.0
+files:
+  README.md: sha256:709db4921e3a49620a5afa392a5bb926cc24826463edca4a74b9280720297285
+  assets/README.md: sha256:ae38214c7b83a46a0720edc9fab6a5e9180e8d79f15aa013919bfab4560e9ea7
+  assets/vss-6.0-bundled.json: sha256:de12e86c96585124140adde847951d0006295a944d6e5fbc338fe0c1babd90d4
+  assets/vss-6.0-release.json: sha256:b77785180dbe7fc674e4965ab9c1c58dcc97433867cf4abf4e3f78c013550e78
+  assets/vss-6.1.json: sha256:bef9ad501b38edd60e7b903cb39ba5b8f0864a984595b3e901d6efa3f06bdb70
+  main.yaml: sha256:aeebcbeed5097e871c6d13477dbd8593651a74be851e8670b050984a93f3586c
+  parts.yaml: sha256:26561b1b7edb1cb7e9e55249a98af2d6ee2d786f2700a79c1485672a012f99cd
+  tools/compare.py: sha256:2d590e7a07eb0e14b2c7388fe3459be79cb0fc327fc00e5e7a0eb192c1218f03
+  tools/kv2/Containerfile: sha256:91adf9e5226b90d073f1b4634a7345dc73229e3a50a01bb54fce29c923271eb2
+  tools/kv2/kv2.py: sha256:aa076381517b3f9a336bad48f42cfeb97204810bda1d28b6248fc29ca55123ab
+  tools/kv2/requirements.in: sha256:ba7c305b8e175a60b4b3867b8dfff830cf085f5d2d11b000dd1928b8e2a97a68
+  tools/kv2/requirements.txt: sha256:3ea3459402af1e5c91358a74762413731ec98a19f5df04bd12cf26d6b5c713dc
+  vehicle.yaml: sha256:b652d321018b58f39efd1988dcbf3d6571abf353d263d4cd4036d9ebe301f4fa
+  vxp.yaml: sha256:37ce338cd07156dd1c84ff3e14010ed4f5cd5d70876a84d4ea7fa24e7a811569
+parts:
+- ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle
+  digest: sha256:dce921197fa93f7a6bd306b1748b93785e329e443504bd2113a98ccfad52c5e6
+- ref: ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule
+  digest: sha256:4392871714b302e17dc9f81518d4768093bbfbddac6dbc9c10a517a9f286654d
+images:
+- ref: ghcr.io/eclipse-kuksa/kuksa-databroker
+  digest: sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+- ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
+  digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
+vendored: []

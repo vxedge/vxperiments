@@ -1,0 +1,65 @@
+# vx-vehicle-03 (vxperiments/vehicles/vx-vehicle-03), without its OTA service: the store that
+# service serves is built per host, and nothing here uses it. `diff` against the reference vehicle
+# shows nothing else changes. The databroker under test is the vehicle's signal plane on hpc1.
+kind: vehicle
+id: vx-vehicle-03
+class: road
+subtype: car
+
+# Every zone backend in one vehicle: six zones on qemu-microvm, cloud-hypervisor, wasm-capsule and
+# container, with central compute, a service and the signal plane placed on a slice. Guests stay probes: this proves
+# the backends provision and isolate together, not application behaviour. libvirt is left out
+# because a boot here would add nothing the other VM backends do not show.
+#
+# adas and infotainment share one /24 on purpose, as in vx-vehicle-02.
+zones:
+  front-left: {}
+  front-right: {}
+  rear-left: {}
+  rear-right: {}
+  cabin: {}
+  central: {}
+
+devices:
+  zone-fl: { role: zone-controller, zone: front-left, backend: qemu-microvm }
+  zone-fr: { role: zone-controller, zone: front-right, backend: cloud-hypervisor }
+  zone-rl: { role: zone-controller, zone: rear-left, backend: container }
+  sensor-rr: { role: sensor, zone: rear-right, backend: wasm-capsule }
+  cabin1: { role: ecu, zone: cabin, backend: container }
+  hpc1: { role: hpc, zone: central, backend: container }
+
+functions:
+  fn-fl: { deployed_on: zone-fl }
+  fn-fr: { deployed_on: zone-fr }
+  fn-rl: { deployed_on: zone-rl }
+  fn-rr: { deployed_on: sensor-rr }
+  fn-cab: { deployed_on: cabin1 }
+  fn-hpc: { deployed_on: hpc1 }
+
+links:
+  - id: link-fl
+    endpoints: [{ node: zone-fl, port: eth0, ip: 10.100.0.11/24 }]
+    slice: adas
+  - id: link-fr
+    endpoints: [{ node: zone-fr, port: eth0, ip: 10.100.0.12/24 }]
+    slice: adas
+  - id: link-cab
+    endpoints: [{ node: cabin1, port: eth0, ip: 10.100.0.13/24 }]
+    slice: adas
+  - id: link-rr
+    endpoints: [{ node: sensor-rr, port: eth0, ip: 10.100.0.14/24 }]
+    slice: adas
+  - id: link-rl
+    endpoints: [{ node: zone-rl, port: eth0, ip: 10.100.0.31/24 }]
+    slice: infotainment
+  - id: link-hpc
+    endpoints: [{ node: hpc1, port: eth0, ip: 10.100.0.50/24 }]
+    slice: adas
+
+signal_plane:
+  kuksa:
+    image:
+      url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+      kind: container
+    on: hpc1
+    config: { listen: "0.0.0.0:55555" }

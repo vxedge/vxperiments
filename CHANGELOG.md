@@ -11,6 +11,37 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Added
+
+- `experiments/exp-015` is the `vxp/1` package `vxedge/exp-015` 0.2.0, locked (X9.2): the Kuksa
+  use cases, a functional suite on vxedge 0.22.0's `checks`. Its `main.yaml` holds what
+  `cases-v2.sh`, `lib.sh` and `flags.sh` held:
+  - each client call is a step that runs kv2 in a node's namespace, a subscriber or provider a
+    background step, and a gone provider's claim is waited out by a step repeated until actuate
+    finds no provider;
+  - the databroker's restarts and the denied sender's frames are `observe` steps, compared;
+  - the flag cases run two throwaway brokers with the v2 client, in place of the v1 CLI;
+  - every `PASS` and `FAIL` line is a case of the criterion `kuksa-v2` (50 cases), and every `OBS`
+    line an `observe` case.
+  The vehicle is vx-vehicle-03 without its OTA service, whose store is built per host, and its
+  guest zones boot the published probe bundle 0.1.1 and reflector capsule 0.1.0. Live on a quick
+  run, all 50 cases passed and the observations matched `results/kuksa-cases-2026-11-04`. The
+  signal-plane lifecycle checks `run.sh` repeated first are not part of the package.
+- `experiments/exp-017` is the `vxp/1` package `vxedge/exp-017` 0.2.0, locked (X9.2): the VSS
+  scenarios, the same way. `scenarios.sh` and `vss61.sh` are its steps and cases (34 judged, the
+  rest observed), the throwaway brokers run `on: alone` with their VSS file from `assets/`, and
+  `compare.py` is `tools/compare.py`, printing one JSON line. Live on a quick run, all 34 cases
+  passed and the observations matched `results/vss-scenarios-2026-11-04`.
+
+### Removed
+
+- exp-015's `run.sh`, `lib.sh`, `cases-v2.sh` and `flags.sh`, and exp-017's `run.sh`,
+  `scenarios.sh`, `vss61.sh` and `compare.py`: the packages replace them.
+
+### Changed
+
+- CI validates the workspaces with vxedge 0.22.0.
+
 ## [0.2.1] - 2026-11-12
 
 exp-010 (H2, real S-NSSAI slicing against static VLAN mapping) and exp-002 (H3, virtual-ECU
