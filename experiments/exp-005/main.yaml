@@ -110,5 +110,5 @@ campaign:
     - { id: cold, duration_s: 3, set: { probe_pps: 20 } }
     - { id: steady, duration_s: 60 }
   profiles:
-    quick: { repetitions: 2 }
+    quick: { repetitions: 2, windows: { steady: 10 } }
     repro: { repetitions: 20 }

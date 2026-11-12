@@ -44,7 +44,7 @@ not any single repetition's own percentiles.
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-005`, version 0.2.0 (`vxp.yaml`). Its catalogue
+This folder is the `vxp/1` package `vxedge/exp-005`, version 0.2.1 (`vxp.yaml`). Its catalogue
 alias is `exp-005`. `vxp.lock` records the digest of every file it holds, and `.vxpignore` keeps
 `scripts/` out of it. It needs vxedge 0.18.0 or later, for measure windows.
 
@@ -72,9 +72,9 @@ vxedge campaign plan --profile repro          # the 20 trials, each a cold and a
 vxedge campaign start --profile repro         # one archive per trial, then the verdict
 ```
 
-The `quick` profile checks the pipeline only and is never reported: two repetitions. Unlike
-`run.sh --quick`, it keeps the 60 s steady window at 1000 pps, because a profile does not change
-the windows.
+The `quick` profile checks the pipeline only and is never reported: two repetitions with
+`run.sh --quick`'s 10 s steady window. Unlike `run.sh --quick`, it keeps the steady window at
+1000 pps, because a profile changes window lengths, not what a window sets.
 
 **Differences from `run.sh`:**
 - Each window starts the probe afresh, so the steady window's figures are its own, as `run.sh`'s

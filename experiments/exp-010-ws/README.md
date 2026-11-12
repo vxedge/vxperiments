@@ -1,5 +1,42 @@
 # exp-010
 
+## The package
+
+This folder is the `vxp/1` package `vxedge/exp-010`, version 0.2.0 (`vxp.yaml`). Its catalogue
+alias is `exp-010`. `vxp.lock` records the digest of every file it holds, and `.vxpignore` keeps
+`scripts/` out of it.
+
+`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
+`../../notebooks/analyze_exp010.py`:
+
+| What | Where it was | Where it is |
+|---|---|---|
+| Load sweep 0, 100, 250, 400, 600 Mbit/s | `LOADS_MBPS` in `run.sh` | `campaign.sweep`, through `load_mbps`, which binds `traffic_profiles[infotainment-load].bandwidth_mbps` |
+| 5 repetitions, 10 s of load, then a 60 s probe window | `REPS`, `WARMUP_S`, `PROBE_S` in `run.sh` | `campaign.repetitions`, `warmup_s`, `duration_s`, and the `repro` profile |
+| The probe at 1000 pps on the `adas` slice's UE | the `adas-probe` traffic profile | `measurements.ctl-rtt`, through `probe_pps` |
+| H2: p99 growth from 0 to 600 Mbit/s within 1.10x of exp-001's | `H2_TOLERANCE` and exp-001's summary in the notebook | `hypothesis`, `metrics`, `references.vlan` and `criteria` |
+
+The probe's end is the `adas` slice's UE. Its address is its PDU session, which the 5G core
+assigns at `up`, so the vehicle's link pins none: vxedge 0.20.0 learns it when the measurement
+starts, runs the reflector in the UE, and sends from the data-network side through the core, the
+path `run.sh`'s probe took.
+
+H2's other arm is exp-001's frozen VLAN campaign, which is not rerun. `../../results/exp-001/campaign.json`
+records it; its archives are the published ones (Zenodo `exp-001.tgz`, unpacked into
+`../../results/exp-001/`). Run it through vxAPI, from inside this folder:
+
+```bash
+vxedge campaign plan --profile repro                                 # the 25 trials; touches nothing
+vxedge campaign start --profile repro --reference-workspace ../..    # one archive per trial, then H2's verdict
+```
+
+The `quick` profile checks the pipeline only and is never reported. It runs one repetition of the
+five loads with `run.sh --quick`'s 3 s and 12 s windows; `run.sh --quick` ran two loads.
+
+The published exp-010 archives hold only each point's probe summary, never samples, so verdict
+parity cannot check H2 from them. Checked instead: its `rhs` (exp-001's growth) reads 0.91x from
+the frozen record, as the notebook's 0.91x.
+
 ## This is a sandbox
 
 Everything the experiment needs is in this folder: its documents, its campaign
@@ -36,8 +73,8 @@ recorded against it and is no longer runnable (`ARCHITECTURE.md` §6.0.6).
 
 | File | `kind` | What it owns |
 |---|---|---|
-| `exp-010.vxp` | — | identity, version, entry point, host requirements |
-| `main.yaml` | `experiment` | the test: slices, traffic, method, telemetry |
+| `vxp.yaml` | — | identity, version, entry point, host requirements |
+| `main.yaml` | `experiment` | the test: slices, traffic, measurement, typed intent, campaign |
 | `vehicle.yaml` | `vehicle` | the system under test: zones, devices, functions, links, channels |
 | `parts.yaml` | `baseline` | which software, by ref + digest |
 
