@@ -98,8 +98,8 @@ number changes.
 
 - exp-005 0.2.1: its `quick` profile gives the steady window `run.sh --quick`'s 10 s (vxedge
   0.20.0 profile window lengths), and it requires vxedge 0.20.0.
-- CI validates the workspaces with vxedge 0.23.0. It moved through 0.19.0 (cross-campaign
-  criteria), 0.20.0, 0.21.0, 0.22.0 and 0.23.0.
+- CI validates the workspaces with vxedge 0.24.0. It moved through 0.19.0 (cross-campaign
+  criteria), 0.20.0, 0.21.0, 0.22.0, 0.23.0 and 0.24.0.
 
 ### Removed
 
