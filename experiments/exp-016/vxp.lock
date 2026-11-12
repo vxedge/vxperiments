@@ -2,7 +2,7 @@ schema: vxp-lock/1
 package:
   id: vxedge/exp-016
   version: 0.2.0
-locked_with: 0.24.0
+locked_with: 0.25.0
 files:
   README.md: sha256:27667a6c1ecdf576769f8e455579a651b7367e6fecd7472e43a14128d0686b7f
   data/actuate-g1-k1.json: sha256:3989f85facaf556f005bd62b08b58867e2ff7a781dfbbe74987467a48cc3e86b

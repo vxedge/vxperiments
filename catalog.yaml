@@ -86,7 +86,7 @@ packages:
 - alias: exp-016
   id: vxedge/exp-016
   version: 0.2.0
-  digest: sha256:d53d76c3a0ac9ca43beefb6495db4378b154596e74ac76163a3ac7cc16e57a46
+  digest: sha256:b86cc2ce6a2341ed718bbc86ccf92195e5893e5d0184521fcb200c56181ca4c4
   title: The Kuksa databroker measured across a slice
   hypothesis:
     id: broker-slice
