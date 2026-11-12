@@ -33,15 +33,10 @@ results:
 # notebooks/criteria/exp-002b.yaml held: the six arms, one up at a time, repetitions and windows,
 # the probe from the host to each arm, each arm's CPU and memory, and the four decompositions.
 #
-# The hypothesis is the decomposition's, as run.sh labelled it (`H3-decomposition`), and the four
-# criteria are all of it. On the published campaigns its outcome is `fail`, and by design: the
-# machine type has no measurable effect, which is one of the published findings, not a failure of
-# H3 (packaging affects RTT), which holds.
-hypothesis:
-  id: H3-decomposition
-  statement: >-
-    Each of the machine type, the virtio transport, vhost-net and the management layer changes
-    the host-to-ECU median RTT by more than the larger IQR of the two arms it separates.
+# No `hypothesis`: this is a decomposition study of exp-002's H3, and its criteria report each
+# mechanism on its own. The machine decomposition is the expected negative: on the published
+# campaigns q35 and microvm differ by less than their IQR ("no measurable effect"), so its
+# criterion is `fail`, as the notebook's verdict was.
 
 # One arm up at a time: concurrent guests contend for host CPU and show as loss that is not the
 # packaging's, which invalidated this experiment's first campaign. `isolate` brings the arm's
@@ -112,7 +107,8 @@ metrics:
   - { id: rss_microvm-pci,  kind: gauge, unit: B, entity: vx-h3b-vehicle/front-left/node-mvm-pci-01,
       series: vxedge_node_memory_bytes, reduce: mean }
 
-# The four decompositions as notebooks/analyze_exp002b.py judged them: each pair MATTERS (pass)
+# The four decompositions as notebooks/analyze_exp002b.py judged them, each reported on its own
+# (machine is the expected `fail`): each pair MATTERS (pass)
 # when the median p50s differ by more than the larger IQR of the two arms, at least 1 µs, and is
 # UNRELIABLE (inconclusive) when either arm lost more than 1 % in any repetition (LOSS_WARN_PCT).
 criteria:

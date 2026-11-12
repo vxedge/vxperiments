@@ -102,10 +102,10 @@ unchanged at 0.2.0. No published number changes.
     boot the published probe bundle 0.1.2, which declares its reflector and a PCI-capable guest.
   - The probe is `measurements.probe`, `from: host` to the arm's address.
   - The four decompositions (transport, machine, vhost-net, management) are the criteria, unchanged,
-    each with its two 1 % loss guards, under the hypothesis `H3-decomposition`. Verdict parity
-    reads the package: `transport=pass machine=fail vhost-net=pass management=pass` on `exp-002b`
-    and `exp-002b-repro-2026-08-05`. The machine type's "no measurable effect" is the `fail`, so the
-    hypothesis, which needs all four, fails on both, as the notebook's verdicts did.
+    each with its two 1 % loss guards, read one by one: the package declares no hypothesis, as
+    the criteria file had none. Verdict parity reads the package: `transport=pass machine=fail
+    vhost-net=pass management=pass` on `exp-002b` and `exp-002b-repro-2026-08-05`. `machine` is the
+    expected negative, the published "no measurable effect".
   - Each arm's CPU share (`rate` of `vxedge_node_cpu_seconds_total`) and mean RSS (`mean` of
     `vxedge_node_memory_bytes`) are reported, not judged. The frozen archives hold
     `vxtelemetry sample` output instead of those series, so offline they have no value, and the

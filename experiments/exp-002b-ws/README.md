@@ -27,7 +27,7 @@ one per pair of arms, and records what each arm costs the host:
 | Waiting for a VM arm's reflector | `wait_reflector` in `run.sh` | the measurement, which waits for its reflector to answer |
 | Each arm's CPU and memory | `vxtelemetry sample` on a command-line match | `cpu_<arm>` and `rss_<arm>`, read from the daemon's exporter |
 | 5 repetitions, 10 s warmup, then a 60 s probe window | `REPS`, `WARM_S`, `PROBE_S` in `run.sh` | `campaign.repetitions`, `warmup_s`, `duration_s`, and the `repro` profile |
-| The four decompositions and their 1 % loss guards | `exp-002b.yaml` | `hypothesis`, `metrics` and `criteria` |
+| The four decompositions and their 1 % loss guards | `exp-002b.yaml` | `metrics` and `criteria` |
 
 The five VM arms boot the published guest bundle `zone/linux/stack/probe-bundle` 0.1.2, pinned by
 digest in `parts.yaml`. Its part declares the UDP reflector its guest runs on port 9800, so the
@@ -50,9 +50,17 @@ the part cache readable by libvirt's qemu user (see `ARCHITECTURE.md` §9).
 
 Each decomposition passes when the two arms' median p50s differ by more than the larger of their
 IQRs, at least 1 µs, and is inconclusive when either arm lost more than 1 % of its probes in any
-repetition. The hypothesis is all four, `H3-decomposition` as `run.sh` labelled it, so on the
-published campaigns its outcome is `fail`: the machine type has no measurable effect, which is a
-finding, not a failure of H3.
+repetition. Each criterion tests one mechanism:
+
+- `transport`: virtio PCI moves the median RTT against MMIO, on the microvm machine;
+- `machine`: q35 moves it against microvm, with a virtio-pci NIC;
+- `vhost-net`: vhost-net on moves it against off, on q35 with virtio-pci;
+- `management`: libvirt moves it against raw QEMU, on q35 with virtio-pci.
+
+The package declares no hypothesis: it decomposes exp-002's H3, and its criteria are read one by
+one, not as one claim. `machine` is the expected negative. On the published campaigns q35 and
+microvm differ by less than their IQR, "no measurable effect" as published, so its outcome is
+`fail`, and the campaign's overall outcome is `fail` with it.
 
 Verdict parity: the published exp-002b archives (`exp-002b.tgz`,
 `exp-002b-repro-2026-08-05.tgz`) give `transport=pass machine=fail vhost-net=pass
