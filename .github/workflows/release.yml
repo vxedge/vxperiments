@@ -1,0 +1,119 @@
+name: Release
+
+# Pushing a tag vMAJOR.MINOR.PATCH publishes a vxperiments catalogue release. Each `vxp/1` package
+# is packed, pushed to ghcr.io/vxedge/experiments/<name> tagged with its own version, and attested.
+# The packed files, SHA256SUMS and catalog.yaml go on a GitHub Release whose notes are the tag's
+# CHANGELOG.md section. workflow_dispatch is a dry run: it checks and packs, then uploads the
+# packed files as a workflow artifact. It pushes, attests and releases nothing.
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:
+
+# Nothing is granted by default; the job opts in to exactly what it needs.
+permissions: {}
+
+jobs:
+  release:
+    name: packages, attestation, release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # First, so a tag with no changelog section stops before anything is pushed or attested.
+      - name: Release notes from CHANGELOG.md
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: scripts/release-notes.sh "$TAG" > "$RUNNER_TEMP/release-notes.md"
+      - name: Install pinned vxedge release
+        # The same pinned, attested release the CI validates with (ci/vxedge-release.txt).
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^version=//p' ci/vxedge-release.txt)
+          sha256=$(sed -n 's/^sha256=//p' ci/vxedge-release.txt)
+          archive="vxedge-${version}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/vxedge/vxedge/releases/download/v${version}/${archive}"
+          echo "${sha256}  $RUNNER_TEMP/$archive" | sha256sum -c -
+          gh attestation verify "$RUNNER_TEMP/$archive" --repo vxedge/vxedge \
+            --signer-workflow vxedge/vxedge/.github/workflows/release.yml
+          tar -C "$RUNNER_TEMP" -xzf "$RUNNER_TEMP/$archive"
+          echo "VXEDGE=$RUNNER_TEMP/vxedge-${version}-x86_64-unknown-linux-gnu/vxedge" >> "$GITHUB_ENV"
+      - name: Install oras
+        # `vxedge pkg push` pushes through oras. Pinned by version and sha256.
+        env:
+          ORAS_VERSION: 1.3.3
+          ORAS_SHA256: 9ce999f8d2de03fc03968b29d743077a58783e545e5eaa53917ca177352d0e59
+        run: |
+          set -euo pipefail
+          archive="oras_${ORAS_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/${archive}"
+          echo "${ORAS_SHA256}  $RUNNER_TEMP/$archive" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/oras"
+          tar -C "$RUNNER_TEMP/oras" -xzf "$RUNNER_TEMP/$archive" oras
+          echo "$RUNNER_TEMP/oras" >> "$GITHUB_PATH"
+      - name: Catalogue is current
+        # A release publishes exactly what catalog.yaml lists, and a version an earlier release
+        # published is never pushed again with other bytes.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -c 'import yaml' 2>/dev/null || sudo apt-get install -y python3-yaml
+          base=()
+          tag=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null || true)
+          if [ -n "$tag" ] && gh api "repos/$GITHUB_REPOSITORY/contents/catalog.yaml?ref=$tag" \
+              -H "Accept: application/vnd.github.raw" > "$RUNNER_TEMP/published.yaml" 2>/dev/null; then
+            base=(--base "$RUNNER_TEMP/published.yaml")
+          fi
+          scripts/packages.py catalog --check "${base[@]}"
+      - name: Pack
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for pkg in $(scripts/packages.py list); do
+            "$VXEDGE" --chdir "$pkg" pkg validate
+            "$VXEDGE" --chdir "$pkg" pkg pack --out "$PWD/dist"
+          done
+          cd dist && sha256sum -- *.vxp > SHA256SUMS && cat SHA256SUMS
+      - name: Keep the packed files with the dry run
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: packages
+          path: dist
+      - name: Push to ghcr.io
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$GH_TOKEN" | oras login ghcr.io -u "$ACTOR" --password-stdin
+          scripts/packages.py targets | while read -r pkg repo version; do
+            "$VXEDGE" --chdir "$pkg" pkg push --file "$PWD/dist/$(basename "$repo")-$version.vxp" "$repo"
+          done
+      - name: Attest build provenance
+        if: github.ref_type == 'tag'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/*.vxp
+      - name: Create release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" dist/*.vxp dist/SHA256SUMS catalog.yaml \
+            --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"

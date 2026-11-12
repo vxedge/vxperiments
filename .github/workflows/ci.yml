@@ -55,6 +55,7 @@ jobs:
             --signer-workflow vxedge/vxedge/.github/workflows/release.yml
           tar -C "$RUNNER_TEMP" -xzf "$RUNNER_TEMP/$archive"
           echo "VXEDGE=$RUNNER_TEMP/vxedge-${version}-x86_64-unknown-linux-gnu/vxedge" >> "$GITHUB_ENV"
+          echo "VXEDGED=$RUNNER_TEMP/vxedge-${version}-x86_64-unknown-linux-gnu/vxedged" >> "$GITHUB_ENV"
           "$RUNNER_TEMP/vxedge-${version}-x86_64-unknown-linux-gnu/vxedge" --version
       - name: Validate every workspace
         working-directory: vxperiments
@@ -98,6 +99,44 @@ jobs:
             fi
           done
           echo "== retired §6.1 manifests correctly refused"
+      - name: Plan every package's campaign
+        # `campaign plan` for the default and every declared profile, against an unprivileged
+        # vxedged on this runner: the same checks `campaign start` makes before any trial (typed
+        # intent, bounds, profiles, the trial list). Planning touches nothing, so no privilege.
+        working-directory: vxperiments
+        run: |
+          set -euo pipefail
+          python3 -c 'import yaml' 2>/dev/null || sudo apt-get install -y python3-yaml
+          sock="$RUNNER_TEMP/vxedged.sock"
+          "$VXEDGED" --listen "unix://$sock" --runtime-dir "$RUNNER_TEMP/rt" \
+            --cache-dir "$RUNNER_TEMP/cache" > "$RUNNER_TEMP/vxedged.log" 2>&1 &
+          trap 'kill %1 2>/dev/null || true' EXIT
+          for _ in $(seq 60); do [ -S "$sock" ] && break; sleep 0.5; done
+          [ -S "$sock" ] || { cat "$RUNNER_TEMP/vxedged.log"; exit 1; }
+          for pkg in $(scripts/packages.py list); do
+            for profile in "" $(scripts/packages.py profiles "$pkg"); do
+              echo "== $pkg ${profile:-(default)}"
+              out=$("$VXEDGE" --endpoint "unix://$sock" --chdir "$pkg" campaign plan --profile "$profile" 2>&1) \
+                || { echo "$out"; exit 1; }
+              echo "$out" | tail -1
+            done
+          done
+      - name: Catalogue is current
+        # catalog.yaml is generated from the packages. A package version a release published
+        # is immutable: a changed package needs a new version.
+        working-directory: vxperiments
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          base=()
+          tag=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null || true)
+          if [ -n "$tag" ] && gh api "repos/$GITHUB_REPOSITORY/contents/catalog.yaml?ref=$tag" \
+              -H "Accept: application/vnd.github.raw" > "$RUNNER_TEMP/published.yaml" 2>/dev/null; then
+            echo "versions published by $tag are immutable"
+            base=(--base "$RUNNER_TEMP/published.yaml")
+          fi
+          scripts/packages.py catalog --check "${base[@]}"
       - name: Verdict parity
         # vxedge's verdict engine must give the notebooks' verdicts on every full published
         # dataset that holds samples. The archives come from the pinned Zenodo record, each
