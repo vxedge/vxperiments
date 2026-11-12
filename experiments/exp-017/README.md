@@ -4,15 +4,33 @@ Four SDV scenarios on the COVESA VSS 6.0 metadata that kuksa-databroker 0.7.1 bu
 [`vx-vehicle-03`](../../vehicles/vx-vehicle-03)'s broker, then VSS 6.1 against the same broker
 version, test-side.
 
+## The package
+
+This folder is the `vxp/1` package `vxedge/exp-017`, version 0.2.0 (`vxp.yaml`). Its catalogue
+alias is `exp-017`. Like exp-015, it is a functional suite: `main.yaml`'s `checks` (vxedge 0.22.0)
+run each case as a step and judge what the client prints.
+
+| What | Where it was | Where it is |
+|---|---|---|
+| The vehicle | `../../vehicles/vx-vehicle-03` | `vehicle.yaml` and `parts.yaml`, as in exp-015 |
+| The scenarios on the vehicle | `scenarios.sh` | `checks.steps` on `cabin1` and `hpc1`, and their cases |
+| Throwaway brokers on a VSS file | `vss61.sh`, `podman run` with the file fetched by URL | steps `on: alone`, each given its file from `assets/` |
+| A broker's list against its file | `compare.py` | `tools/compare.py`, run by the client image's Python, printing one JSON line |
+| `PASS`, `FAIL` and `OBS` lines | the scripts | `checks.cases`; `OBS` lines are `observe` cases |
+
 ```bash
-podman build -t localhost/vxperiments/kv2:1 ../exp-015/tools/kv2
-VXEDGE_BUILD=<vxedge>/target/debug ./run.sh     # needs a sudo timestamp, see run.sh
+podman build -t localhost/vxperiments/kv2:1 tools/kv2
+vxedge campaign start
+vxedge results verdict --experiment . results/<campaign>
 ```
+
+[`assets/`](assets) holds the three VSS files the scripts fetched, each with the sha256 they were
+checked by. `tools/kv2` is exp-015's client, copied so the package stands alone.
 
 ## Scenarios, on the vehicle
 
 Each scenario has a function on `cabin1`, a sensor feed or an actuator provider, and a consumer
-on `hpc1`, both on `adas`, through kv2 on `kuksa.val.v2` ([`scenarios.sh`](scenarios.sh)).
+on `hpc1`, both on `adas`, through kv2 on `kuksa.val.v2`.
 
 | Scenario | Signals |
 |---|---|
@@ -22,18 +40,18 @@ on `hpc1`, both on `adas`, through kv2 on `kuksa.val.v2` ([`scenarios.sh`](scena
 | Cabin | `Vehicle.Cabin.HVAC.Station.Row1.Driver.Temperature` and `.AirDistribution` |
 
 Each checks metadata (entry type, data type, unit, min, max, allowed values), a consumer receiving
-what the function published, and actuation reaching the provider. `PASS` and `FAIL` lines also
+what the function published, and actuation reaching the provider. The judged cases also
 check what `kuksa.val.v2` documents as `INVALID_ARGUMENT`: a value of the wrong type, outside
-min/max, not in the allowed list, or an actuation of a sensor. `OBS` lines record what the
+min/max, not in the allowed list, or an actuation of a sensor. `observe` cases record what the
 documentation does not say, such as writing an attribute or sending a `double` to a `float`.
 
 ## VSS 6.1, test-side
 
 VSS 6.1 (2026-09-17) is not bundled in 0.7.1, or on upstream `main`. The signal plane's `config`
-carries `listen` alone, so giving the vehicle's broker another file would need a vxedge change.
-[`vss61.sh`](vss61.sh) starts throwaway rootless brokers instead, one on the bundled file and one
-on the 6.1 release's `vss.json` mounted with `--vss`, both fetched by URL and checked by sha256.
-It checks each broker lists exactly the signals and types in its file, then 6.1's changes.
+carries `listen` alone, so giving the vehicle's broker another file would need a vxedge change. The
+package starts throwaway brokers instead, each in a namespace of its own: one on the bundled file
+and one on the 6.1 release's `vss.json` mounted with `--vss`. It checks each broker lists exactly
+the signals and types in its file, then 6.1's changes.
 
 Differences found by comparing the files, before any run:
 

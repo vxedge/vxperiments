@@ -1,0 +1,253 @@
+kind: experiment
+id: exp-015
+
+# Kuksa use cases on vx-vehicle-03's signal plane: kuksa-databroker 0.7.1 on hpc1, on the adas
+# slice, with real kuksa.val.v2 providers and subscribers on the allowed slice and a client on
+# another slice. A functional suite, not a measurement: every case passes or fails, and what the
+# databroker's documentation does not say is recorded and never judged.
+vehicles: [vx-vehicle-03]
+baseline: bl-exp-015
+
+# adas and infotainment share one /24, so only the VLANs keep zone-rl from the broker.
+network:
+  slices:
+    - { id: adas, mode: vlan, vlan: 100 }
+    - { id: infotainment, mode: vlan, vlan: 101 }
+
+# vxtelemetry collects each trial's archive, with every step's output in it.
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
+
+hypothesis:
+  id: kuksa-v2
+  statement: >-
+    On vx-vehicle-03's signal plane, kuksa-databroker 0.7.1 does what kuksa.val.v2 documents for
+    subscribers, signal and actuation providers and a CAN feed on its slice, survives providers
+    that misbehave, and refuses every client on another slice.
+
+# One trial runs every case. The steps run in the trial's measure phase, within its duration.
+campaign:
+  repetitions: 1
+  duration_s: 900
+  profiles:
+    quick: { repetitions: 1 }
+    repro: { repetitions: 3 }
+
+# Each step runs a tool in a node's namespace (`on`), in a namespace of its own (`alone`), or in a
+# background step's (`with`), and its output is archived under `checks/<step>`. Every client is
+# test-side, so only container nodes host one: the broker is on hpc1 (adas), the allowed clients on
+# cabin1 and hpc1, the denied one on zone-rl (infotainment).
+checks:
+  tools:
+    # The kuksa.val.v2 test client, built from tools/kv2 on the host that runs the package:
+    #   podman build -t localhost/vxperiments/kv2:1 tools/kv2
+    kv2: { image: localhost/vxperiments/kv2:1, args: [--server, "10.100.0.50:55555"] }
+    # can-provider 0.5.1 replays the CAN dump its image carries into the broker on hpc1.
+    can:
+      image: ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider@sha256:41f5abffe30be4dd0bf6d82f28ca149d327e2d6de8619b562a12035a30da0c8e
+      args: [--dumpfile, candump.log, --no-infinite, "grpc://10.100.0.50:55555"]
+    # The broker under test, as throwaway servers for the flag cases.
+    broker: { image: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd }
+  steps:
+    - { id: state-before, observe: member, on: hpc1, member: kuksa-databroker }
+    - { id: info, tool: kv2, on: cabin1, args: [info] }
+    - { id: publish, tool: kv2, on: cabin1, args: [publish, Vehicle.Speed, "51.5"] }
+    - { id: get, tool: kv2, on: hpc1, args: [get, Vehicle.Speed] }
+    - { id: sub-speed, tool: kv2, on: cabin1, args: [subscribe, Vehicle.Speed, --count, "6", --timeout-s, "30"], background: true, ready: { op: subscribe, result: open } }
+    - { sleep_s: 0.5 }
+    - { id: publish-10, tool: kv2, on: hpc1, args: [publish, Vehicle.Speed, "10"] }
+    - { id: publish-20, tool: kv2, on: hpc1, args: [publish, Vehicle.Speed, "20"] }
+    - { id: publish-30, tool: kv2, on: hpc1, args: [publish, Vehicle.Speed, "30"] }
+    - { id: publish-40, tool: kv2, on: hpc1, args: [publish, Vehicle.Speed, "40"] }
+    - { id: publish-50, tool: kv2, on: hpc1, args: [publish, Vehicle.Speed, "50"] }
+    - { wait: sub-speed, timeout_s: 40 }
+    - { id: sub-temp, tool: kv2, on: hpc1, args: [subscribe, Vehicle.Exterior.AirTemperature, --count, "4", --timeout-s, "30"], background: true, ready: { op: subscribe, result: open } }
+    - { id: provide-temp, tool: kv2, on: cabin1, args: [provide-signal, Vehicle.Exterior.AirTemperature, --values, "18.5,19.5,20.5", --interval-ms, "200"] }
+    - { wait: sub-temp, timeout_s: 40 }
+    - { id: provide-soc, tool: kv2, on: cabin1, args: [provide-signal, Vehicle.Powertrain.TractionBattery.StateOfCharge.Current, --values, "50.5,150", --interval-ms, "200"] }
+    - { id: sub-can, tool: kv2, on: hpc1, args: [subscribe, Vehicle.Powertrain.Transmission.CurrentGear, Vehicle.Speed, --count, "30", --timeout-s, "60"], background: true, ready: { op: subscribe, result: open } }
+    - { id: can, tool: can, on: cabin1, background: true }
+    - { wait: sub-can, timeout_s: 70 }
+    - { stop: can }
+    - { id: get-gear, tool: kv2, on: hpc1, args: [get, Vehicle.Powertrain.Transmission.CurrentGear] }
+    - { id: info-can, tool: kv2, on: cabin1, args: [info] }
+    - { id: state-can, observe: member, on: hpc1, member: kuksa-databroker }
+    - { id: prov-ok, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --mode, ok, --duration-s, "30", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-ok, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "true"] }
+    - { id: claim-again, tool: kv2, on: hpc1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --duration-s, "5"] }
+    - { stop: prov-ok }
+    - { id: release-ok, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "false"], until: { op: actuate, code: UNAVAILABLE }, every_s: 0.5, attempts: 20 }
+    - { id: actuate-none, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "true"] }
+    - { id: prov-silent, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --mode, silent, --duration-s, "40", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-silent, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "true", --timeout-s, "10"] }
+    - { id: info-silent, tool: kv2, on: cabin1, args: [info] }
+    - { id: state-silent, observe: member, on: hpc1, member: kuksa-databroker }
+    - { stop: prov-silent }
+    - { id: release-silent, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "false"], until: { op: actuate, code: UNAVAILABLE }, every_s: 0.5, attempts: 20 }
+    - { id: prov-slow, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --mode, "slow:3000", --duration-s, "40", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-slow, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "true", --timeout-s, "10"] }
+    - { id: info-slow, tool: kv2, on: cabin1, args: [info] }
+    - { id: state-slow, observe: member, on: hpc1, member: kuksa-databroker }
+    - { stop: prov-slow }
+    - { id: release-slow, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "false"], until: { op: actuate, code: UNAVAILABLE }, every_s: 0.5, attempts: 20 }
+    - { id: prov-error, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --mode, error, --duration-s, "40", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-error, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "true", --timeout-s, "10"] }
+    - { id: info-error, tool: kv2, on: cabin1, args: [info] }
+    - { id: state-error, observe: member, on: hpc1, member: kuksa-databroker }
+    - { stop: prov-error }
+    - { id: release-error, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "false"], until: { op: actuate, code: UNAVAILABLE }, every_s: 0.5, attempts: 20 }
+    - { id: prov-drop, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --mode, "exit-after:1", --duration-s, "30", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-first, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "true"] }
+    - { wait: prov-drop, timeout_s: 15 }
+    - { sleep_s: 1 }
+    - { id: actuate-after-drop, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "false"] }
+    - { id: prov-new, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --mode, ok, --duration-s, "10", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { stop: prov-new }
+    - { id: release-new, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "false"], until: { op: actuate, code: UNAVAILABLE }, every_s: 0.5, attempts: 20 }
+    - { id: info-exit-after, tool: kv2, on: cabin1, args: [info] }
+    - { id: state-exit-after, observe: member, on: hpc1, member: kuksa-databroker }
+    - { id: prov-gone, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --mode, ok, --duration-s, "30", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { stop: prov-gone }
+    - { id: gone-actuate, tool: kv2, on: hpc1, args: [actuate, Vehicle.Body.Trunk.Rear.IsOpen, "false"], until: { op: actuate, code: UNAVAILABLE }, every_s: 0.1, attempts: 100 }
+    - { id: gone-reclaim, tool: kv2, on: hpc1, args: [provide-actuator, Vehicle.Body.Trunk.Rear.IsOpen, --duration-s, "0.2"], until: { op: provide, result: ok }, every_s: 0.1, attempts: 100 }
+    - { id: wrong-port, tool: kv2, on: cabin1, args: [--server, "10.100.0.50:55556", --connect-s, "3", info] }
+    - { id: publish-61, tool: kv2, on: cabin1, args: [publish, Vehicle.Speed, "61.5"] }
+    - { id: rx-before-publish, observe: port, on: zone-rl }
+    - { id: denied-publish, tool: kv2, on: zone-rl, args: [--connect-s, "5", publish, Vehicle.Speed, "99"] }
+    - { id: rx-after-publish, observe: port, on: zone-rl }
+    - { id: rx-before-get, observe: port, on: zone-rl }
+    - { id: denied-get, tool: kv2, on: zone-rl, args: [--connect-s, "5", get, Vehicle.Speed] }
+    - { id: rx-after-get, observe: port, on: zone-rl }
+    - { id: rx-before-subscribe, observe: port, on: zone-rl }
+    - { id: denied-subscribe, tool: kv2, on: zone-rl, args: [--connect-s, "5", subscribe, Vehicle.Speed, --count, "1"] }
+    - { id: rx-after-subscribe, observe: port, on: zone-rl }
+    - { id: get-after-denied, tool: kv2, on: cabin1, args: [get, Vehicle.Speed] }
+    - { id: state-end, observe: member, on: hpc1, member: kuksa-databroker }
+    - { id: broker-insecure, tool: broker, on: alone, args: [--insecure, --address, 127.0.0.1, --port, "55556"], background: true }
+    - { sleep_s: 3 }
+    - { id: info-insecure, tool: kv2, with: broker-insecure, args: [--server, "127.0.0.1:55556", info] }
+    - { stop: broker-insecure }
+    - { id: broker-plain, tool: broker, on: alone, args: [--address, 127.0.0.1, --port, "55556"], background: true }
+    - { sleep_s: 3 }
+    - { id: info-plain, tool: kv2, with: broker-plain, args: [--server, "127.0.0.1:55556", info] }
+    - { stop: broker-plain }
+  cases:
+    - { id: broker-running, step: state-before, where: { op: member }, field: running, equals: true }
+    - { id: info-version, step: info, where: { op: info, result: ok }, field: version, equals: "0.7.1" }
+    - { id: publish-cabin1, step: publish, where: { op: publish }, field: result, equals: ok }
+    - { id: get-hpc1, step: get, where: { op: get }, field: value, equals: 51.5 }
+    - { id: subscriber-order, statement: "the first response carries the current value", step: sub-speed, where: { op: update }, field: value, sequence: [51.5, 10, 20, 30, 40, 50] }
+    - { id: provider-sent, step: provide-temp, where: { op: sent, result: ok }, count: 3 }
+    - { id: provider-none-rejected, step: provide-temp, where: { op: provide-signal, result: done }, field: rejected, equals: 0 }
+    - { id: provider-values-seen, step: sub-temp, where: { op: update }, field: value, ends_with: [18.5, 19.5, 20.5] }
+    - { id: provider-max-rejected, statement: "a value over the signal's max 100 is rejected on the stream", step: provide-soc, where: { op: rejected }, field: errors, contains: ERROR_CODE_INVALID_ARGUMENT }
+    - { id: provider-max-rejected-once, step: provide-soc, where: { op: rejected }, count: 1 }
+    - { id: can-gear-consumed, statement: "the gear has no other writer, so a gear value came from the feed", step: sub-can, where: { op: update, path: Vehicle.Powertrain.Transmission.CurrentGear }, field: value, present: true }
+    - { id: can-gear-read, step: get-gear, where: { op: get }, field: value, present: true }
+    - { id: can-answers, step: info-can, where: { op: info }, field: result, equals: ok }
+    - { id: can-not-restarted, compare: { lhs: { step: state-can, field: started_at }, op: eq, rhs: { step: state-before, field: started_at } } }
+    - { id: actuate-with-provider, step: actuate-ok, where: { op: actuate }, field: result, equals: ok }
+    - { id: provider-got-request, step: prov-ok, where: { op: actuation-request }, field: value, equals: true }
+    - { id: second-claim-refused, step: claim-again, where: { op: provide }, field: code, equals: ALREADY_EXISTS }
+    - { id: ok-released, step: release-ok, where: { op: vx.step }, field: matched, equals: true }
+    - { id: no-provider-unavailable, step: actuate-none, where: { op: actuate }, field: code, equals: UNAVAILABLE }
+    - { id: silent-reached-provider, step: prov-silent, where: { op: actuation-request }, field: result, equals: ok }
+    - { id: silent-actuate-result, step: actuate-silent, where: { op: actuate }, field: result, observe: true }
+    - { id: silent-actuate-code, step: actuate-silent, where: { op: actuate }, field: code, observe: true }
+    - { id: silent-actuate-ms, step: actuate-silent, where: { op: actuate }, field: elapsed_ms, observe: true }
+    - { id: silent-answers, step: info-silent, where: { op: info }, field: result, equals: ok }
+    - { id: silent-not-restarted, compare: { lhs: { step: state-silent, field: started_at }, op: eq, rhs: { step: state-before, field: started_at } } }
+    - { id: silent-released, step: release-silent, where: { op: vx.step }, field: matched, equals: true }
+    - { id: slow-reached-provider, step: prov-slow, where: { op: actuation-request }, field: result, equals: ok }
+    - { id: slow-actuate-result, step: actuate-slow, where: { op: actuate }, field: result, observe: true }
+    - { id: slow-actuate-code, step: actuate-slow, where: { op: actuate }, field: code, observe: true }
+    - { id: slow-actuate-ms, step: actuate-slow, where: { op: actuate }, field: elapsed_ms, observe: true }
+    - { id: slow-answers, step: info-slow, where: { op: info }, field: result, equals: ok }
+    - { id: slow-not-restarted, compare: { lhs: { step: state-slow, field: started_at }, op: eq, rhs: { step: state-before, field: started_at } } }
+    - { id: slow-released, step: release-slow, where: { op: vx.step }, field: matched, equals: true }
+    - { id: error-reached-provider, step: prov-error, where: { op: actuation-request }, field: result, equals: ok }
+    - { id: error-actuate-result, step: actuate-error, where: { op: actuate }, field: result, observe: true }
+    - { id: error-actuate-code, step: actuate-error, where: { op: actuate }, field: code, observe: true }
+    - { id: error-actuate-ms, step: actuate-error, where: { op: actuate }, field: elapsed_ms, observe: true }
+    - { id: error-answers, step: info-error, where: { op: info }, field: result, equals: ok }
+    - { id: error-not-restarted, compare: { lhs: { step: state-error, field: started_at }, op: eq, rhs: { step: state-before, field: started_at } } }
+    - { id: error-released, step: release-error, where: { op: vx.step }, field: matched, equals: true }
+    - { id: exit-after-first-ok, step: actuate-first, where: { op: actuate }, field: result, equals: ok }
+    - { id: exit-after-dropped, step: prov-drop, where: { op: provide, result: dropped }, count: 1 }
+    - { id: exit-after-unavailable, step: actuate-after-drop, where: { op: actuate }, field: code, equals: UNAVAILABLE }
+    - { id: new-provider-claims, step: prov-new, where: { op: provide, result: ok }, count: { ge: 1 } }
+    - { id: new-released, step: release-new, where: { op: vx.step }, field: matched, equals: true }
+    - { id: exit-after-answers, step: info-exit-after, where: { op: info }, field: result, equals: ok }
+    - { id: exit-after-not-restarted, compare: { lhs: { step: state-exit-after, field: started_at }, op: eq, rhs: { step: state-before, field: started_at } } }
+    - { id: gone-no-provider-s, statement: "seconds from the provider's removal until actuate finds no provider", step: gone-actuate, where: { op: vx.step }, field: elapsed_s, observe: true }
+    - { id: gone-reclaim-s, statement: "seconds after that until a new claim succeeds", step: gone-reclaim, where: { op: vx.step }, field: elapsed_s, observe: true }
+    - { id: gone-claim-released, step: gone-reclaim, where: { op: vx.step }, field: matched, equals: true }
+    - { id: wrong-port-refused, step: wrong-port, where: { op: connect }, field: result, equals: refused }
+    - { id: denied-publish-refused, step: denied-publish, where: { op: connect }, field: result, equals: refused }
+    - { id: denied-publish-reached-bridge, statement: "the sender's frames reached its bridge port", compare: { lhs: { step: rx-after-publish, field: rx_packets }, op: gt, rhs: { step: rx-before-publish, field: rx_packets } } }
+    - { id: denied-get-refused, step: denied-get, where: { op: connect }, field: result, equals: refused }
+    - { id: denied-get-reached-bridge, statement: "the sender's frames reached its bridge port", compare: { lhs: { step: rx-after-get, field: rx_packets }, op: gt, rhs: { step: rx-before-get, field: rx_packets } } }
+    - { id: denied-subscribe-refused, step: denied-subscribe, where: { op: connect }, field: result, equals: refused }
+    - { id: denied-subscribe-reached-bridge, statement: "the sender's frames reached its bridge port", compare: { lhs: { step: rx-after-subscribe, field: rx_packets }, op: gt, rhs: { step: rx-before-subscribe, field: rx_packets } } }
+    - { id: value-unchanged-after-denied, step: get-after-denied, where: { op: get }, field: value, equals: 61.5 }
+    - { id: broker-not-restarted, compare: { lhs: { step: state-end, field: restarts }, op: eq, rhs: { step: state-before, field: restarts } } }
+    - { id: flag-insecure-serves, step: info-insecure, where: { op: info }, field: result, equals: ok }
+    - { id: flag-insecure-not-required, statement: "without --insecure the broker still serves plain gRPC", step: info-plain, where: { op: info }, field: result, equals: ok }
+
+criteria:
+  - id: kuksa-v2
+    cases:
+      - broker-running
+      - info-version
+      - publish-cabin1
+      - get-hpc1
+      - subscriber-order
+      - provider-sent
+      - provider-none-rejected
+      - provider-values-seen
+      - provider-max-rejected
+      - provider-max-rejected-once
+      - can-gear-consumed
+      - can-gear-read
+      - can-answers
+      - can-not-restarted
+      - actuate-with-provider
+      - provider-got-request
+      - second-claim-refused
+      - ok-released
+      - no-provider-unavailable
+      - silent-reached-provider
+      - silent-answers
+      - silent-not-restarted
+      - silent-released
+      - slow-reached-provider
+      - slow-answers
+      - slow-not-restarted
+      - slow-released
+      - error-reached-provider
+      - error-answers
+      - error-not-restarted
+      - error-released
+      - exit-after-first-ok
+      - exit-after-dropped
+      - exit-after-unavailable
+      - new-provider-claims
+      - new-released
+      - exit-after-answers
+      - exit-after-not-restarted
+      - gone-claim-released
+      - wrong-port-refused
+      - denied-publish-refused
+      - denied-publish-reached-bridge
+      - denied-get-refused
+      - denied-get-reached-bridge
+      - denied-subscribe-refused
+      - denied-subscribe-reached-bridge
+      - value-unchanged-after-denied
+      - broker-not-restarted
+      - flag-insecure-serves
+      - flag-insecure-not-required

@@ -1,0 +1,203 @@
+kind: experiment
+id: exp-017
+
+# VSS scenarios on vx-vehicle-03's signal plane: four SDV scenarios on the COVESA VSS 6.0 metadata
+# kuksa-databroker 0.7.1 bundles, each a function on cabin1 and a consumer on hpc1, both on adas,
+# then VSS 6.1 against the same broker version, test-side. A functional suite, not a measurement.
+vehicles: [vx-vehicle-03]
+baseline: bl-exp-017
+
+network:
+  slices:
+    - { id: adas, mode: vlan, vlan: 100 }
+    - { id: infotainment, mode: vlan, vlan: 101 }
+
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
+
+hypothesis:
+  id: vss-scenarios
+  statement: >-
+    kuksa-databroker 0.7.1 serves the ADAS, body, EV and cabin scenarios of its bundled VSS 6.0 as
+    kuksa.val.v2 documents, refusing each value of the wrong type, out of range or not allowed, and
+    serves VSS 6.1, given as its file, with exactly that file's signals.
+
+campaign:
+  repetitions: 1
+  duration_s: 600
+  profiles:
+    quick: { repetitions: 1 }
+    repro: { repetitions: 3 }
+
+# PASS cases check what kuksa.val.v2 documents; `observe` cases record what it does not say.
+# assets/ holds the three VSS files, by the sha256 the scripts fetched them by.
+checks:
+  tools:
+    # The kuksa.val.v2 test client, built from tools/kv2 on the host that runs the package:
+    #   podman build -t localhost/vxperiments/kv2:1 tools/kv2
+    kv2: { image: localhost/vxperiments/kv2:1, args: [--server, "10.100.0.50:55555"] }
+    # tools/compare.py, run by the client image's own Python: a broker's list against a VSS file.
+    compare: { image: localhost/vxperiments/kv2:1, entrypoint: [python3, -I, /vx/tools/compare.py] }
+    # The broker version under test, as throwaway servers given a VSS file.
+    broker: { image: "ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd" }
+    can: { image: "ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider@sha256:41f5abffe30be4dd0bf6d82f28ca149d327e2d6de8619b562a12035a30da0c8e" }
+  steps:
+    - { id: meta-speed, tool: kv2, on: cabin1, args: [metadata, Vehicle.Speed] }
+    - { id: sub-adas, tool: kv2, on: hpc1, args: [subscribe, Vehicle.Speed, Vehicle.ADAS.ABS.IsEngaged, --count, "3", --timeout-s, "20"], background: true, ready: { op: subscribe, result: open } }
+    - { id: publish-speed, tool: kv2, on: cabin1, args: [publish, Vehicle.Speed, "88.5"] }
+    - { id: publish-abs, tool: kv2, on: cabin1, args: [publish, Vehicle.ADAS.ABS.IsEngaged, "true"] }
+    - { wait: sub-adas, timeout_s: 30 }
+    - { id: prov-cruise, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.ADAS.CruiseControl.SpeedSet, Vehicle.ADAS.CruiseControl.IsActive, --mode, ok, --duration-s, "60", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-cruise-speed, tool: kv2, on: hpc1, args: [actuate, Vehicle.ADAS.CruiseControl.SpeedSet, "100"] }
+    - { id: actuate-cruise-active, tool: kv2, on: hpc1, args: [actuate, Vehicle.ADAS.CruiseControl.IsActive, "true"] }
+    - { stop: prov-cruise }
+    - { id: rejected-actuate-sensor, tool: kv2, on: hpc1, args: [actuate, Vehicle.Speed, "50"] }
+    - { id: rejected-speed-string, tool: kv2, on: hpc1, args: [publish, Vehicle.Speed, fast, --as, string] }
+    - { id: meta-window, tool: kv2, on: cabin1, args: [metadata, Vehicle.Cabin.Door.Row1.DriverSide.Window.Position] }
+    - { id: prov-body, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Cabin.Door.Row1.DriverSide.Window.Position, Vehicle.Cabin.Door.Row1.DriverSide.IsLocked, --mode, ok, --duration-s, "60", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-window, tool: kv2, on: hpc1, args: [actuate, Vehicle.Cabin.Door.Row1.DriverSide.Window.Position, "50"] }
+    - { id: actuate-lock, tool: kv2, on: hpc1, args: [actuate, Vehicle.Cabin.Door.Row1.DriverSide.IsLocked, "true"] }
+    - { id: rejected-window-over-max, tool: kv2, on: hpc1, args: [actuate, Vehicle.Cabin.Door.Row1.DriverSide.Window.Position, "101"] }
+    - { stop: prov-body }
+    - { id: observe-door-open, tool: kv2, on: cabin1, args: [publish, Vehicle.Cabin.Door.Row1.DriverSide.IsOpen, "true"] }
+    - { id: meta-soc, tool: kv2, on: cabin1, args: [metadata, Vehicle.Powertrain.TractionBattery.StateOfCharge.Current] }
+    - { id: publish-soc, tool: kv2, on: cabin1, args: [publish, Vehicle.Powertrain.TractionBattery.StateOfCharge.Current, "80.5"] }
+    - { id: publish-charging, tool: kv2, on: cabin1, args: [publish, Vehicle.Powertrain.TractionBattery.Charging.IsCharging, "true"] }
+    - { id: rejected-soc-over-max, tool: kv2, on: hpc1, args: [publish, Vehicle.Powertrain.TractionBattery.StateOfCharge.Current, "150"] }
+    - { id: get-soc, tool: kv2, on: hpc1, args: [get, Vehicle.Powertrain.TractionBattery.StateOfCharge.Current] }
+    - { id: prov-charge, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit, --mode, ok, --duration-s, "60", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-charge-limit, tool: kv2, on: hpc1, args: [actuate, Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit, "90"] }
+    - { id: rejected-charge-limit-over-max, tool: kv2, on: hpc1, args: [actuate, Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit, "120"] }
+    - { stop: prov-charge }
+    - { id: meta-air, tool: kv2, on: cabin1, args: [metadata, Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution] }
+    - { id: prov-hvac, tool: kv2, on: cabin1, args: [provide-actuator, Vehicle.Cabin.HVAC.Station.Row1.Driver.Temperature, Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution, --mode, ok, --duration-s, "60", --claim-retry-s, "10"], background: true, ready: { op: provide, result: ok } }
+    - { id: actuate-temperature, tool: kv2, on: hpc1, args: [actuate, Vehicle.Cabin.HVAC.Station.Row1.Driver.Temperature, "21.5"] }
+    - { id: actuate-air, tool: kv2, on: hpc1, args: [actuate, Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution, MIDDLE] }
+    - { id: rejected-air-not-allowed, tool: kv2, on: hpc1, args: [actuate, Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution, SIDEWAYS] }
+    - { stop: prov-hvac }
+    - { id: observe-vin-attribute, tool: kv2, on: cabin1, args: [publish, Vehicle.VehicleIdentification.VIN, TESTVIN0000000001] }
+    - { id: observe-speed-double, tool: kv2, on: cabin1, args: [publish, Vehicle.Speed, "1.5", --as, double] }
+    - { id: observe-gear-int64, tool: kv2, on: cabin1, args: [publish, Vehicle.Powertrain.Transmission.CurrentGear, "3", --as, int64] }
+    - { id: list, tool: kv2, on: cabin1, args: [list, Vehicle] }
+    - { id: meta-fuel-after-refueling, tool: kv2, on: cabin1, args: [metadata, Vehicle.Powertrain.FuelSystem.AfterRefuelingFuelEconomy] }
+    - { id: meta-fuel-cumulative, tool: kv2, on: cabin1, args: [metadata, Vehicle.Powertrain.FuelSystem.CumulativeFuelEconomy] }
+    - { id: broker-60, tool: broker, on: alone, args: [--insecure], background: true }
+    - { sleep_s: 2 }
+    - { id: list-60, tool: kv2, with: broker-60, args: [--server, "127.0.0.1:55555", list, Vehicle] }
+    - { stop: broker-60 }
+    - { id: compare-60, tool: compare, on: alone, args: [/vx/assets/vss-6.0-bundled.json, /vx/checks/list-60.log], files: { /vx/tools/compare.py: tools/compare.py, /vx/assets/vss-6.0-bundled.json: assets/vss-6.0-bundled.json } }
+    - { id: compare-60-release, tool: compare, on: alone, args: [/vx/assets/vss-6.0-release.json, /vx/checks/list-60.log], files: { /vx/tools/compare.py: tools/compare.py, /vx/assets/vss-6.0-release.json: assets/vss-6.0-release.json } }
+    - { id: broker-61, tool: broker, on: alone, args: [--insecure, --vss, /vss/vss-6.1.json], files: { /vss/vss-6.1.json: assets/vss-6.1.json }, background: true }
+    - { sleep_s: 2 }
+    - { id: list-61, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", list, Vehicle] }
+    - { id: compare-61, tool: compare, on: alone, args: [/vx/assets/vss-6.1.json, /vx/checks/list-61.log], files: { /vx/tools/compare.py: tools/compare.py, /vx/assets/vss-6.1.json: assets/vss-6.1.json } }
+    - { id: publish-co2, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", publish, Vehicle.Cabin.AirQuality.CO2, "650"] }
+    - { id: get-removed, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", get, Vehicle.Powertrain.ElectricMotor.Power] }
+    - { id: meta-front-power, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", metadata, Vehicle.Powertrain.ElectricMotor.Front.Power] }
+    - { id: meta-precipitation, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", metadata, Vehicle.Exterior.PrecipitationType] }
+    - { id: publish-precipitation-2, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", publish, Vehicle.Exterior.PrecipitationType, "2"] }
+    - { id: publish-precipitation-200, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", publish, Vehicle.Exterior.PrecipitationType, "200"] }
+    - { id: can-61, tool: can, with: broker-61, args: [--dumpfile, candump.log, --no-infinite, "grpc://127.0.0.1:55555"], background: true }
+    - { sleep_s: 15 }
+    - { id: after-replay-speed, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", get, Vehicle.Speed] }
+    - { id: after-replay-front-power, tool: kv2, with: broker-61, args: [--server, "127.0.0.1:55555", get, Vehicle.Powertrain.ElectricMotor.Front.Power] }
+    - { stop: can-61 }
+    - { stop: broker-61 }
+  cases:
+    - { id: meta-speed, step: meta-speed, where: { op: metadata, result: ok, entry_type: ENTRY_TYPE_SENSOR, data_type: DATA_TYPE_FLOAT, unit: km/h, min: null, max: null, allowed: null }, count: 1 }
+    - { id: publish-speed, step: publish-speed, where: { op: publish }, field: result, equals: ok }
+    - { id: publish-abs, step: publish-abs, where: { op: publish }, field: result, equals: ok }
+    - { id: adas-consumer, statement: "the consumer on hpc1 saw the speed and then ABS engaged", step: sub-adas, where: { op: update }, field: value, includes: [88.5, true] }
+    - { id: actuate-cruise-speed, step: actuate-cruise-speed, where: { op: actuate }, field: result, equals: ok }
+    - { id: actuate-cruise-active, step: actuate-cruise-active, where: { op: actuate }, field: result, equals: ok }
+    - { id: prov-cruise-reached, statement: "every accepted actuation reached the provider", step: prov-cruise, where: { op: actuation-request, result: ok }, count: { ge: 2 } }
+    - { id: rejected-actuate-sensor, statement: "actuate Vehicle.Speed = 50  is INVALID_ARGUMENT", step: rejected-actuate-sensor, where: { op: actuate }, field: code, equals: INVALID_ARGUMENT }
+    - { id: rejected-speed-string, statement: "publish Vehicle.Speed = fast --as string is INVALID_ARGUMENT", step: rejected-speed-string, where: { op: publish }, field: code, equals: INVALID_ARGUMENT }
+    - { id: meta-window, step: meta-window, where: { op: metadata, result: ok, entry_type: ENTRY_TYPE_ACTUATOR, data_type: DATA_TYPE_UINT8, unit: percent, min: 0, max: 100, allowed: null }, count: 1 }
+    - { id: actuate-window, step: actuate-window, where: { op: actuate }, field: result, equals: ok }
+    - { id: actuate-lock, step: actuate-lock, where: { op: actuate }, field: result, equals: ok }
+    - { id: rejected-window-over-max, statement: "actuate Vehicle.Cabin.Door.Row1.DriverSide.Window.Position = 101  is INVALID_ARGUMENT", step: rejected-window-over-max, where: { op: actuate }, field: code, equals: INVALID_ARGUMENT }
+    - { id: prov-body-reached, statement: "every accepted actuation reached the provider", step: prov-body, where: { op: actuation-request, result: ok }, count: { ge: 2 } }
+    - { id: observe-door-open-result, step: observe-door-open, where: { op: publish }, field: result, observe: true }
+    - { id: observe-door-open-code, step: observe-door-open, where: { op: publish }, field: code, observe: true }
+    - { id: meta-soc, step: meta-soc, where: { op: metadata, result: ok, entry_type: ENTRY_TYPE_SENSOR, data_type: DATA_TYPE_FLOAT, unit: percent, min: 0.0, max: 100.0, allowed: null }, count: 1 }
+    - { id: publish-soc, step: publish-soc, where: { op: publish }, field: result, equals: ok }
+    - { id: publish-charging, step: publish-charging, where: { op: publish }, field: result, equals: ok }
+    - { id: rejected-soc-over-max, statement: "publish Vehicle.Powertrain.TractionBattery.StateOfCharge.Current = 150  is INVALID_ARGUMENT", step: rejected-soc-over-max, where: { op: publish }, field: code, equals: INVALID_ARGUMENT }
+    - { id: get-soc, step: get-soc, where: { op: get }, field: value, equals: 80.5 }
+    - { id: actuate-charge-limit, step: actuate-charge-limit, where: { op: actuate }, field: result, equals: ok }
+    - { id: rejected-charge-limit-over-max, statement: "actuate Vehicle.Powertrain.TractionBattery.Charging.ChargeLimit = 120  is INVALID_ARGUMENT", step: rejected-charge-limit-over-max, where: { op: actuate }, field: code, equals: INVALID_ARGUMENT }
+    - { id: prov-charge-reached, statement: "every accepted actuation reached the provider", step: prov-charge, where: { op: actuation-request, result: ok }, count: { ge: 1 } }
+    - { id: meta-air, step: meta-air, where: { op: metadata, result: ok, entry_type: ENTRY_TYPE_ACTUATOR, data_type: DATA_TYPE_STRING, unit: "", min: null, max: null, allowed: [UP, MIDDLE, DOWN] }, count: 1 }
+    - { id: actuate-temperature, step: actuate-temperature, where: { op: actuate }, field: result, equals: ok }
+    - { id: actuate-air, step: actuate-air, where: { op: actuate }, field: result, equals: ok }
+    - { id: rejected-air-not-allowed, statement: "actuate Vehicle.Cabin.HVAC.Station.Row1.Driver.AirDistribution = SIDEWAYS  is INVALID_ARGUMENT", step: rejected-air-not-allowed, where: { op: actuate }, field: code, equals: INVALID_ARGUMENT }
+    - { id: prov-hvac-reached, statement: "every accepted actuation reached the provider", step: prov-hvac, where: { op: actuation-request, result: ok }, count: { ge: 2 } }
+    - { id: observe-vin-attribute-result, step: observe-vin-attribute, where: { op: publish }, field: result, observe: true }
+    - { id: observe-vin-attribute-code, step: observe-vin-attribute, where: { op: publish }, field: code, observe: true }
+    - { id: observe-speed-double-result, step: observe-speed-double, where: { op: publish }, field: result, observe: true }
+    - { id: observe-speed-double-code, step: observe-speed-double, where: { op: publish }, field: code, observe: true }
+    - { id: observe-gear-int64-result, step: observe-gear-int64, where: { op: publish }, field: result, observe: true }
+    - { id: observe-gear-int64-code, step: observe-gear-int64, where: { op: publish }, field: code, observe: true }
+    - { id: list-count, step: list, where: { op: list }, field: count, observe: true }
+    - { id: fuel-after-refueling-result, statement: "in the COVESA v6.0 release, not in the bundled file", step: meta-fuel-after-refueling, where: { op: metadata }, field: result, observe: true }
+    - { id: fuel-after-refueling-code, step: meta-fuel-after-refueling, where: { op: metadata }, field: code, observe: true }
+    - { id: fuel-cumulative-result, statement: "in the COVESA v6.0 release, not in the bundled file", step: meta-fuel-cumulative, where: { op: metadata }, field: result, observe: true }
+    - { id: fuel-cumulative-code, step: meta-fuel-cumulative, where: { op: metadata }, field: code, observe: true }
+    - { id: broker-60-running, statement: "the bundled-6.0 broker was still running when stopped", step: broker-60, where: { op: vx.step }, field: running_at_stop, equals: true }
+    - { id: broker-60-lists-bundled, statement: "the 6.0 broker lists exactly the bundled file's signals and types", step: compare-60, where: { op: compare }, field: result, equals: same }
+    - { id: bundled-against-release, statement: "the bundled 6.0 file against the COVESA v6.0 release", step: compare-60-release, where: { op: compare }, field: missing, observe: true }
+    - { id: broker-61-lists-file, statement: "the 6.1 broker lists exactly the 6.1 file's signals and types", step: compare-61, where: { op: compare }, field: result, equals: same }
+    - { id: added-in-61, step: publish-co2, where: { op: publish }, field: result, equals: ok }
+    - { id: removed-in-61, step: get-removed, where: { op: get }, field: code, equals: NOT_FOUND }
+    - { id: instanced-in-61, step: meta-front-power, where: { op: metadata }, field: result, equals: ok }
+    - { id: precipitation-metadata, statement: "uint8 with an enum map of 0 to 5 and no min, max or allowed", step: meta-precipitation, where: { op: metadata }, field: data_type, observe: true }
+    - { id: precipitation-2-result, step: publish-precipitation-2, where: { op: publish }, field: result, observe: true }
+    - { id: precipitation-2-code, step: publish-precipitation-2, where: { op: publish }, field: code, observe: true }
+    - { id: precipitation-200-result, step: publish-precipitation-200, where: { op: publish }, field: result, observe: true }
+    - { id: precipitation-200-code, step: publish-precipitation-200, where: { op: publish }, field: code, observe: true }
+    - { id: after-replay-speed, statement: "can-provider 0.5.1's newest mapping, vss_6.0, against the 6.1 broker", step: after-replay-speed, where: { op: get }, field: value, observe: true }
+    - { id: after-replay-front-power, statement: "can-provider 0.5.1's newest mapping, vss_6.0, against the 6.1 broker", step: after-replay-front-power, where: { op: get }, field: value, observe: true }
+    - { id: broker-61-running, step: broker-61, where: { op: vx.step }, field: running_at_stop, equals: true }
+
+criteria:
+  - id: vss-scenarios
+    cases:
+      - meta-speed
+      - publish-speed
+      - publish-abs
+      - adas-consumer
+      - actuate-cruise-speed
+      - actuate-cruise-active
+      - prov-cruise-reached
+      - rejected-actuate-sensor
+      - rejected-speed-string
+      - meta-window
+      - actuate-window
+      - actuate-lock
+      - rejected-window-over-max
+      - prov-body-reached
+      - meta-soc
+      - publish-soc
+      - publish-charging
+      - rejected-soc-over-max
+      - get-soc
+      - actuate-charge-limit
+      - rejected-charge-limit-over-max
+      - prov-charge-reached
+      - meta-air
+      - actuate-temperature
+      - actuate-air
+      - rejected-air-not-allowed
+      - prov-hvac-reached
+      - broker-60-running
+      - broker-60-lists-bundled
+      - broker-61-lists-file
+      - added-in-61
+      - removed-in-61
+      - instanced-in-61
+      - broker-61-running

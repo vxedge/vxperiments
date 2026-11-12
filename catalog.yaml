@@ -59,3 +59,29 @@ packages:
   folder: experiments/exp-014
   registry: ghcr.io/vxedge/experiments/exp-014:0.2.0
   frozen_campaign: null
+- alias: exp-015
+  id: vxedge/exp-015
+  version: 0.2.0
+  digest: sha256:4388d809d177fc21619ac66eb1c5549717a29f5e6c07fa5ec72f2d2aa541783a
+  title: Kuksa use cases on vx-vehicle-03's signal plane
+  hypothesis:
+    id: kuksa-v2
+    statement: On vx-vehicle-03's signal plane, kuksa-databroker 0.7.1 does what kuksa.val.v2 documents
+      for subscribers, signal and actuation providers and a CAN feed on its slice, survives providers
+      that misbehave, and refuses every client on another slice.
+  folder: experiments/exp-015
+  registry: ghcr.io/vxedge/experiments/exp-015:0.2.0
+  frozen_campaign: null
+- alias: exp-017
+  id: vxedge/exp-017
+  version: 0.2.0
+  digest: sha256:1baffbc1e585ef95f196eee491909523a0261855dae087c383de2ea6e0b59ffa
+  title: VSS scenarios on the signal plane
+  hypothesis:
+    id: vss-scenarios
+    statement: kuksa-databroker 0.7.1 serves the ADAS, body, EV and cabin scenarios of its bundled VSS
+      6.0 as kuksa.val.v2 documents, refusing each value of the wrong type, out of range or not allowed,
+      and serves VSS 6.1, given as its file, with exactly that file's signals.
+  folder: experiments/exp-017
+  registry: ghcr.io/vxedge/experiments/exp-017:0.2.0
+  frozen_campaign: null
