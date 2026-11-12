@@ -11,6 +11,16 @@ than a repo tag.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-12
+
+The first catalogue release. Experiments become `vxp/1` packages that vxAPI plans, runs and judges
+on its own: exp-001 (H1, slice isolation), exp-005 (cold start) and exp-014 (harness topology). Each
+package carries its campaign, parameters, metrics and criteria as typed intent, is locked, and
+packs to the same digest every time. The release pushes each to
+`ghcr.io/vxedge/experiments/<name>` at version 0.2.0 with build provenance, and `catalog.yaml`
+lists them. No published number changes. The other experiments still run through their scripts
+until they become packages.
+
 ### Changed
 
 - CI validates the workspaces with vxedge 0.18.0.
@@ -79,7 +89,8 @@ than a repo tag.
   digest, and a tampered copy is refused. Bounds are refused at plan time, and a retry returns
   its campaign. Live phases match the archives, and the verdict is typed. The archives are
   fetched and re-hashed, and the campaign is rerun from an archive's package. 94 checks, 0
-  failures. Comparing against the published frozen reference through vxAPI is still open.
+  failures. Comparing against the published frozen reference through vxAPI came after, with
+  vxedge 0.17.0 and `results/exp-001/campaign.json`.
 
 - `scenarios/urban-stop-line/`: the first reference scenario, written for vxedge. It is an
   OpenDRIVE road and an OpenSCENARIO storyboard in which a lead vehicle brakes to a stop line,
