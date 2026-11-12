@@ -11,6 +11,17 @@ than a repo tag.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-12
+
+Four experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-010 (H2,
+real S-NSSAI slicing against static VLAN mapping), exp-015 (Kuksa use cases) and exp-017 (VSS
+scenarios). exp-002 probes each packaging of one ECU from the host, one arm up at a time, and its VM
+arms boot the published probe bundle. exp-010's probe runs from the ADAS slice's 5G UE, and H2 is
+judged against exp-001's frozen campaign. exp-015 and exp-017 are functional suites on vxedge's
+checks; their test client is built locally from `experiments/exp-015/tools/kv2`. exp-005 0.2.1
+gives its `quick` profile the scripts' 10 s steady window. The packages need vxedge 0.22.0. exp-001
+and exp-014 are unchanged at 0.2.0. No published number changes.
+
 ### Added
 
 - `experiments/exp-015` is the `vxp/1` package `vxedge/exp-015` 0.2.0, locked (X9.2): the Kuksa
@@ -32,26 +43,6 @@ than a repo tag.
   rest observed), the throwaway brokers run `on: alone` with their VSS file from `assets/`, and
   `compare.py` is `tools/compare.py`, printing one JSON line. Live on a quick run, all 34 cases
   passed and the observations matched `results/vss-scenarios-2026-11-04`.
-
-### Removed
-
-- exp-015's `run.sh`, `lib.sh`, `cases-v2.sh` and `flags.sh`, and exp-017's `run.sh`,
-  `scenarios.sh`, `vss61.sh` and `compare.py`: the packages replace them.
-
-### Changed
-
-- CI validates the workspaces with vxedge 0.22.0.
-
-## [0.2.1] - 2026-11-12
-
-exp-010 (H2, real S-NSSAI slicing against static VLAN mapping) and exp-002 (H3, virtual-ECU
-packaging) join the catalogue as packages. exp-010's probe runs from the ADAS slice's 5G UE, and H2
-is judged against exp-001's frozen campaign; it needs vxedge 0.20.0. exp-002 probes each packaging
-of one ECU from the host, one arm up at a time, and its VM arms boot the published probe bundle; it
-needs vxedge 0.21.0. exp-005 0.2.1 gives its `quick` profile the scripts' 10 s steady window.
-exp-001 and exp-014 are unchanged at 0.2.0. No published number changes.
-
-### Added
 
 - `experiments/exp-002-ws` is the `vxp/1` package `vxedge/exp-002` 0.2.0, locked (X9.2). Its
   `main.yaml` holds what `scripts/run.sh` and `notebooks/analyze_exp002.py` held:
@@ -87,7 +78,13 @@ exp-001 and exp-014 are unchanged at 0.2.0. No published number changes.
 
 - exp-005 0.2.1: its `quick` profile gives the steady window `run.sh --quick`'s 10 s (vxedge
   0.20.0 profile window lengths), and it requires vxedge 0.20.0.
-- CI validates the workspaces with vxedge 0.21.0. It moved through 0.19.0 and 0.20.0.
+- CI validates the workspaces with vxedge 0.22.0. It moved through 0.19.0 (cross-campaign
+  criteria), 0.20.0, 0.21.0 and 0.22.0.
+
+### Removed
+
+- exp-015's `run.sh`, `lib.sh`, `cases-v2.sh` and `flags.sh`, and exp-017's `run.sh`,
+  `scenarios.sh`, `vss61.sh` and `compare.py`: the packages replace them.
 
 ## [0.2.0] - 2026-11-12
 
