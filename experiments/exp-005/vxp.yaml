@@ -2,12 +2,12 @@
 # experiment content. The catalogue alias is `exp-005`.
 schema: vxp/1
 id: vxedge/exp-005
-version: 0.2.0
+version: 0.2.1
 entry: main.yaml
 title: Cold-start first-packet latency after zone boot
 license: Apache-2.0
 authors: [{ org: vxedge }]
 requires:
-  vxedge: ">=0.18.0"
+  vxedge: ">=0.20.0"
   gpu: none
   backends: [container]

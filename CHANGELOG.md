@@ -11,6 +11,29 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Added
+
+- `experiments/exp-010-ws` is the `vxp/1` package `vxedge/exp-010` 0.2.0, locked (X9.2). Its
+  `main.yaml` holds what `scripts/run.sh` and `notebooks/analyze_exp010.py` held:
+  - The load sweep, repetitions and windows are `campaign`, with `quick` and `repro` profiles.
+  - The probe is `measurements.ctl-rtt` on the `adas` slice's UE. Its address is learned when it
+    starts (vxedge 0.20.0), and it replaces the `adas-probe` traffic profile.
+  - H2's rule is typed intent: this campaign's median p99 growth from 0 to 600 Mbit/s within
+    1.10x of exp-001's. `references.vlan` names exp-001's frozen campaign, which
+    `results/exp-001/campaign.json` records, so `campaign start --reference-workspace <this repo>`
+    judges it when the campaign finishes.
+  - Offline, over the exp-001 2026-10-13 repro archives, it reads 0.94 against 1.01 (exp-001's
+    0.91 x 1.10) and passes.
+  - The published exp-010 archives hold each point's probe summary only, never samples, so verdict
+    parity cannot check H2 from them.
+  - `vxp.yaml` replaces `exp-010.vxp`, and `.vxpignore` keeps `scripts/` out of the package.
+
+### Changed
+
+- exp-005 0.2.1: its `quick` profile gives the steady window `run.sh --quick`'s 10 s (vxedge
+  0.20.0 profile window lengths), and it requires vxedge 0.20.0.
+- CI validates the workspaces with vxedge 0.20.0.
+
 ### Changed
 
 - CI validates the workspaces with vxedge 0.19.0, which adds cross-campaign criteria.

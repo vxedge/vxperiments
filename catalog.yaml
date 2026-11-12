@@ -14,15 +14,27 @@ packages:
   frozen_campaign: results/exp-001/campaign.json
 - alias: exp-005
   id: vxedge/exp-005
-  version: 0.2.0
-  digest: sha256:1317dc13a8136f90ba4b6e81b1179fcc400c2435a1134dfdd98da6868803e59e
+  version: 0.2.1
+  digest: sha256:750c1c6cbbde0e76260e57000e512a8b1e17981447c4760efabd17dacf362c20
   title: Cold-start first-packet latency after zone boot
   hypothesis:
     id: cold-start
     statement: A fresh zone boot costs its first packets at least 2x the steady-state median latency,
       on every boot.
   folder: experiments/exp-005
-  registry: ghcr.io/vxedge/experiments/exp-005:0.2.0
+  registry: ghcr.io/vxedge/experiments/exp-005:0.2.1
+  frozen_campaign: null
+- alias: exp-010
+  id: vxedge/exp-010
+  version: 0.2.0
+  digest: sha256:407e8a4ef83eaaca5d68a79e9348d3ef62f2f93d31a89e2dd3bade708274e134
+  title: Real S-NSSAI slicing against static VLAN mapping (H2)
+  hypothesis:
+    id: H2
+    statement: Real S-NSSAI slicing isolates the ADAS slice at least as well as exp-001's static VLAN
+      mapping.
+  folder: experiments/exp-010-ws
+  registry: ghcr.io/vxedge/experiments/exp-010:0.2.0
   frozen_campaign: null
 - alias: exp-014
   id: vxedge/exp-014

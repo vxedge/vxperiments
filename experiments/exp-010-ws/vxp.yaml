@@ -1,0 +1,13 @@
+# Package descriptor for exp-010 (H2): packaging only, so a version bump never touches experiment
+# content. The catalogue alias is `exp-010`.
+schema: vxp/1
+id: vxedge/exp-010
+version: 0.2.0
+entry: main.yaml
+title: Real S-NSSAI slicing against static VLAN mapping (H2)
+license: Apache-2.0
+authors: [{ org: vxedge }]
+requires:
+  vxedge: ">=0.20.0"
+  gpu: none
+  backends: [container]
