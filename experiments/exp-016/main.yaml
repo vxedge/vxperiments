@@ -1,0 +1,303 @@
+kind: experiment
+id: exp-016
+
+# The Kuksa databroker measured across a slice: how much the adas slice adds to kuksa-databroker
+# 0.7.1's publish-to-subscriber and actuate-to-provider time on hpc1, measured with kuksa-perf, and
+# how much competing load on another slice adds to that. kuksa-perf keeps its sender and receiver
+# in one process, so every update outside the baseline crosses the slice twice, to the broker and
+# back: no number here is a one-way latency.
+vehicles: [vx-vehicle-03-load]
+baseline: bl-exp-016
+
+# adas and infotainment share one /24, so only the VLANs keep info2 and zone-rl from the broker.
+network:
+  slices:
+    - { id: adas, mode: vlan, vlan: 100 }
+    - { id: infotainment, mode: vlan, vlan: 101 }
+
+# vxtelemetry collects each trial's archive, with every step's output in it.
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
+
+hypothesis:
+  id: broker-slice
+  statement: >-
+    On vx-vehicle-03-load, the adas slice adds more to kuksa-databroker 0.7.1's publish and
+    actuate p50 than their spread between repetitions, and 600 Mbit/s on the infotainment slice
+    adds no more than that spread.
+
+# One trial runs every setup once, in the order baseline, idle, loaded, cpu, for publish and then
+# actuate, then the issue-233 runs. A repetition is a trial, on a vehicle of its own.
+campaign:
+  repetitions: 5
+  duration_s: 900
+  profiles:
+    quick: { repetitions: 1 }
+    repro: { repetitions: 5 }
+
+# Each kuksa-perf run is a step: in hpc1's own namespace (baseline), or in cabin1's on the broker's
+# slice. Its output is archived under `checks/<step>`, and `samples` reads the percentiles that
+# tools/perf.awk prints from it as series on the step's entity.
+checks:
+  tools:
+    # kuksa-perf at upstream commit aa6fba0, the vxparts part built by tools/perf/Containerfile.
+    # The image's program runs with the step's arguments, its own output is printed as it is, and
+    # perf.awk adds its summary and percentiles as JSON lines; the step exits as kuksa-perf did.
+    perf:
+      image: ghcr.io/vxedge/parts/agent/load/app/kuksa-perf@sha256:1e894b9d7de05d41059d711871b17ae3023497933ad88f05f29f903000c7ba73
+      entrypoint: [sh, -c, '"$0" "$@" >/tmp/out 2>&1; rc=$?; cat /tmp/out; awk -f /vx/perf.awk /tmp/out; exit $rc', /app/databroker-perf]
+      args: [--api, kuksa.val.v2, --host, "http://10.100.0.50", --port, "55555"]
+    # kuksa-perf 0.3.2, the latest release, recorded only: its v2 provider publishes without
+    # claiming its signals, 0.7.1 aborts that stream, and it exits 0 having sent nothing. Its
+    # image has no shell, so `summary` reads its output afterwards.
+    release:
+      image: ghcr.io/eclipse-kuksa/kuksa-databroker-perf@sha256:74ad5bb003e2f541cf9862ba63cecf66cd93badb514f1c6c8b68bcaac29ffd93
+      args: [--api, kuksa.val.v2, --host, "http://10.100.0.50", --port, "55555"]
+    summary:
+      image: ghcr.io/vxedge/parts/agent/load/app/kuksa-perf@sha256:1e894b9d7de05d41059d711871b17ae3023497933ad88f05f29f903000c7ba73
+      entrypoint: [awk, -f, /vx/perf.awk]
+    # The competing load: vxtraffic from zone-rl to info2, both on infotainment.
+    load:
+      image: ghcr.io/vxedge/parts/agent/load/app/vxtraffic@sha256:be310378c1f330969072669fb24a991b26c2a991dc02f23c81056c8fc98f2c3c
+      args: [--target, "10.100.0.32:9999", --bandwidth-mbps, "600", --duration-s, "120"]
+    # CPU load without traffic: two busy loops in a namespace of their own.
+    busy:
+      image: ghcr.io/vxedge/parts/agent/load/app/kuksa-perf@sha256:1e894b9d7de05d41059d711871b17ae3023497933ad88f05f29f903000c7ba73
+      entrypoint: [sh, -c, "yes >/dev/null & yes >/dev/null & wait"]
+  steps:
+    - { id: state-before, observe: member, on: hpc1, member: kuksa-databroker }
+
+    # The released kuksa-perf against 0.7.1, recorded and never a result.
+    - { id: release-0.3.2, tool: release, on: hpc1, timeout_s: 60,
+        args: [--duration, "5", --skip-seconds, "0", --test-data-file, /data/publish-1.json],
+        files: { /data/publish-1.json: data/publish-1.json } }
+    - { id: release-summary, tool: summary, on: alone, args: [/vx/checks/release-0.3.2.log],
+        files: { /vx/perf.awk: tools/perf.awk } }
+    - { sleep_s: 3 }
+
+    # The broker is not reachable from infotainment, though info2's frames reach its bridge port.
+    - { id: rx-info2-before, observe: port, on: info2 }
+    - { id: denied-info2, tool: perf, on: info2, timeout_s: 60,
+        args: [--duration, "3", --skip-seconds, "0", --test-data-file, /data/publish-1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/publish-1.json: data/publish-1.json } }
+    - { id: rx-info2-after, observe: port, on: info2 }
+
+    # The load reaches info2 and stays on infotainment: what each port delivered while it ran.
+    - { id: load-info2-before, observe: port, on: info2 }
+    - { id: load-hpc1-before, observe: port, on: hpc1 }
+    - { id: load-cabin1-before, observe: port, on: cabin1 }
+    - { id: load-check, tool: load, on: zone-rl, background: true }
+    - { sleep_s: 5 }
+    - { id: load-info2-after, observe: port, on: info2 }
+    - { id: load-hpc1-after, observe: port, on: hpc1 }
+    - { id: load-cabin1-after, observe: port, on: cabin1 }
+    - { stop: load-check }
+    - { sleep_s: 2 }
+
+    # publish, every setup.
+    - { id: publish-baseline, tool: perf, on: hpc1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --test-data-file, /data/publish-1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/publish-1.json: data/publish-1.json },
+        samples: &perf-samples [
+          { series: kuksa_perf_latency_us, where: { op: latency }, value: us, unit: us, labels: [quantile] },
+          { series: kuksa_perf_received, where: { op: summary }, value: received, unit: "1" } ] }
+    - { sleep_s: 3 }
+    - { id: publish-idle, tool: perf, on: cabin1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --test-data-file, /data/publish-1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/publish-1.json: data/publish-1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { id: load-publish, tool: load, on: zone-rl, background: true }
+    - { sleep_s: 2 }
+    - { id: publish-loaded, tool: perf, on: cabin1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --test-data-file, /data/publish-1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/publish-1.json: data/publish-1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { stop: load-publish }
+    - { id: busy-publish, tool: busy, on: alone, background: true }
+    - { sleep_s: 2 }
+    - { id: publish-cpu, tool: perf, on: cabin1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --test-data-file, /data/publish-1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/publish-1.json: data/publish-1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { stop: busy-publish }
+
+    # actuate, every setup.
+    - { id: actuate-baseline, tool: perf, on: hpc1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --operation, actuate, --test-data-file, /data/actuate-g1-k1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/actuate-g1-k1.json: data/actuate-g1-k1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { id: actuate-idle, tool: perf, on: cabin1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --operation, actuate, --test-data-file, /data/actuate-g1-k1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/actuate-g1-k1.json: data/actuate-g1-k1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { id: load-actuate, tool: load, on: zone-rl, background: true }
+    - { sleep_s: 2 }
+    - { id: actuate-loaded, tool: perf, on: cabin1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --operation, actuate, --test-data-file, /data/actuate-g1-k1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/actuate-g1-k1.json: data/actuate-g1-k1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { stop: load-actuate }
+    - { id: busy-actuate, tool: busy, on: alone, background: true }
+    - { sleep_s: 2 }
+    - { id: actuate-cpu, tool: perf, on: cabin1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --operation, actuate, --test-data-file, /data/actuate-g1-k1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/actuate-g1-k1.json: data/actuate-g1-k1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { stop: busy-actuate }
+
+    # Issue 233: actuate on the broker's device, by providers and actuator ids.
+    - { id: scale-g1-k1, tool: perf, on: hpc1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --operation, actuate, --test-data-file, /data/actuate-g1-k1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/actuate-g1-k1.json: data/actuate-g1-k1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { id: scale-g1-k240, tool: perf, on: hpc1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --operation, actuate, --test-data-file, /data/actuate-g1-k240.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/actuate-g1-k240.json: data/actuate-g1-k240.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { id: scale-g16-k1, tool: perf, on: hpc1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --operation, actuate, --test-data-file, /data/actuate-g16-k1.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/actuate-g16-k1.json: data/actuate-g16-k1.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { id: scale-g16-k15, tool: perf, on: hpc1, timeout_s: 90,
+        args: [--duration, "30", --skip-seconds, "5", --operation, actuate, --test-data-file, /data/actuate-g16-k15.json],
+        files: { /vx/perf.awk: tools/perf.awk, /data/actuate-g16-k15.json: data/actuate-g16-k15.json }, samples: *perf-samples }
+    - { sleep_s: 3 }
+    - { id: state-end, observe: member, on: hpc1, member: kuksa-databroker }
+  cases:
+    - { id: broker-running, step: state-before, where: { op: member }, field: running, equals: true }
+    - { id: broker-not-restarted, compare: { lhs: { step: state-end, field: restarts }, op: eq,
+                                             rhs: { step: state-before, field: restarts } } }
+    - { id: release-sent, step: release-summary, where: { op: summary }, field: sent, observe: true }
+    - { id: release-received, step: release-summary, where: { op: summary }, field: received, observe: true }
+    - { id: release-exit, step: release-0.3.2, where: { op: vx.step }, field: exit, observe: true }
+    - { id: denied-info2, statement: "kuksa-perf on info2 cannot connect to the broker",
+        step: denied-info2, where: { op: summary }, field: error, contains: Failed to connect }
+    - { id: denied-info2-reached-bridge, statement: "info2's frames reached its bridge port",
+        compare: { lhs: { step: rx-info2-after, field: rx_packets }, op: gt,
+                   rhs: { step: rx-info2-before, field: rx_packets } } }
+    - { id: load-reached-info2, statement: "the load's frames were delivered to info2",
+        compare: { lhs: { step: load-info2-after, field: tx_packets }, op: gt,
+                   rhs: { step: load-info2-before, field: tx_packets } } }
+    - { id: load-at-hpc1, statement: "frames delivered to hpc1 on adas while the load ran: [after, before]",
+        compare: { lhs: { step: load-hpc1-after, field: tx_packets }, op: ge,
+                   rhs: { step: load-hpc1-before, field: tx_packets } }, observe: true }
+    - { id: load-at-cabin1, statement: "frames delivered to cabin1 on adas while the load ran: [after, before]",
+        compare: { lhs: { step: load-cabin1-after, field: tx_packets }, op: ge,
+                   rhs: { step: load-cabin1-before, field: tx_packets } }, observe: true }
+    - { id: publish-baseline-received, compare: { lhs: { step: publish-baseline, where: { op: summary }, field: received }, op: gt, rhs: { value: 0 } } }
+    - { id: publish-idle-received, compare: { lhs: { step: publish-idle, where: { op: summary }, field: received }, op: gt, rhs: { value: 0 } } }
+    - { id: publish-loaded-received, compare: { lhs: { step: publish-loaded, where: { op: summary }, field: received }, op: gt, rhs: { value: 0 } } }
+    - { id: publish-cpu-received, compare: { lhs: { step: publish-cpu, where: { op: summary }, field: received }, op: gt, rhs: { value: 0 } } }
+    - { id: actuate-baseline-received, compare: { lhs: { step: actuate-baseline, where: { op: summary }, field: received }, op: gt, rhs: { value: 0 } } }
+    - { id: actuate-idle-received, compare: { lhs: { step: actuate-idle, where: { op: summary }, field: received }, op: gt, rhs: { value: 0 } } }
+    - { id: actuate-loaded-received, compare: { lhs: { step: actuate-loaded, where: { op: summary }, field: received }, op: gt, rhs: { value: 0 } } }
+    - { id: actuate-cpu-received, compare: { lhs: { step: actuate-cpu, where: { op: summary }, field: received }, op: gt, rhs: { value: 0 } } }
+    - { id: scale-g1-k1-received, step: scale-g1-k1, where: { op: summary }, field: received, observe: true }
+    - { id: scale-g1-k240-received, step: scale-g1-k240, where: { op: summary }, field: received, observe: true }
+    - { id: scale-g16-k1-received, step: scale-g16-k1, where: { op: summary }, field: received, observe: true }
+    - { id: scale-g16-k15-received, step: scale-g16-k15, where: { op: summary }, field: received, observe: true }
+
+# Each run's percentiles, in microseconds: a trial's value is its run's.
+metrics:
+  - { id: publish_baseline_p50, kind: gauge, unit: us, entity: checks/publish-baseline, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: publish_baseline_p99, kind: gauge, unit: us, entity: checks/publish-baseline, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.99" } }
+  - { id: publish_idle_p50, kind: gauge, unit: us, entity: checks/publish-idle, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: publish_idle_p99, kind: gauge, unit: us, entity: checks/publish-idle, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.99" } }
+  - { id: publish_loaded_p50, kind: gauge, unit: us, entity: checks/publish-loaded, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: publish_loaded_p99, kind: gauge, unit: us, entity: checks/publish-loaded, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.99" } }
+  - { id: publish_cpu_p50, kind: gauge, unit: us, entity: checks/publish-cpu, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: publish_cpu_p99, kind: gauge, unit: us, entity: checks/publish-cpu, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.99" } }
+  - { id: actuate_baseline_p50, kind: gauge, unit: us, entity: checks/actuate-baseline, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: actuate_baseline_p99, kind: gauge, unit: us, entity: checks/actuate-baseline, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.99" } }
+  - { id: actuate_idle_p50, kind: gauge, unit: us, entity: checks/actuate-idle, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: actuate_idle_p99, kind: gauge, unit: us, entity: checks/actuate-idle, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.99" } }
+  - { id: actuate_loaded_p50, kind: gauge, unit: us, entity: checks/actuate-loaded, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: actuate_loaded_p99, kind: gauge, unit: us, entity: checks/actuate-loaded, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.99" } }
+  - { id: actuate_cpu_p50, kind: gauge, unit: us, entity: checks/actuate-cpu, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: actuate_cpu_p99, kind: gauge, unit: us, entity: checks/actuate-cpu, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.99" } }
+  - { id: scale_g1_k1_p50, kind: gauge, unit: us, entity: checks/scale-g1-k1, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: scale_g1_k240_p50, kind: gauge, unit: us, entity: checks/scale-g1-k240, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: scale_g16_k1_p50, kind: gauge, unit: us, entity: checks/scale-g16-k1, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+  - { id: scale_g16_k15_p50, kind: gauge, unit: us, entity: checks/scale-g16-k15, series: kuksa_perf_latency_us,
+      labels: { quantile: "0.5" } }
+
+# The spread between repetitions is a setup's range, max minus min, as the published tables give
+# it. Three repetitions at least: a spread needs them, so the quick profile's single trial is
+# inconclusive here.
+criteria:
+  # Every measured run received updates: kuksa-perf 0.3.2 exits 0 having sent nothing.
+  - id: runs
+    cases:
+      - publish-baseline-received
+      - publish-idle-received
+      - publish-loaded-received
+      - publish-cpu-received
+      - actuate-baseline-received
+      - actuate-idle-received
+      - actuate-loaded-received
+      - actuate-cpu-received
+  # The slice: idle minus baseline exceeds the larger of the two setups' spreads.
+  - id: slice-publish
+    lhs: { diff: [{ metric: publish_idle_p50, aggregate: median }, { metric: publish_baseline_p50, aggregate: median }] }
+    op: gt
+    rhs:
+      max:
+        - { diff: [{ metric: publish_idle_p50, aggregate: max }, { metric: publish_idle_p50, aggregate: min }] }
+        - { diff: [{ metric: publish_baseline_p50, aggregate: max }, { metric: publish_baseline_p50, aggregate: min }] }
+    min_samples: 3
+  # The slice: idle minus baseline exceeds the larger of the two setups' spreads.
+  - id: slice-actuate
+    lhs: { diff: [{ metric: actuate_idle_p50, aggregate: median }, { metric: actuate_baseline_p50, aggregate: median }] }
+    op: gt
+    rhs:
+      max:
+        - { diff: [{ metric: actuate_idle_p50, aggregate: max }, { metric: actuate_idle_p50, aggregate: min }] }
+        - { diff: [{ metric: actuate_baseline_p50, aggregate: max }, { metric: actuate_baseline_p50, aggregate: min }] }
+    min_samples: 3
+  # Competing load on another slice: loaded and idle within the larger of their spreads.
+  - id: load-publish
+    lhs: { metric: publish_loaded_p50, aggregate: median }
+    op: within
+    rhs: { metric: publish_idle_p50, aggregate: median }
+    tolerance:
+      max:
+        - { diff: [{ metric: publish_loaded_p50, aggregate: max }, { metric: publish_loaded_p50, aggregate: min }] }
+        - { diff: [{ metric: publish_idle_p50, aggregate: max }, { metric: publish_idle_p50, aggregate: min }] }
+    min_samples: 3
+  # Competing load on another slice: loaded and idle within the larger of their spreads.
+  - id: load-actuate
+    lhs: { metric: actuate_loaded_p50, aggregate: median }
+    op: within
+    rhs: { metric: actuate_idle_p50, aggregate: median }
+    tolerance:
+      max:
+        - { diff: [{ metric: actuate_loaded_p50, aggregate: max }, { metric: actuate_loaded_p50, aggregate: min }] }
+        - { diff: [{ metric: actuate_idle_p50, aggregate: max }, { metric: actuate_idle_p50, aggregate: min }] }
+    min_samples: 3
+  # The setup held: the broker ran unrestarted, refused infotainment, and the load reached info2.
+  - id: setup
+    cases: [broker-running, broker-not-restarted, denied-info2, denied-info2-reached-bridge,
+            load-reached-info2]

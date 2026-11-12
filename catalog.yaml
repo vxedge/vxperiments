@@ -83,6 +83,19 @@ packages:
   folder: experiments/exp-015
   registry: ghcr.io/vxedge/experiments/exp-015:0.2.0
   frozen_campaign: null
+- alias: exp-016
+  id: vxedge/exp-016
+  version: 0.2.0
+  digest: sha256:b86cc2ce6a2341ed718bbc86ccf92195e5893e5d0184521fcb200c56181ca4c4
+  title: The Kuksa databroker measured across a slice
+  hypothesis:
+    id: broker-slice
+    statement: On vx-vehicle-03-load, the adas slice adds more to kuksa-databroker 0.7.1's publish and
+      actuate p50 than their spread between repetitions, and 600 Mbit/s on the infotainment slice adds
+      no more than that spread.
+  folder: experiments/exp-016
+  registry: ghcr.io/vxedge/experiments/exp-016:0.2.0
+  frozen_campaign: null
 - alias: exp-017
   id: vxedge/exp-017
   version: 0.2.0

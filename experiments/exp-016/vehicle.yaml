@@ -3,8 +3,9 @@ id: vx-vehicle-03-load
 class: road
 subtype: car
 
-# exp-016's vehicle: vx-vehicle-03 unchanged, plus one container device on infotainment, info2, so
-# competing load has two ends on a slice the databroker is not on. Nothing else differs; check with
+# exp-016's vehicle: vx-vehicle-03 without its OTA service, plus one container device on
+# infotainment, info2, so competing load has two ends on a slice the databroker is not on. The OTA
+# store is built per host and nothing here uses it. Nothing else differs; check with
 #   diff ../../vehicles/vx-vehicle-03/vehicle.yaml vehicle.yaml
 #
 # adas and infotainment share one /24 on purpose, as in vx-vehicle-02.
@@ -56,14 +57,6 @@ links:
   - id: link-hpc
     endpoints: [{ node: hpc1, port: eth0, ip: 10.100.0.50/24 }]
     slice: adas
-
-services:
-  ota:
-    id: ota-01
-    type: ota
-    image: { url: ghcr.io/vxedge/parts/svc/ota/app/vxota@sha256:38dc26f33a08dc0af3085e86caa07eb697559200d52c12e3730a7cd2e78e213d, kind: container }
-    on: hpc1
-    config: { artifacts: ./ota-store, listen: "0.0.0.0:9900" }
 
 signal_plane:
   kuksa:
