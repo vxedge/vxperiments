@@ -10,7 +10,7 @@ absorbed. This one measures it deliberately.
 ```bash
 cd experiments/exp-005
 sudo -E env "PATH=$PATH" ./scripts/run.sh --quick   # pipeline validation
-sudo -E env "PATH=$PATH" ./scripts/run.sh --repro   # the campaign
+sudo -E env "PATH=$PATH" ./scripts/run.sh --repro   # the bash campaign; the package runs it through vxAPI (below)
 python3 ../../notebooks/analyze_exp005.py results/exp-005-repro-<date>
 ```
 
@@ -42,6 +42,48 @@ requires. Its `max` and `p50` are the reportable per-repetition figures, always 
 `analyze_exp005.py` reports the *distribution* of `(cold.max / steady.p50)` across repetitions,
 not any single repetition's own percentiles.
 
+## The package
+
+This folder is the `vxp/1` package `vxedge/exp-005`, version 0.2.0 (`vxp.yaml`). Its catalogue
+alias is `exp-005`. `vxp.lock` records the digest of every file it holds, and `.vxpignore` keeps
+`scripts/` out of it. It needs vxedge 0.18.0 or later, for measure windows.
+
+`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
+`../../notebooks/analyze_exp005.py`:
+
+| What | Where it was | Where it is |
+|---|---|---|
+| The cold burst: 3 s at 20 pps the instant the zone is up, no warmup | `COLD_S`, `COLD_PPS`, `WARM_S=0` in `run.sh` | `campaign.windows[cold]`, which sets the `probe_pps` parameter to 20, and `campaign.warmup_s: 0` |
+| The steady window: 60 s at 1000 pps on the same zone | `STEADY_S`, `STEADY_PPS` in `run.sh` | `campaign.windows[steady]` |
+| 20 repetitions | `REPS` in `run.sh` | `campaign.repetitions`, and the `repro` profile |
+| The probe, inside the device | `vxprobe send` under `ip netns exec` | `measurements.probe`, through `probe_pps` (`measurements[probe].rate_pps`) |
+| Cold max and p50, steady p50 and p99, and their ratios | the notebook's per-repetition table | `metrics`, each reading its window; `ratio_max` and `ratio_p50` divide within one repetition |
+| The rule: cold max at least 2x steady p50 (`cold_start.py`'s `RATIO_MULTIPLE`), on every repetition | the notebook's verdict | `criteria`: the smallest `ratio_max` across repetitions is at least 2.0 |
+
+The published campaign confirms the effect on 20 of 20 repetitions, which this criterion reads as
+`cold-start=pass`. Verdict parity cannot check it against the published archives: those
+`run.sh` archives hold the cold burst only as a summary file, never as samples, so the engine has
+nothing to read for the cold window. A campaign of this package records both windows.
+
+Run it through vxAPI, from inside this folder:
+
+```bash
+vxedge campaign plan --profile repro          # the 20 trials, each a cold and a steady window
+vxedge campaign start --profile repro         # one archive per trial, then the verdict
+```
+
+The `quick` profile checks the pipeline only and is never reported: two repetitions. Unlike
+`run.sh --quick`, it keeps the 60 s steady window at 1000 pps, because a profile does not change
+the windows.
+
+**Differences from `run.sh`:**
+- Each window starts the probe afresh, so the steady window's figures are its own, as `run.sh`'s
+  second `vxprobe send` was.
+- The cold window's values are the last samples the telemetry service took inside it, every 1 s.
+  `run.sh` read the burst's own end-of-run summary instead.
+- The probe's timeout is vxprobe's default in both windows. `run.sh` gave the cold burst 2000 ms
+  and the steady window 1000 ms, and a measurement has no timeout field yet.
+
 ## Measurement locality
 
 Like exp-014 (and exp-001/exp-003 after `docs/ROADMAP.md` #28's fix), the device is genuinely
@@ -54,11 +96,11 @@ loopback shortcut for the kernel to take.
 
 | Path | `kind` | What it owns |
 |---|---|---|
-| `exp-005.vxp` | — | identity, version, entry point, host requirements |
-| `main.yaml` | `experiment` | the one slice, method, telemetry |
+| `vxp.yaml`, `vxp.lock` | — | the package: identity, version, entry point, requirements, and the digest of every file |
+| `main.yaml` | `experiment` | the one slice, the measurement, the telemetry service, metrics, criteria and the campaign's windows |
 | `vehicle.yaml` | `vehicle` | the single device and its address |
 | `parts.yaml` | `baseline` | the vxprobe payload the device carries |
-| `scripts/run.sh` | — | the campaign: zone up, cold burst, steady window, zone down |
+| `scripts/run.sh` | — | the bash campaign that came before the package's: zone up, cold burst, steady window, zone down |
 | `scripts/lib/` | — | vendored: `freshness.sh`, `host_pinning.sh`, `results_dir.sh` |
 | `results/` | — | archives, one per repetition |
 

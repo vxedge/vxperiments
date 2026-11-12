@@ -12,6 +12,18 @@ packages:
   folder: experiments/exp-001-ws
   registry: ghcr.io/vxedge/experiments/exp-001:0.2.0
   frozen_campaign: results/exp-001/campaign.json
+- alias: exp-005
+  id: vxedge/exp-005
+  version: 0.2.0
+  digest: sha256:1317dc13a8136f90ba4b6e81b1179fcc400c2435a1134dfdd98da6868803e59e
+  title: Cold-start first-packet latency after zone boot
+  hypothesis:
+    id: cold-start
+    statement: A fresh zone boot costs its first packets at least 2x the steady-state median latency,
+      on every boot.
+  folder: experiments/exp-005
+  registry: ghcr.io/vxedge/experiments/exp-005:0.2.0
+  frozen_campaign: null
 - alias: exp-014
   id: vxedge/exp-014
   version: 0.2.0
