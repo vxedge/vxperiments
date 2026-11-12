@@ -6,8 +6,8 @@ exp-001-repro-2026-10-13	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	
 exp-001-repro-2026-10-13-run2	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
 exp-002	experiments/exp-002-ws	rep{repetition}-{arm}	h3=pass
 exp-002-repro-2026-08-05	experiments/exp-002-ws	rep{repetition}-{arm}	h3=pass
-exp-002b	exp-002b.yaml	rep{repetition}-{arm}	transport=pass machine=fail vhost-net=pass management=pass
-exp-002b-repro-2026-08-05	exp-002b.yaml	rep{repetition}-{arm}	transport=pass machine=fail vhost-net=pass management=pass
+exp-002b	experiments/exp-002b-ws	rep{repetition}-{arm}	transport=pass machine=fail vhost-net=pass management=pass
+exp-002b-repro-2026-08-05	experiments/exp-002b-ws	rep{repetition}-{arm}	transport=pass machine=fail vhost-net=pass management=pass
 exp-003	experiments/exp-003-ws	rep{repetition}-{arm}	h4=pass
 exp-003-repro-2026-08-03	experiments/exp-003-ws	rep{repetition}-{arm}	h4=pass
 exp-003-repro-2026-10-30	experiments/exp-003-ws	rep{repetition}-{arm}	h4=pass

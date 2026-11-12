@@ -1,68 +1,109 @@
-# exp-002b (workspace form)
+# exp-002b
 
-## This is a sandbox
+## The package
 
-Everything the experiment needs is in this folder: its documents, its campaign
-(`scripts/run.sh`), its loadables (`parts/`), its analysis helpers (`tools/`), and its results.
-`scripts/lib/` is vendored so the folder is zip-portable; `../../scripts/lib/` stays the
-canonical copy and CI asserts the two are byte-identical, so vendoring cannot drift silently.
+This folder is the `vxp/1` package `vxedge/exp-002b`, version 0.2.0 (`vxp.yaml`). Its catalogue
+alias is `exp-002b`. `vxp.lock` records the digest of every file it holds and the guest bundle it
+pins.
+
+exp-002 shows *that* packaging costs latency. exp-002b separates the effect into its mechanisms,
+one per pair of arms, and records what each arm costs the host:
+
+| Decomposition | Arms | What differs |
+|---|---|---|
+| transport | `microvm-pci` vs `microvm-mmio` | virtio PCI vs MMIO, on the microvm machine |
+| machine | `q35-pci` vs `microvm-pci` | q35 vs microvm, with a virtio-pci NIC |
+| vhost-net | `q35-vhost` vs `q35-pci` | vhost-net on vs off, on q35 with virtio-pci |
+| management | `libvirt-q35` vs `q35-pci` | libvirt vs raw QEMU, on q35 with virtio-pci |
+
+`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
+`../../notebooks/criteria/exp-002b.yaml`:
+
+| What | Where it was | Where it is |
+|---|---|---|
+| Six arms, one up at a time | `ARMS`, `DEVICE_OF`, `zone up --vxid` in `run.sh` | `campaign.arms`, through `arm_device`, which binds `isolate` |
+| Three arms on QEMU flags the runner chose | `launch_qemu` in `run.sh`, on taps the gateway made | each device's `qemu:` block in `vehicle.yaml` (vxedge 0.25.0) |
+| The probe from the host to each arm at 1000 pps | `vxprobe send` from the host on `vxup0p.101` | `measurements.probe` (`from: host`), through `arm_target` and `probe_pps` |
+| Waiting for a VM arm's reflector | `wait_reflector` in `run.sh` | the measurement, which waits for its reflector to answer |
+| Each arm's CPU and memory | `vxtelemetry sample` on a command-line match | `cpu_<arm>` and `rss_<arm>`, read from the daemon's exporter |
+| 5 repetitions, 10 s warmup, then a 60 s probe window | `REPS`, `WARM_S`, `PROBE_S` in `run.sh` | `campaign.repetitions`, `warmup_s`, `duration_s`, and the `repro` profile |
+| The four decompositions and their 1 % loss guards | `exp-002b.yaml` | `hypothesis`, `metrics` and `criteria` |
+
+The five VM arms boot the published guest bundle `zone/linux/stack/probe-bundle` 0.1.2, pinned by
+digest in `parts.yaml`. Its part declares the UDP reflector its guest runs on port 9800, so the
+measurement aims at it and starts nothing in the guest, and that its kernel drives a virtio-net on
+PCI, which the three `transport: pci` arms need. Run it through vxAPI, from inside this folder:
 
 ```bash
-cd experiments/exp-002b-ws
-./tools/fetch-parts.sh                                   # once: populate + verify parts/
-sudo -E env "PATH=$PATH" ./scripts/run.sh --quick        # pipeline validation, NOT reportable
-sudo -E env "PATH=$PATH" ./scripts/run.sh --repro        # the campaign
+vxedge campaign plan --profile repro     # the 30 trials; touches nothing
+vxedge campaign start --profile repro    # one archive per trial, then the verdict
 ```
 
-The §6.0 workspace that replaces `../retired-6.1/exp-002b.yaml` (H3 decomposition: machine type, virtio
-transport, vhost, management layer, plus per-arm resource cost). Run it from **inside this
-directory**:
+The `quick` profile checks the pipeline only and is never reported: one repetition with
+`run.sh --quick`'s 2 s and 10 s windows, at 1000 pps (`run.sh --quick` probed at 500).
 
-```bash
-cd experiments/exp-002b-ws
-vxedge experiment up
-vxedge experiment down
-```
+The host needs KVM for the VM arms and `/dev/vhost-net` open to vxedged's user for `q35-vhost`
+(the `kvm` group on most hosts). The libvirt arm needs vxedged's user in the `libvirt` group, with
+the part cache readable by libvirt's qemu user (see `ARCHITECTURE.md` §9).
 
-## Status: structurally equivalent, not yet numerically equivalent
+### The verdict
 
-`../retired-6.1/exp-002b.yaml` stays authoritative until a campaign run reproduces the frozen numbers
-through this workspace.
+Each decomposition passes when the two arms' median p50s differ by more than the larger of their
+IQRs, at least 1 µs, and is inconclusive when either arm lost more than 1 % of its probes in any
+repetition. The hypothesis is all four, `H3-decomposition` as `run.sh` labelled it, so on the
+published campaigns its outcome is `fail`: the machine type has no measurable effect, which is a
+finding, not a failure of H3.
 
-**Verified** — identical gateway, node, traffic and 5G plans across all six arms:
+Verdict parity: the published exp-002b archives (`exp-002b.tgz`,
+`exp-002b-repro-2026-08-05.tgz`) give `transport=pass machine=fail vhost-net=pass
+management=pass` through this package, the notebook's verdicts (`../../scripts/verdict-parity.sh`).
 
-```bash
-# One planning path, so there is nothing left to diff: validating the workspace runs the same
-# cross-file checks and model invariants `up` runs.
-vxedge manifest validate --manifest experiments/exp-002b-ws --json
-```
+### Cost per arm
 
-The plan-equivalence check that signed this migration off used `plan-diff`, which compared the
-§6.0 and §6.1 planning paths. Both the example and §6.1's planning path are gone (2026-07-31),
-so the result is recorded here rather than re-runnable: **IDENTICAL** — same interface names,
-vlans, slices, addresses, bundles and backends.
+`cpu_<arm>` is the share of one CPU the arm's node used over the probe window (`rate` of
+`vxedge_node_cpu_seconds_total`), and `rss_<arm>` its mean resident memory (`mean` of
+`vxedge_node_memory_bytes`). The daemon's exporter reads a VM arm's QEMU process and, for the
+container arm, the processes in its namespace: the reflector. They are reported, not judged. A
+metric names one entity, so there is a pair per arm, and in a trial only the isolated arm's pair
+has a value.
 
-## The three arms nobody brings up
+The frozen archives cannot give these: they carry `resource-samples.jsonl` from `vxtelemetry
+sample`, and the exporter series did not exist yet, so offline both are empty for every trial.
+The published CPU and RSS figures stay the notebook's, from those samples.
 
-`node-q35-pci-01`, `node-q35-vhost-01` and `node-mvm-pci-01` are declared here but never
-`zone up`'d. Their *taps* are the point: the gateway creates them, and
-`scripts/run-exp-002b.sh` launches QEMU on them with each arm's exact machine/transport/vhost
-flags — the only way to vary one mechanism at a time. The runner names those taps, and it can
-now do so safely: interface names are derived from the device id rather than from position, so
-`node-q35-pci-01` is `vz-node-q-691e` no matter what else the experiment declares. Under the
-old positional naming they were `vz3`/`vz4`/`vz5` and adding any device ahead of them in
-traversal order would have silently pointed the runner at a different arm.
+### What differs from the frozen campaigns
 
-To look a name up rather than recompute it, `vxedge zone list` prints `port=` and `peer=` for
-every device.
+Every VM arm still has 1 vCPU and 128 MiB, and the four raw-QEMU arms run `-cpu host` under KVM
+on the machine and NIC `run.sh` gave them (`q35`, `microvm,pcie=on` with ACPI, `virtio-net-pci`,
+`vhost=on`). Three things are not as they were:
+
+- **`microvm-mmio` speaks virtio-mmio version 2.** vxedge passes
+  `-global virtio-mmio.force-legacy=false` since 0.6.0; the frozen runs used QEMU's default, the
+  legacy transport. This is the transport decomposition's MMIO side.
+- **`libvirt-q35` has the host CPU and ACPI.** The domain carries `<cpu mode='host-passthrough'/>`
+  (since vxedge 0.6.1) and `<features><acpi/><apic/></features>` (since 0.13.0); the frozen domain
+  had libvirt's default CPU model and neither feature.
+- **The CPU governor is not pinned.** `run.sh` set `performance` for the campaign; the package
+  leaves host preparation to the host.
+
+A rerun is a new campaign, compared with the frozen one, not a reproduction of it.
+
+## Before the package
+
+`scripts/run.sh` brought the gateway up, put `10.101.0.1/24` on the uplink's VLAN by hand, then
+brought each arm up alone and probed it from the host. Three arms (`q35-pci`, `q35-vhost`,
+`microvm-pci`) were declared but never brought up by vxedge: the runner launched QEMU itself on
+their taps with each arm's machine, transport and vhost flags. vxedge 0.25.0's `qemu:` block made
+those three ordinary devices, so the package brings every arm up the same way.
 
 ## Structure
 
 | File | `kind` | What it owns |
 |---|---|---|
-| `exp-002b.vxp` | — | identity, version, entry point, host requirements |
-| `main.yaml` | `experiment` | the test: slice + QoS, method, telemetry, results |
-| `vehicle.yaml` | `vehicle` | six packagings of one ECU, and their addresses |
+| `vxp.yaml` | — | identity, version, entry point, host requirements |
+| `main.yaml` | `experiment` | the test: slice + QoS, the probe, the arms, the cost metrics, the decompositions |
+| `vehicle.yaml` | `vehicle` | the system under test: six packagings of one ECU, their QEMU options and addresses |
 | `parts.yaml` | `baseline` | the identical payload every arm carries |
 
-See `../exp-002-ws/README.md` for what migrating this pair of experiments needed from §6.0.
+Device ids are the frozen manifest's node ids so the two forms stay diffable, and so the
+recorded results keep naming the same things.

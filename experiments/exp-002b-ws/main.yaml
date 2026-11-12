@@ -1,13 +1,19 @@
 kind: experiment
 id: exp-002b
 
-# H3 decomposition. exp-002 shows *that* packaging costs latency; this separates the effect
-# into its parts — machine type (microvm vs q35) at fixed virtio-pci transport, transport
-# (MMIO vs PCI) at fixed microvm machine, vhost-net on/off at fixed q35+pci, and management
-# (raw QEMU vs libvirt) at fixed q35+pci — and records each arm's CPU/RSS cost.
+# H3 decomposed. exp-002 shows *that* packaging costs latency; this separates the effect into its
+# parts, one mechanism per pair of arms, and records what each arm costs the host:
+#   transport   microvm-pci vs microvm-mmio   virtio PCI vs MMIO, on the microvm machine
+#   machine     q35-pci vs microvm-pci        q35 vs microvm, with a virtio-pci NIC
+#   vhost-net   q35-vhost vs q35-pci          vhost-net on vs off, on q35 with virtio-pci
+#   management  libvirt-q35 vs q35-pci        libvirt vs raw QEMU, on q35 with virtio-pci
+# The container arm is the floor the five VM arms are read against. No competing load: this
+# measures packaging overhead in isolation.
 vehicles: [vx-h3b-vehicle]
 baseline: bl-exp-002b
 
+# One slice, because packaging is the variable. The QoS block matches the frozen manifest so the
+# HTB class the arms are shaped by is byte-for-byte the one the recorded numbers came from.
 network:
   defaults:
     bandwidth: 500000000
@@ -17,16 +23,153 @@ network:
       vlan: 101
       qos: { min_rate_mbps: 100, max_rate_mbps: 500, priority: 1 }
 
-method:
-  duration_s: 60
-  repetitions: 5
-  warmup_s: 10
-
-telemetry:
-  prometheus:
-    scrape_targets:
-      - "127.0.0.1:9801"   # vxprobe live exporter
+# No `traffic_profiles`: the arms are probed one at a time on an otherwise idle topology.
 
 results:
   artifact_dir: results/exp-002b
   upload: false
+
+# Typed intent (ARCHITECTURE.md §6.0.3). This replaces what scripts/run.sh and
+# notebooks/criteria/exp-002b.yaml held: the six arms, one up at a time, repetitions and windows,
+# the probe from the host to each arm, each arm's CPU and memory, and the four decompositions.
+#
+# The hypothesis is the decomposition's, as run.sh labelled it (`H3-decomposition`), and the four
+# criteria are all of it. On the published campaigns its outcome is `fail`, and by design: the
+# machine type has no measurable effect, which is one of the published findings, not a failure of
+# H3 (packaging affects RTT), which holds.
+hypothesis:
+  id: H3-decomposition
+  statement: >-
+    Each of the machine type, the virtio transport, vhost-net and the management layer changes
+    the host-to-ECU median RTT by more than the larger IQR of the two arms it separates.
+
+# One arm up at a time: concurrent guests contend for host CPU and show as loss that is not the
+# packaging's, which invalidated this experiment's first campaign. `isolate` brings the arm's
+# device up alone; `arm_device` sets it per arm, and `arm_target` aims the probe at the same device.
+isolate: node-cont-01
+
+parameters:
+  arm_device: { type: string, default: node-cont-01, binds: isolate,
+                values: [node-cont-01, node-mvm-mmio-01, node-libvirt-01, node-q35-pci-01, node-q35-vhost-01, node-mvm-pci-01] }
+  arm_target: { type: string, default: node-cont-01, binds: "measurements[probe].to",
+                values: [node-cont-01, node-mvm-mmio-01, node-libvirt-01, node-q35-pci-01, node-q35-vhost-01, node-mvm-pci-01] }
+  probe_pps: { type: integer, unit: 1/s, default: 1000, min: 10, max: 5000,
+               binds: "measurements[probe].rate_pps" }
+
+# run.sh's probe: from the host, over the slice's VLAN, to the arm's address on port 9800. The
+# daemon sends from the first address of the arms' subnet (10.101.0.1, the address run.sh put on
+# the uplink's VLAN by hand). The container arm's reflector is vxprobe in its namespace; a VM arm's
+# is its guest's own, which its part declares, and the probe waits until it answers.
+measurements:
+  probe: { kind: rtt-probe, from: host, to: node-cont-01, slice: adas, rate_pps: 1000 }
+
+# vxtelemetry collects each trial's archive, and scrapes the daemon's exporter for each node's cost.
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
+
+metrics:
+  # vxprobe exports cumulative quantiles; a trial's value is the last sample, which equals the
+  # probe-summary.json the notebook read.
+  - { id: p50, kind: gauge, unit: s, entity: measurements/probe, series: vxprobe_rtt_seconds,
+      labels: { quantile: "0.5" } }
+  - { id: lost, kind: counter, unit: "1", entity: measurements/probe, series: vxprobe_lost_total }
+  - { id: sent, kind: counter, unit: "1", entity: measurements/probe, series: vxprobe_sent_total }
+  - { id: loss_pct, kind: gauge, unit: "%", entity: measurements/probe, ratio: [lost, sent],
+      factor: 100 }
+  # What each arm costs the host over the probe window, reported and not judged: the share of one
+  # CPU its node used (`rate` of the CPU-seconds counter) and its mean resident memory. The daemon's
+  # exporter reads a VM arm's QEMU process and the processes in the container arm's namespace (its
+  # reflector). A metric names one entity, so there is a pair per arm; in a trial only the isolated
+  # arm's pair has samples, and the other five pairs have no value.
+  - { id: cpu_container,    kind: counter, unit: "1", entity: vx-h3b-vehicle/front-left/node-cont-01,
+      series: vxedge_node_cpu_seconds_total, reduce: rate }
+  - { id: rss_container,    kind: gauge, unit: B, entity: vx-h3b-vehicle/front-left/node-cont-01,
+      series: vxedge_node_memory_bytes, reduce: mean }
+  - { id: cpu_microvm-mmio, kind: counter, unit: "1", entity: vx-h3b-vehicle/front-left/node-mvm-mmio-01,
+      series: vxedge_node_cpu_seconds_total, reduce: rate }
+  - { id: rss_microvm-mmio, kind: gauge, unit: B, entity: vx-h3b-vehicle/front-left/node-mvm-mmio-01,
+      series: vxedge_node_memory_bytes, reduce: mean }
+  - { id: cpu_libvirt-q35,  kind: counter, unit: "1", entity: vx-h3b-vehicle/front-left/node-libvirt-01,
+      series: vxedge_node_cpu_seconds_total, reduce: rate }
+  - { id: rss_libvirt-q35,  kind: gauge, unit: B, entity: vx-h3b-vehicle/front-left/node-libvirt-01,
+      series: vxedge_node_memory_bytes, reduce: mean }
+  - { id: cpu_q35-pci,      kind: counter, unit: "1", entity: vx-h3b-vehicle/front-left/node-q35-pci-01,
+      series: vxedge_node_cpu_seconds_total, reduce: rate }
+  - { id: rss_q35-pci,      kind: gauge, unit: B, entity: vx-h3b-vehicle/front-left/node-q35-pci-01,
+      series: vxedge_node_memory_bytes, reduce: mean }
+  - { id: cpu_q35-vhost,    kind: counter, unit: "1", entity: vx-h3b-vehicle/front-left/node-q35-vhost-01,
+      series: vxedge_node_cpu_seconds_total, reduce: rate }
+  - { id: rss_q35-vhost,    kind: gauge, unit: B, entity: vx-h3b-vehicle/front-left/node-q35-vhost-01,
+      series: vxedge_node_memory_bytes, reduce: mean }
+  - { id: cpu_microvm-pci,  kind: counter, unit: "1", entity: vx-h3b-vehicle/front-left/node-mvm-pci-01,
+      series: vxedge_node_cpu_seconds_total, reduce: rate }
+  - { id: rss_microvm-pci,  kind: gauge, unit: B, entity: vx-h3b-vehicle/front-left/node-mvm-pci-01,
+      series: vxedge_node_memory_bytes, reduce: mean }
+
+# The four decompositions as notebooks/analyze_exp002b.py judged them: each pair MATTERS (pass)
+# when the median p50s differ by more than the larger IQR of the two arms, at least 1 µs, and is
+# UNRELIABLE (inconclusive) when either arm lost more than 1 % in any repetition (LOSS_WARN_PCT).
+criteria:
+  - id: transport
+    op: outside
+    lhs: { metric: p50, aggregate: median, select: { arm: microvm-pci } }
+    rhs: { metric: p50, aggregate: median, select: { arm: microvm-mmio } }
+    tolerance: { max: [{ metric: p50, aggregate: iqr, select: { arm: microvm-pci } }, { metric: p50, aggregate: iqr, select: { arm: microvm-mmio } }, { value: 0.000001, unit: s }] }
+    guards:
+      - { id: transport-microvm-pci-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: microvm-pci } },
+          rhs: { value: 1.0, unit: "%" } }
+      - { id: transport-microvm-mmio-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: microvm-mmio } },
+          rhs: { value: 1.0, unit: "%" } }
+  - id: machine
+    op: outside
+    lhs: { metric: p50, aggregate: median, select: { arm: q35-pci } }
+    rhs: { metric: p50, aggregate: median, select: { arm: microvm-pci } }
+    tolerance: { max: [{ metric: p50, aggregate: iqr, select: { arm: q35-pci } }, { metric: p50, aggregate: iqr, select: { arm: microvm-pci } }, { value: 0.000001, unit: s }] }
+    guards:
+      - { id: machine-q35-pci-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: q35-pci } },
+          rhs: { value: 1.0, unit: "%" } }
+      - { id: machine-microvm-pci-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: microvm-pci } },
+          rhs: { value: 1.0, unit: "%" } }
+  - id: vhost-net
+    op: outside
+    lhs: { metric: p50, aggregate: median, select: { arm: q35-vhost } }
+    rhs: { metric: p50, aggregate: median, select: { arm: q35-pci } }
+    tolerance: { max: [{ metric: p50, aggregate: iqr, select: { arm: q35-vhost } }, { metric: p50, aggregate: iqr, select: { arm: q35-pci } }, { value: 0.000001, unit: s }] }
+    guards:
+      - { id: vhost-net-q35-vhost-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: q35-vhost } },
+          rhs: { value: 1.0, unit: "%" } }
+      - { id: vhost-net-q35-pci-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: q35-pci } },
+          rhs: { value: 1.0, unit: "%" } }
+  - id: management
+    op: outside
+    lhs: { metric: p50, aggregate: median, select: { arm: libvirt-q35 } }
+    rhs: { metric: p50, aggregate: median, select: { arm: q35-pci } }
+    tolerance: { max: [{ metric: p50, aggregate: iqr, select: { arm: libvirt-q35 } }, { metric: p50, aggregate: iqr, select: { arm: q35-pci } }, { value: 0.000001, unit: s }] }
+    guards:
+      - { id: management-libvirt-q35-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: libvirt-q35 } },
+          rhs: { value: 1.0, unit: "%" } }
+      - { id: management-q35-pci-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: q35-pci } },
+          rhs: { value: 1.0, unit: "%" } }
+
+# run.sh --repro: 5 repetitions of the six arms, 10 s before a 60 s probe window at 1000 pps.
+# `quick` checks the pipeline only and is never reported: one repetition with run.sh --quick's
+# 2 s and 10 s windows (a profile changes repetitions and windows only, so it keeps 1000 pps;
+# run.sh --quick probed at 500).
+campaign:
+  arms:
+    container:    { arm_device: node-cont-01,      arm_target: node-cont-01 }
+    microvm-mmio: { arm_device: node-mvm-mmio-01,  arm_target: node-mvm-mmio-01 }
+    libvirt-q35:  { arm_device: node-libvirt-01,   arm_target: node-libvirt-01 }
+    q35-pci:      { arm_device: node-q35-pci-01,   arm_target: node-q35-pci-01 }
+    q35-vhost:    { arm_device: node-q35-vhost-01, arm_target: node-q35-vhost-01 }
+    microvm-pci:  { arm_device: node-mvm-pci-01,   arm_target: node-mvm-pci-01 }
+  repetitions: 5
+  warmup_s: 10
+  duration_s: 60
+  profiles:
+    quick: { repetitions: 1, warmup_s: 2, duration_s: 10 }
+    repro: { repetitions: 5 }

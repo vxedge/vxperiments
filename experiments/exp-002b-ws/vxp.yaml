@@ -1,0 +1,14 @@
+# Package descriptor for exp-002b (H3 decomposition): packaging only, so a version bump never
+# touches experiment content. The catalogue alias is `exp-002b`.
+schema: vxp/1
+id: vxedge/exp-002b
+version: 0.2.0
+entry: main.yaml
+title: Virtual-ECU packaging decomposed (machine, transport, vhost-net, management) and its cost (H3)
+license: Apache-2.0
+authors: [{ org: vxedge }]
+requires:
+  vxedge: ">=0.25.0"
+  gpu: none
+  kvm: true
+  backends: [container, qemu-microvm, libvirt]

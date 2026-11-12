@@ -13,18 +13,21 @@ than a repo tag.
 
 ## [0.2.1] - 2026-11-12
 
-Six experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-003 (H4,
-OTA co-location), exp-010 (H2, real S-NSSAI slicing against static VLAN mapping), exp-015 (Kuksa use
-cases), exp-016 (the Kuksa databroker measured across a slice) and exp-017 (VSS scenarios). exp-002 probes each packaging of one ECU from the host, one arm
-up at a time, and its VM arms boot the published probe bundle. exp-003's OTA service signs a fresh
-burst artifact at every start, and in the burst arm one client downloads it back to back. exp-010's
-probe runs from the ADAS slice's 5G UE, and H2 is judged against exp-001's frozen campaign. exp-015
-and exp-017 are functional suites on vxedge's checks; their test client is built locally from
-`experiments/exp-015/tools/kv2`. exp-016 runs kuksa-perf as check steps whose percentiles vxedge
-0.25.0 reads as samples, so its criteria aggregate them across trials. exp-005 0.2.1 gives its
-`quick` profile the scripts' 10 s steady window. The packages need vxedge 0.23.0, and exp-016 needs
-0.25.0. exp-001 and exp-014 are unchanged at 0.2.0. No published
-number changes.
+Seven experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-002b (H3
+decomposed into its mechanisms, with each arm's cost), exp-003 (H4, OTA co-location), exp-010 (H2,
+real S-NSSAI slicing against static VLAN mapping), exp-015 (Kuksa use cases), exp-016 (the Kuksa
+databroker measured across a slice) and exp-017 (VSS scenarios). exp-002 probes each packaging of
+one ECU from the host, one arm up at a time, and its VM arms boot the published probe bundle.
+exp-003's OTA service signs a fresh burst artifact at every start, and in the burst arm one client
+downloads it back to back. exp-010's probe runs from the ADAS slice's 5G UE, and H2 is judged
+against exp-001's frozen campaign. exp-015 and exp-017 are functional suites on vxedge's checks;
+their test client is built locally from `experiments/exp-015/tools/kv2`. exp-016 runs kuksa-perf as
+check steps whose percentiles vxedge 0.25.0 reads as samples, so its criteria aggregate them across
+trials. exp-002b's six arms are all vxedge devices, the three its script booted by hand now set
+their machine, NIC transport and vhost-net in a `qemu:` block, and each arm's CPU and memory come
+from the daemon's exporter. exp-005 0.2.1 gives its `quick` profile the scripts' 10 s steady window.
+The packages need vxedge 0.23.0, and exp-002b and exp-016 need 0.25.0. exp-001 and exp-014 are
+unchanged at 0.2.0. No published number changes.
 
 ### Added
 
@@ -90,6 +93,27 @@ number changes.
   `compare.py` is `tools/compare.py`, printing one JSON line. Live on a quick run, all 34 cases
   passed and the observations matched `results/vss-scenarios-2026-11-04`.
 
+- `experiments/exp-002b-ws` is the `vxp/1` package `vxedge/exp-002b` 0.2.0, locked (X9.2, X9.18).
+  Its `main.yaml` holds what `scripts/run.sh` and `notebooks/criteria/exp-002b.yaml` held:
+  - The six arms (container, microvm-mmio, libvirt-q35, q35-pci, q35-vhost, microvm-pci) are
+    `campaign.arms`, with `quick` and `repro` profiles, each brought up alone through `isolate`.
+  - The three arms `run.sh` launched QEMU for itself are `qemu-microvm` devices whose `qemu:` block
+    (vxedge 0.25.0) sets the machine, the NIC's virtio transport and vhost-net. All five VM arms
+    boot the published probe bundle 0.1.2, which declares its reflector and a PCI-capable guest.
+  - The probe is `measurements.probe`, `from: host` to the arm's address.
+  - The four decompositions (transport, machine, vhost-net, management) are the criteria, unchanged,
+    each with its two 1 % loss guards, under the hypothesis `H3-decomposition`. Verdict parity
+    reads the package: `transport=pass machine=fail vhost-net=pass management=pass` on `exp-002b`
+    and `exp-002b-repro-2026-08-05`. The machine type's "no measurable effect" is the `fail`, so the
+    hypothesis, which needs all four, fails on both, as the notebook's verdicts did.
+  - Each arm's CPU share (`rate` of `vxedge_node_cpu_seconds_total`) and mean RSS (`mean` of
+    `vxedge_node_memory_bytes`) are reported, not judged. The frozen archives hold
+    `vxtelemetry sample` output instead of those series, so offline they have no value, and the
+    published CPU and RSS figures stay the notebook's.
+  - Against the frozen runs, the `microvm-mmio` arm now uses virtio-mmio version 2, the
+    `libvirt-q35` domain has the host CPU and ACPI, and the governor is not pinned. Vcpus, memory
+    and the raw-QEMU arms' flags are as `run.sh` set them.
+
 - `experiments/exp-002-ws` is the `vxp/1` package `vxedge/exp-002` 0.2.0, locked (X9.2). Its
   `main.yaml` holds what `scripts/run.sh` and `notebooks/analyze_exp002.py` held:
   - The three arms (container, microVM, full VM) are `campaign.arms`, with `quick` and `repro`
@@ -133,6 +157,9 @@ number changes.
   `scenarios.sh`, `vss61.sh` and `compare.py`: the packages replace them.
 - exp-003's `scripts/` (its `run.sh` and vendored `lib/`), its legacy `exp-003-ws.vxp`
   descriptor, and `notebooks/criteria/exp-003.yaml`: the package replaces them.
+- exp-002b's `scripts/` (its `run.sh` and vendored `lib/`), `tools/fetch-parts.sh`,
+  `parts/linux-probe.sha256`, its legacy `exp-002b.vxp` descriptor, and
+  `notebooks/criteria/exp-002b.yaml`: the package replaces them.
 
 ## [0.2.0] - 2026-11-12
 

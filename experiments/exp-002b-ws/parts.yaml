@@ -1,16 +1,18 @@
 kind: baseline
 id: bl-exp-002b
 
-# Identical payload on every arm — the same guest bundle for the five VM arms and vxprobe as a
-# host process for the container arm. If the software differed between arms, the decomposition
-# would be measuring software, not mechanism.
+# Identical payload on every arm. The container arm's reflector is vxprobe, which the daemon runs
+# in the node's namespace (`local/…` names nothing in a registry, so there is nothing to pin); the
+# five VM arms boot the *same* published guest bundle, so any difference between them is the
+# mechanism and not the software. 0.1.2 carries 0.1.0's payload and declares the reflector its
+# guest runs (`org.vxedge.reflector: udp/9800`) and that its kernel drives a virtio-net on PCI
+# (`org.vxedge.virtio-pci: true`), which the `transport: pci` arms need.
 parts:
   - ref: local/vxprobe:host-process
     target_ids: reflector-cont
-  # Sandbox-local: `./tools/fetch-parts.sh` populates it and verifies it against
-  # `parts/linux-probe.sha256`.
-  - ref: ./parts/linux-probe
+  - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle
     kind: bundle
+    digest: sha256:7d7f0c0c2d5c70f94661d67f5221b16093591aa01144a4d4dc2d99572a1e53b0   # 0.1.2
     target_ids:
       - reflector-mvm-mmio
       - reflector-libvirt
