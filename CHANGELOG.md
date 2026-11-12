@@ -11,6 +11,10 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Changed
+
+- CI validates the workspaces with vxedge 0.19.0, which adds cross-campaign criteria.
+
 ## [0.2.0] - 2026-11-12
 
 The first catalogue release. Experiments become `vxp/1` packages that vxAPI plans, runs and judges
