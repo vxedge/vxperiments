@@ -11,6 +11,13 @@ than a repo tag.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-12
+
+exp-010 (H2, real S-NSSAI slicing against static VLAN mapping) joins the catalogue as a package.
+Its probe runs from the ADAS slice's 5G UE, and H2 is judged against exp-001's frozen campaign.
+exp-005 0.2.1 gives its `quick` profile the scripts' 10 s steady window. Both need vxedge 0.20.0.
+exp-001 and exp-014 are unchanged at 0.2.0. No published number changes.
+
 ### Added
 
 - `experiments/exp-010-ws` is the `vxp/1` package `vxedge/exp-010` 0.2.0, locked (X9.2). Its
@@ -32,11 +39,8 @@ than a repo tag.
 
 - exp-005 0.2.1: its `quick` profile gives the steady window `run.sh --quick`'s 10 s (vxedge
   0.20.0 profile window lengths), and it requires vxedge 0.20.0.
-- CI validates the workspaces with vxedge 0.20.0.
-
-### Changed
-
-- CI validates the workspaces with vxedge 0.19.0, which adds cross-campaign criteria.
+- CI validates the workspaces with vxedge 0.20.0. It moved through 0.19.0, which adds
+  cross-campaign criteria.
 
 ## [0.2.0] - 2026-11-12
 
