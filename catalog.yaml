@@ -15,9 +15,12 @@ packages:
 - alias: exp-014
   id: vxedge/exp-014
   version: 0.2.0
-  digest: sha256:4e2ee6b4d270c1a8bf86f8a85aab14e9f76df3fd861de863247cdfc505d1fa59
+  digest: sha256:341aa9c436fb15e845d420ce367d45365c399f693a787eccc5f6357a0c071af4
   title: Wiring-harness topology as a variable, star vs daisy chain
-  hypothesis: null
+  hypothesis:
+    id: topology
+    statement: Each hop of a daisy-chained harness raises latency by more than a star harness varies across
+      positions.
   folder: experiments/exp-014
   registry: ghcr.io/vxedge/experiments/exp-014:0.2.0
   frozen_campaign: null

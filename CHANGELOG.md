@@ -13,6 +13,7 @@ than a repo tag.
 
 ### Fixed
 
+- exp-014 declares its hypothesis (`topology`), so the catalogue and `PackageService.Inspect` name it.
 - The exp-001 and exp-014 packages no longer list the probe's own exporter under
   `telemetry.prometheus.scrape_targets`. Their probe is a vxAPI measurement, whose samples come
   from vxedged's exporter, which the daemon adds to every run. Nothing answered the old target,
