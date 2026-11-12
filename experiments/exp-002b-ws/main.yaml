@@ -50,9 +50,11 @@ isolate: node-cont-01
 
 parameters:
   arm_device: { type: string, default: node-cont-01, binds: isolate,
-                values: [node-cont-01, node-mvm-mmio-01, node-libvirt-01, node-q35-pci-01, node-q35-vhost-01, node-mvm-pci-01] }
+                values: [node-cont-01, node-mvm-mmio-01, node-libvirt-01, node-q35-pci-01,
+                         node-q35-vhost-01, node-mvm-pci-01] }
   arm_target: { type: string, default: node-cont-01, binds: "measurements[probe].to",
-                values: [node-cont-01, node-mvm-mmio-01, node-libvirt-01, node-q35-pci-01, node-q35-vhost-01, node-mvm-pci-01] }
+                values: [node-cont-01, node-mvm-mmio-01, node-libvirt-01, node-q35-pci-01,
+                         node-q35-vhost-01, node-mvm-pci-01] }
   probe_pps: { type: integer, unit: 1/s, default: 1000, min: 10, max: 5000,
                binds: "measurements[probe].rate_pps" }
 

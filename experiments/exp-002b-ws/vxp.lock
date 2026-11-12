@@ -6,7 +6,7 @@ locked_with: 0.25.0
 files:
   README.md: sha256:1526a1519cf3b1f6f306dd13ca9abb76a2a2bdb549ecff6d3c42043766f138a7
   assets/README.md: sha256:4361a160c8080e70a1e1532b9aea39f6b9f3f3cac07f359cfd67c703146c0136
-  main.yaml: sha256:1a06f5518e45f55c796ce53856f31cebd2b97962cf07f6ee926f74db97888265
+  main.yaml: sha256:a44dacb6191278c8d317197dcbd15419706b2f2b5fee9d0b3e0a2cb6b3e7a0fc
   parts.yaml: sha256:d907c85d07913b914409c78b5938f46c569ee8ca3442debb4d4d7f69ab6aeb86
   parts/README.md: sha256:418dfca64fad211fea5ff5bc049fcf0c8bfeba9626bcd83ffb5f66395a88149d
   tools/README.md: sha256:c68ef29cf0541b6ff8cd1320e7e515b98b628838676b2ed03ea53b6958ce7fce

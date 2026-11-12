@@ -26,7 +26,7 @@ packages:
 - alias: exp-002b
   id: vxedge/exp-002b
   version: 0.2.0
-  digest: sha256:33dd228bcddd557af5db033903466e4d468cf0670cd9ed69d6a4ebc2992af52a
+  digest: sha256:b06b4faae42eb0260687a7f9bfac5cbe1df4e4bcec77c8e7f53c3b2f5db0ec7a
   title: Virtual-ECU packaging decomposed (machine, transport, vhost-net, management) and its cost (H3)
   hypothesis:
     id: H3-decomposition
