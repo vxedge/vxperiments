@@ -13,15 +13,17 @@ than a repo tag.
 
 ## [0.2.1] - 2026-11-12
 
-Five experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-003 (H4,
+Six experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-003 (H4,
 OTA co-location), exp-010 (H2, real S-NSSAI slicing against static VLAN mapping), exp-015 (Kuksa use
-cases) and exp-017 (VSS scenarios). exp-002 probes each packaging of one ECU from the host, one arm
+cases), exp-016 (the Kuksa databroker measured across a slice) and exp-017 (VSS scenarios). exp-002 probes each packaging of one ECU from the host, one arm
 up at a time, and its VM arms boot the published probe bundle. exp-003's OTA service signs a fresh
 burst artifact at every start, and in the burst arm one client downloads it back to back. exp-010's
 probe runs from the ADAS slice's 5G UE, and H2 is judged against exp-001's frozen campaign. exp-015
 and exp-017 are functional suites on vxedge's checks; their test client is built locally from
-`experiments/exp-015/tools/kv2`. exp-005 0.2.1 gives its `quick` profile the scripts' 10 s steady
-window. The packages need vxedge 0.23.0. exp-001 and exp-014 are unchanged at 0.2.0. No published
+`experiments/exp-015/tools/kv2`. exp-016 runs kuksa-perf as check steps whose percentiles vxedge
+0.25.0 reads as samples, so its criteria aggregate them across trials. exp-005 0.2.1 gives its
+`quick` profile the scripts' 10 s steady window. The packages need vxedge 0.23.0, and exp-016 needs
+0.25.0. exp-001 and exp-014 are unchanged at 0.2.0. No published
 number changes.
 
 ### Added
@@ -58,6 +60,30 @@ number changes.
   guest zones boot the published probe bundle 0.1.1 and reflector capsule 0.1.0. Live on a quick
   run, all 50 cases passed and the observations matched `results/kuksa-cases-2026-11-04`. The
   signal-plane lifecycle checks `run.sh` repeated first are not part of the package.
+- `experiments/exp-016` is the `vxp/1` package `vxedge/exp-016` 0.2.0, locked (X9.2, X9.15): the
+  databroker measured across a slice with kuksa-perf. Its `main.yaml` holds what `run.sh`,
+  `build.sh` and `summarize.py` held:
+  - each kuksa-perf run is a step of the published kuksa-perf part (`aa6fba0`) in a node's
+    namespace, and `tools/perf.awk` adds its counts and percentiles as JSON lines after the run's
+    own output;
+  - the steps' `samples` (vxedge 0.25.0) read those as series on `checks/<step>`, so the metrics
+    are each setup's p50 and p99, and the criteria compare setups across five repetitions:
+    `slice-publish` and `slice-actuate` (idle minus baseline beyond the larger spread),
+    `load-publish` and `load-actuate` (loaded within the larger spread of idle), `runs` (every
+    measured run received updates) and `setup` (the broker unrestarted and refused from `info2`,
+    the load reaching `info2`);
+  - the load and the CPU load are background steps, and the release 0.3.2 run, the denial from
+    `info2` and the issue-233 runs are steps of every trial.
+  The hypothesis and criteria are written from the published result, which they reproduce. One
+  trial runs the setups in one order, where the script rotated it; host preparation (governor,
+  `/dev/cpu_dma_latency`) stays outside the package. The vehicle drops its per-host OTA store and
+  boots the published probe bundle and reflector capsule.
+- Verdict parity reads exp-016's two frozen runs, `results/broker-slice-main-2026-11-04` and
+  `results/broker-slice-2026-11-04`, from their committed kuksa-perf output:
+  `scripts/frozen-checks.py` builds their trial archives through the package's own `perf.awk`.
+  Both give `runs`, `slice-*` and `load-*` `pass`, with the published differences (+8 and +11 µs
+  over the slice, +1 µs under load, on the main run). `setup` is `inconclusive`, because those
+  runs recorded it once in their transcripts, not as step output.
 - `experiments/exp-017` is the `vxp/1` package `vxedge/exp-017` 0.2.0, locked (X9.2): the VSS
   scenarios, the same way. `scenarios.sh` and `vss61.sh` are its steps and cases (34 judged, the
   rest observed), the throwaway brokers run `on: alone` with their VSS file from `assets/`, and

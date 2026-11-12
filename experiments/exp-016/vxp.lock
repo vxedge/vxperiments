@@ -1,0 +1,30 @@
+schema: vxp-lock/1
+package:
+  id: vxedge/exp-016
+  version: 0.2.0
+locked_with: 0.24.0
+files:
+  README.md: sha256:27667a6c1ecdf576769f8e455579a651b7367e6fecd7472e43a14128d0686b7f
+  data/actuate-g1-k1.json: sha256:3989f85facaf556f005bd62b08b58867e2ff7a781dfbbe74987467a48cc3e86b
+  data/actuate-g1-k240.json: sha256:8a7cebe5d158cab8c8c98061b3ef6ff4ccf8fc12f252b2fb9e15d0a01efe052d
+  data/actuate-g16-k1.json: sha256:c5c54c3282399d4192202f0712c9d8dfdb0adea704d4f25158287ad265573d39
+  data/actuate-g16-k15.json: sha256:cd3a82fdc52b3792a650922214d515dc37a36f8463ceb46e7169596db792d9d2
+  data/make-data.py: sha256:ab34eed41effbc489a46341fad978d0f14c07e01ccca1735bbeb32c651237189
+  data/publish-1.json: sha256:741ba5ceba0cf54ff3d5b98163b3beb9c8f596f600df2730e15a17cc04857774
+  main.yaml: sha256:6f6aeeeb05bc21abd3e186b26737ece77f6990a09f72724db101be0882fa7861
+  parts.yaml: sha256:078e164407a4cca0677c8721c06401b735552e459c9c9976e63571be71d7f7c5
+  tools/perf.awk: sha256:edf277cf3090afafe20ac06cc77c02fb27b3322446bc6643284363ea429cbf48
+  tools/perf/Containerfile: sha256:563a933b19fa70328a824c0a0e3b24c9d7c3cbbe9a1f692198c3193db1791cb9
+  vehicle.yaml: sha256:97c160edb4b940cede055e0b783e03db6a127e9f8cdf7c4415d157620d6715c1
+  vxp.yaml: sha256:5341d8e3bcc4a93b44700c28ac5d624236bf40f3edcb466f5f8f501cf5699b5f
+parts:
+- ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle
+  digest: sha256:dce921197fa93f7a6bd306b1748b93785e329e443504bd2113a98ccfad52c5e6
+- ref: ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule
+  digest: sha256:4392871714b302e17dc9f81518d4768093bbfbddac6dbc9c10a517a9f286654d
+images:
+- ref: ghcr.io/eclipse-kuksa/kuksa-databroker
+  digest: sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+- ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
+  digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
+vendored: []
