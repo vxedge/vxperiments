@@ -13,17 +13,37 @@ than a repo tag.
 
 ## [0.2.1] - 2026-11-12
 
-Four experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-010 (H2,
-real S-NSSAI slicing against static VLAN mapping), exp-015 (Kuksa use cases) and exp-017 (VSS
-scenarios). exp-002 probes each packaging of one ECU from the host, one arm up at a time, and its VM
-arms boot the published probe bundle. exp-010's probe runs from the ADAS slice's 5G UE, and H2 is
-judged against exp-001's frozen campaign. exp-015 and exp-017 are functional suites on vxedge's
-checks; their test client is built locally from `experiments/exp-015/tools/kv2`. exp-005 0.2.1
-gives its `quick` profile the scripts' 10 s steady window. The packages need vxedge 0.22.0. exp-001
-and exp-014 are unchanged at 0.2.0. No published number changes.
+Five experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-003 (H4,
+OTA co-location), exp-010 (H2, real S-NSSAI slicing against static VLAN mapping), exp-015 (Kuksa use
+cases) and exp-017 (VSS scenarios). exp-002 probes each packaging of one ECU from the host, one arm
+up at a time, and its VM arms boot the published probe bundle. exp-003's OTA service signs a fresh
+burst artifact at every start, and in the burst arm one client downloads it back to back. exp-010's
+probe runs from the ADAS slice's 5G UE, and H2 is judged against exp-001's frozen campaign. exp-015
+and exp-017 are functional suites on vxedge's checks; their test client is built locally from
+`experiments/exp-015/tools/kv2`. exp-005 0.2.1 gives its `quick` profile the scripts' 10 s steady
+window. The packages need vxedge 0.23.0. exp-001 and exp-014 are unchanged at 0.2.0. No published
+number changes.
 
 ### Added
 
+- `experiments/exp-003-ws` is the `vxp/1` package `vxedge/exp-003` 0.2.0, locked (X9.2). Its
+  `main.yaml` holds what `scripts/run.sh` and `notebooks/criteria/exp-003.yaml` held:
+  - The two arms (baseline, ota-burst) are `campaign.arms`, with `quick` and `repro` profiles.
+  - The OTA service publishes its own store (vxedge 0.23.0): a fresh root key and a 5 MB random
+    `burst-artifact`, signed at every start, in place of a store `run.sh` signed once per host
+    under `/tmp`.
+  - The burst is the service's `fetch` client, which `ota_clients` turns on per arm: one
+    `vxota-probe fetch` downloading and verifying the artifact back to back from provisioning to
+    teardown, as `run.sh` started it by hand. Its deliveries are archived on the service's entity
+    and reported, not judged.
+  - The probe is `measurements.probe`, from node-adas-probe-01 across the adas VLAN.
+  - H4's rule is typed intent: the burst raises the median p50 by no more than the larger IQR of
+    the two arms, at least 1 µs, with loss at most 1 % in either arm. Verdict parity reads the
+    package: h4=pass on `exp-003`, `exp-003-repro-2026-08-03` and `exp-003-repro-2026-10-30`.
+  - Live, the `quick` and `repro` profiles ran every trial, the burst client delivering throughout
+    the burst arm with no failed delivery and no probe loss in either arm. The `repro` campaign
+    did not reproduce the frozen H4 verdict, so its outcome is under review before any published
+    number changes.
 - `experiments/exp-015` is the `vxp/1` package `vxedge/exp-015` 0.2.0, locked (X9.2): the Kuksa
   use cases, a functional suite on vxedge 0.22.0's `checks`. Its `main.yaml` holds what
   `cases-v2.sh`, `lib.sh` and `flags.sh` held:
@@ -78,13 +98,15 @@ and exp-014 are unchanged at 0.2.0. No published number changes.
 
 - exp-005 0.2.1: its `quick` profile gives the steady window `run.sh --quick`'s 10 s (vxedge
   0.20.0 profile window lengths), and it requires vxedge 0.20.0.
-- CI validates the workspaces with vxedge 0.22.0. It moved through 0.19.0 (cross-campaign
-  criteria), 0.20.0, 0.21.0 and 0.22.0.
+- CI validates the workspaces with vxedge 0.23.0. It moved through 0.19.0 (cross-campaign
+  criteria), 0.20.0, 0.21.0, 0.22.0 and 0.23.0.
 
 ### Removed
 
 - exp-015's `run.sh`, `lib.sh`, `cases-v2.sh` and `flags.sh`, and exp-017's `run.sh`,
   `scenarios.sh`, `vss61.sh` and `compare.py`: the packages replace them.
+- exp-003's `scripts/` (its `run.sh` and vendored `lib/`), its legacy `exp-003-ws.vxp`
+  descriptor, and `notebooks/criteria/exp-003.yaml`: the package replaces them.
 
 ## [0.2.0] - 2026-11-12
 

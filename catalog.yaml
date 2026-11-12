@@ -23,6 +23,17 @@ packages:
   folder: experiments/exp-002-ws
   registry: ghcr.io/vxedge/experiments/exp-002:0.2.0
   frozen_campaign: null
+- alias: exp-003
+  id: vxedge/exp-003
+  version: 0.2.0
+  digest: sha256:11820fd244ffbb2ed8e84c3db48c15ac670cf8f3483bed5402145e1e8b517343
+  title: ADAS slice SLA under OTA co-location (H4)
+  hypothesis:
+    id: H4
+    statement: An OTA burst does not compromise the ADAS slice.
+  folder: experiments/exp-003-ws
+  registry: ghcr.io/vxedge/experiments/exp-003:0.2.0
+  frozen_campaign: null
 - alias: exp-005
   id: vxedge/exp-005
   version: 0.2.1
