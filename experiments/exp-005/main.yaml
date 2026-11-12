@@ -9,9 +9,9 @@ id: exp-005
 # samples pile in behind it. That was always incidental: none of those experiments were built
 # to measure it, only to notice it. This one is. One device, no slice contention, no offered
 # load — the only thing varied across repetitions is time since `zone up` returned, which
-# `scripts/run.sh` isolates into two probe calls per repetition rather than one:
+# the campaign isolates into two measure windows per repetition rather than one:
 #
-#   - a short, low-rate "cold" burst fired the instant `zone up` returns (WARM_S=0 — the
+#   - a short, low-rate "cold" window fired the instant the zone is up (`warmup_s: 0` — the
 #     opposite of every other campaign's discarded warmup, because the warmup IS the
 #     measurement here), small enough (~60 samples) that a slow first packet dominates its
 #     `max` instead of being averaged away;
@@ -22,9 +22,9 @@ id: exp-005
 # The cold burst's own sample count (~60) is below tail-percentile support by design (this is
 # the point cold_start.py itself makes: a large window dilutes the phenomenon back out) — its
 # `p99` must never be reported. Its `max` and `p50` are the reportable figures, always stated
-# next to n. The repetition axis is what carries statistical weight: `analyze_exp005.py` reports
-# the distribution of (cold.max / steady.p50) across repetitions, not any single repetition's
-# own percentiles.
+# next to n. The repetition axis is what carries statistical weight: the criterion below reads
+# (cold max / steady p50) per repetition, and judges it across repetitions, not any single
+# repetition's own percentiles.
 vehicles: [vx-cold-start-vehicle]
 baseline: bl-exp-005
 
@@ -44,23 +44,71 @@ network:
 # idle topology, not an offered-load sweep — there is nothing here for a background flow to
 # compete with, and introducing one would confound the transient under test with contention.
 
-# Declarative method knobs; `scripts/run.sh` owns the actual two-phase timing (cold burst
-# pps/duration are campaign-specific and have no field in this schema, so they live in the
-# script next to REPS/WARM_S, matching exp-014's precedent). `warmup_s: 0` here is the
-# experiment's defining property, not an oversight — see the header comment.
-method:
-  duration_s: 60
-  repetitions: 20
-  warmup_s: 0
-
-telemetry:
-  prometheus:
-    scrape_targets:
-      # vxprobe's live exporter, opened inside node-cold-probe-01's own netns during the
-      # steady phase only — the cold burst is too short (~3 s) for a 5 s scrape interval to
-      # say anything, so vxtelemetry ingest runs for the steady phase alone.
-      - "127.0.0.1:9801"
-
 results:
   artifact_dir: results/exp-005
   upload: false
+
+# Typed intent (ARCHITECTURE.md §6.0.3). This replaces what scripts/run.sh and
+# notebooks/analyze_exp005.py held: the two probe calls per repetition as two measure windows,
+# their rates and lengths, the repetitions, and the cold-start rule (cold max / steady p50 at or
+# above cold_start.py's 2.0 blowout threshold, on every repetition).
+
+hypothesis: { id: cold-start, statement: "A fresh zone boot costs its first packets at least 2x the steady-state median latency, on every boot." }
+
+# The probe's rate. The cold window sets it to 20 pps for its ~60 samples; the steady window keeps
+# the default.
+parameters:
+  probe_pps: { type: integer, unit: 1/s, default: 1000, min: 10, max: 5000,
+               binds: "measurements[probe].rate_pps" }
+
+# The probe run.sh started by hand with `ip netns exec`: MeasurementService runs it inside the
+# device, towards a reflector the daemon places across the slice.
+measurements:
+  probe: { kind: rtt-probe, from: node-cold-probe-01, to: internet, slice: adas, rate_pps: 1000 }
+
+# vxtelemetry collects each trial's archive. A 1 s interval, so the 3 s cold window has samples.
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 1, duration_s: 80 }
+
+# The cold window's ~60 samples are below tail-percentile support by design: only its `max` and
+# `p50` are read, never a p99. Each value is the last sample inside its window, so the figure for
+# that window so far.
+metrics:
+  - { id: cold_max, kind: gauge, unit: s, entity: measurements/probe,
+      series: vxprobe_rtt_seconds_max, window: cold }
+  - { id: cold_p50, kind: gauge, unit: s, entity: measurements/probe, series: vxprobe_rtt_seconds,
+      labels: { quantile: "0.5" }, window: cold }
+  - { id: steady_p50, kind: gauge, unit: s, entity: measurements/probe, series: vxprobe_rtt_seconds,
+      labels: { quantile: "0.5" }, window: steady }
+  - { id: steady_p99, kind: gauge, unit: s, entity: measurements/probe, series: vxprobe_rtt_seconds,
+      labels: { quantile: "0.99" }, window: steady }
+  - { id: ratio_max, kind: gauge, unit: "1", entity: measurements/probe,
+      ratio: [cold_max, steady_p50] }
+  - { id: ratio_p50, kind: gauge, unit: "1", entity: measurements/probe,
+      ratio: [cold_p50, steady_p50] }
+
+# The effect holds when every repetition's cold max is at least 2x its own steady p50: the
+# smallest ratio across the repetitions clears cold_start.py's RATIO_MULTIPLE. The comparison is
+# always within one repetition, never across repetitions or days.
+criteria:
+  - id: cold-start
+    op: ge
+    lhs: { metric: ratio_max, aggregate: min }
+    rhs: { value: 2.0, unit: "1" }
+
+# run.sh: zone up, a 3 s cold burst at 20 pps with no warmup (the warmup is the measurement here),
+# then a 60 s steady window at 1000 pps on the same zone, 20 repetitions. `quick` checks the
+# pipeline only and is never reported: two repetitions. A profile does not change the windows.
+campaign:
+  repetitions: 20
+  warmup_s: 0
+  windows:
+    - { id: cold, duration_s: 3, set: { probe_pps: 20 } }
+    - { id: steady, duration_s: 60 }
+  profiles:
+    quick: { repetitions: 2 }
+    repro: { repetitions: 20 }
