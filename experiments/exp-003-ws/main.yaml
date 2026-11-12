@@ -1,9 +1,9 @@
 kind: experiment
 id: exp-003
 
-# H4: an OTA service co-located in central compute, driving a sustained artifact-delivery
-# burst, does not compromise the ADAS slice's SLA. Same adas slice/QoS/probe parameters as
-# exp-001, so the baseline arm is directly comparable to exp-001's load=0 point.
+# H4: an OTA service co-located in central compute, driving a sustained artifact-delivery burst,
+# does not compromise the ADAS slice's SLA. Same adas slice, QoS and probe as exp-001, so the
+# baseline arm is directly comparable to exp-001's load=0 point.
 vehicles: [vx-h4-vehicle]
 baseline: bl-exp-003
 
@@ -16,36 +16,88 @@ network:
       vlan: 101
       qos: { min_rate_mbps: 100, max_rate_mbps: 200, priority: 1 }
 
+results:
+  artifact_dir: results/exp-003
+  upload: false
+
+# Typed intent (ARCHITECTURE.md §6.0.3, §8). This replaces what scripts/run.sh and
+# notebooks/criteria/exp-003.yaml held: the store signed once per host, the burst artifact, the
+# burst client started by hand for one arm, repetitions and windows, and H4's rule.
+hypothesis: { id: H4, statement: An OTA burst does not compromise the ADAS slice. }
+
+# The only values a caller may change between trials. `ota_clients` is the burst: how many OTA
+# clients download the artifact back to back while the trial runs.
+parameters:
+  ota_clients: { type: integer, unit: "1", default: 0, min: 0, max: 4,
+                 binds: services.ota.config.fetch.clients }
+  probe_pps: { type: integer, unit: 1/s, default: 1000, min: 10, max: 5000,
+               binds: "measurements[probe].rate_pps" }
+
+# The probe run.sh started inside node-adas-probe-01's namespace, towards a reflector across the
+# shaped uplink on the adas VLAN.
+measurements:
+  probe: { kind: rtt-probe, from: node-adas-probe-01, to: internet, slice: adas, rate_pps: 1000 }
+
 services:
+  # The OTA server, co-located on the host as run.sh ran it. Each start signs a fresh 5 MB random
+  # artifact into a fresh store, so no store or key is built on the host first. With
+  # `ota_clients: 1`, one client downloads and verifies it back to back (`interval_s: 0`) from
+  # provisioning to teardown, covering the whole warmup and measure window: an update in progress.
   ota:
     id: ota-01
     type: ota
     image: { url: local/vxota:host-process, kind: container }
     config:
-      # Fixed, pre-seeded store path (script keygen/publish once, idempotent
-      # — mirrors how vxparts' guest bundle is a fixed pre-built path, not
-      # regenerated per repetition). Same rationale as exp-001/exp-002b's
-      # "host-process" image url: no container runtime integration, so this
-      # is a v1 process-backend placeholder.
-      artifacts: /tmp/vxota-exp003-store
       listen: 127.0.0.1:9900
+      publish: { burst-artifact: { size_bytes: 5242880 } }
+      fetch: { target: burst-artifact, clients: 0, interval_s: 0 }
+  # vxtelemetry collects each trial's archive.
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
 
-method:
-  duration_s: 60
+# vxprobe exports cumulative quantiles; a trial's value is the last sample, which equals the
+# probe-summary.json the notebook read. The OTA client's counters say the burst happened; they
+# are reported, not judged, since the frozen campaigns name them on another entity.
+metrics:
+  - { id: p50, kind: gauge, unit: s, entity: measurements/probe, series: vxprobe_rtt_seconds,
+      labels: { quantile: "0.5" } }
+  - { id: lost, kind: counter, unit: "1", entity: measurements/probe, series: vxprobe_lost_total }
+  - { id: sent, kind: counter, unit: "1", entity: measurements/probe, series: vxprobe_sent_total }
+  - { id: loss_pct, kind: gauge, unit: "%", entity: measurements/probe, ratio: [lost, sent],
+      factor: 100 }
+  - { id: deliveries, kind: counter, unit: "1", entity: host/services/ota,
+      series: vxota_deployments_total, labels: { status: success } }
+  - { id: failed_deliveries, kind: counter, unit: "1", entity: host/services/ota,
+      series: vxota_deployments_total, labels: { status: failure } }
+
+# H4 holds when the OTA burst raises the median p50 by no more than the larger IQR of the two
+# arms (at least 1 µs), one-sided; it cannot be judged when either arm lost more than 1 % in any
+# repetition. The notebook's rule.
+criteria:
+  - id: h4
+    op: le
+    lhs: { diff: [{ metric: p50, aggregate: median, select: { arm: ota-burst } }, { metric: p50, aggregate: median, select: { arm: baseline } }] }
+    rhs: { max: [{ metric: p50, aggregate: iqr, select: { arm: baseline } }, { metric: p50, aggregate: iqr, select: { arm: ota-burst } }, { value: 0.000001, unit: s }] }
+    guards:
+      - { id: h4-baseline-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: baseline } },
+          rhs: { value: 1.0, unit: "%" } }
+      - { id: h4-ota-burst-loss, op: le, lhs: { metric: loss_pct, aggregate: max, select: { arm: ota-burst } },
+          rhs: { value: 1.0, unit: "%" } }
+
+# run.sh --repro: 5 repetitions of the two arms, 10 s before a 60 s probe window at 1000 pps, a
+# 5 MB burst artifact. `quick` checks the pipeline only and is never reported: one repetition
+# with run.sh --quick's 2 s and 10 s windows (a profile changes repetitions and windows only, so it
+# keeps 1000 pps and the 5 MB artifact; run.sh --quick probed at 500 with 1 MB).
+campaign:
+  arms:
+    baseline: { ota_clients: 0 }
+    ota-burst: { ota_clients: 1 }
   repetitions: 5
   warmup_s: 10
-
-telemetry:
-  prometheus:
-    scrape_targets:
-      # vxprobe's exporter now runs inside node-adas-probe-01's own netns (docs/ROADMAP.md),
-      # so it's reachable at the zone's real address, not host loopback.
-      - "10.101.0.2:9801"  # vxprobe live exporter (always up)
-    optional_scrape_targets:
-      - "127.0.0.1:9902"   # vxota-probe live exporter — only listens during ota-burst;
-                            # a failed scrape here (baseline arm) doesn't count against
-                            # completeness (docs/ARCHITECTURE.md §6)
-
-results:
-  artifact_dir: results/exp-003
-  upload: false
+  duration_s: 60
+  profiles:
+    quick: { repetitions: 1, warmup_s: 2, duration_s: 10 }
+    repro: { repetitions: 5 }
