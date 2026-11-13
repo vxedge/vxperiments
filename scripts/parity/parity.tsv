@@ -1,4 +1,4 @@
-# dataset (a folder of the Zenodo record)	criteria	--name pattern	expected outcome per criterion, from the notebook's own verdict
+# dataset (a folder of the Zenodo record)	package	--name pattern (- when a campaign named the trials)	published outcome per criterion
 exp-001	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
 exp-001-repro-2026-07-31	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
 exp-001-repro-2026-08-03	experiments/exp-001-ws	rep{repetition}-load{load_mbps}	h1=pass
@@ -11,6 +11,7 @@ exp-002b-repro-2026-08-05	experiments/exp-002b-ws	rep{repetition}-{arm}	transpor
 exp-003	experiments/exp-003-ws	rep{repetition}-{arm}	h4=pass
 exp-003-repro-2026-08-03	experiments/exp-003-ws	rep{repetition}-{arm}	h4=pass
 exp-003-repro-2026-10-30	experiments/exp-003-ws	rep{repetition}-{arm}	h4=pass
+exp-003-repro-2026-11-13	experiments/exp-003-ws	-	h4=pass
 exp-014-repro-2026-08-05	experiments/exp-014	rep{repetition}-{arm}	hops=pass
 # A results/ folder holds a run's step output as committed text (no archives): scripts/frozen-checks.py builds its trials, never fetched. Its expected outcomes are the published README's.
 results/broker-slice-main-2026-11-04	experiments/exp-016	rep{repetition}	runs=pass slice-publish=pass slice-actuate=pass load-publish=pass load-actuate=pass setup=inconclusive

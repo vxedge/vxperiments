@@ -11,6 +11,36 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Changed
+
+- Verdict parity reads version 2026-11-v2 of the Zenodo record that holds the raw archives
+  ([10.5281/zenodo.24192950](https://doi.org/10.5281/zenodo.24192950)), in place of 2026-11
+  (10.5281/zenodo.23810053). Its `SHA256SUMS` is the published one, 25 archives, and the table
+  gains `exp-003-repro-2026-11-13`, whose archives a campaign wrote and named (`h4=pass`). All 16
+  datasets give their published verdicts with vxedge 0.25.0.
+- The parity table and checksums moved from `notebooks/criteria/` to `scripts/parity/`, and the
+  parity check compares the engine with the published verdicts.
+- CI's `runners` job is now `static` ("scripts + exp-010 notebook"): shellcheck over
+  `scripts/*.sh` and `notebooks/*.sh`, a compile of the Python scripts, and
+  `notebooks/check-exp010.sh`, which downloads exp-010 and exp-001 from the pinned record, runs
+  `notebooks/analyze_exp010.py`, and requires the published `results/exp-010/` summary and its H2
+  verdict. exp-010's archives hold probe summaries, not samples, so the verdict engine cannot judge
+  them; the notebook stays until exp-010 runs live (`notebooks/README.md`).
+
+### Removed
+
+- The bash campaign runners: `scripts/` in exp-001 (`run.sh`, `run-measurements.sh`), exp-002,
+  exp-005, exp-010 and exp-014, each with its vendored `scripts/lib/`; the canonical
+  `scripts/lib/` (`check-runners.sh`, `freshness.sh`, `host_pinning.sh`, `results_dir.sh`);
+  `scripts/run-smoke.sh` and `scripts/calibrate-exp-010-noise-floor.sh`. Each experiment's
+  package campaign replaces them. Package contents and digests are unchanged: `.vxpignore` already
+  kept `scripts/` out.
+- The analysis notebooks: `analyze_exp001.py`, `analyze_exp002.py`, `analyze_exp002b.py`,
+  `analyze_exp003.py`, `analyze_exp005.py`, `analyze_exp014.py`, `analyze_noise_floor.py` and
+  `compare_exp001_paths.py`. Each package's `main.yaml` holds its acceptance rule.
+  `analyze_exp010.py` and the `cold_start.py` it imports stay.
+- `experiments/retired-6.1/`, the §6.1 manifests, and CI's check that vxedge refuses them.
+
 ## [0.2.1] - 2026-11-13
 
 Seven experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-002b (H3
