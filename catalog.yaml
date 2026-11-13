@@ -46,7 +46,7 @@ packages:
 - alias: exp-005
   id: vxedge/exp-005
   version: 0.2.2
-  digest: sha256:798dee378c2c79038f03997378bf7875ceb87c865c80d3743c78f77acb31572d
+  digest: sha256:5ff1fe217063d22730d503b029241906a1d944139576abc72a621b86b0582087
   title: Cold-start first-packet latency after zone boot
   hypothesis:
     id: cold-start
@@ -58,7 +58,7 @@ packages:
 - alias: exp-010
   id: vxedge/exp-010
   version: 0.2.1
-  digest: sha256:a377ff65c14ef732ec37ae70d33e27cf02aa535d47e35fdb0a42144753102ff1
+  digest: sha256:0107fabd46b9b68885767a907970326002699041c7cb13b70d2c20f174c1335f
   title: Real S-NSSAI slicing against static VLAN mapping (H2)
   hypothesis:
     id: H2

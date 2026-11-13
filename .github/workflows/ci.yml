@@ -8,7 +8,7 @@ on:
 jobs:
   # Everything checkable without the vxedge binaries. Fast, no secrets, always runnable.
   static:
-    name: scripts + exp-010 notebook
+    name: scripts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -17,13 +17,8 @@ jobs:
       - name: Static checks
         run: |
           set -euo pipefail
-          shellcheck -S warning scripts/*.sh notebooks/*.sh
-          python3 -m py_compile scripts/*.py notebooks/*.py
-      - name: exp-010 H2 verdict
-        # exp-010's archives hold probe summaries, not samples, so the verdict engine cannot judge
-        # them: notebooks/analyze_exp010.py must still reproduce the published summary and its H2
-        # verdict from the pinned Zenodo record (notebooks/README.md).
-        run: notebooks/check-exp010.sh
+          shellcheck -S warning scripts/*.sh
+          python3 -m py_compile scripts/*.py
 
   # Every experiment workspace must satisfy the same checks `vxedge experiment up` runs before
   # provisioning: cross-file joins *and* model invariants. A workspace that validates only on

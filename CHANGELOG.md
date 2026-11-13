@@ -11,11 +11,30 @@ than a repo tag.
 
 ## [Unreleased]
 
+### Added
+
+- `results/exp-010-repro-2026-11-13`: exp-010's first live run as a package, `repro` profile,
+  vxedge 0.27.0 with the digest-pinned 5G images. H2 passes: p99 growth from 0 to 600 Mbit/s is
+  0.972x against a bound of 1.006x (1.10 times exp-001's 0.914x). All 25 trials are complete, the
+  worst loss is 0.0017 %, and the archives' `image_digests` name the three 5G images. The published
+  2026-10-30 repro read 1.00x. Absolute p99 is about 300 µs here, about 340 µs there; H2 compares
+  growth.
+
+### Removed
+
+- `notebooks/` (`analyze_exp010.py`, `cold_start.py`, `check-exp010.sh`) and its CI step. exp-010
+  now runs live, and vxedge judges its H2 from the archives. The files stay at the `v0.2.1` tag,
+  and exp-005's and exp-010's links point there.
+
 ### Changed
 
+- `results/exp-001/campaign.json` is the `vxarchive/2` record from Zenodo 2026-11-v2
+  (`exp-001.tgz`), whose archive digests match the published archives. The `vxarchive/1` digests it
+  held cannot be read by vxedge 0.26.0 or later, so exp-010's `--reference-workspace` needs this
+  record with the published archives unpacked beside it.
 - CI validates the workspaces with vxedge 0.27.0, which reads only `vxp.yaml` packages and
   `vxarchive/2` archives and pins the 5G images by digest.
-- exp-010 0.2.1 is locked with vxedge 0.27.0 and requires it. Its lock now pins the 5G core
+- exp-005 0.2.2 and exp-010 0.2.1 are locked with vxedge 0.27.0; exp-010 requires it. Its lock now pins the 5G core
   (`ghcr.io/vxedge/parts/gw/5gc/os/open5gs:0.1.0`), RAN (`gw/ran/os/ueransim:0.1.0`, carrying
   the vxprobe 0.2.3 release) and database (`mongo:7`) images by digest, which the 5G path runs
   and an archive records in `image_digests`. Before this, its lock listed no image, because
