@@ -123,9 +123,9 @@ VXEDGE=/path/to/vxedge scripts/verdict-parity.sh --fetch
 This downloads each dataset in [`scripts/parity/parity.tsv`](scripts/parity/parity.tsv) from Zenodo
 version 2026-11-v2, checks it against [`scripts/parity/SHA256SUMS`](scripts/parity/SHA256SUMS), that
 version's published checksums, and judges it with the criteria of the package the table names. It
-needs `curl`, `jq`, and `python3` with PyYAML. Every dataset must give its published verdict, and all 16 do. exp-005's and
-exp-010's archives hold probe summaries, not samples, so they are not in the table; CI checks
-exp-010's H2 with [`notebooks/check-exp010.sh`](notebooks/check-exp010.sh).
+needs `curl`, `jq`, and `python3` with PyYAML. Every dataset must give its published verdict, and
+all 16 do. exp-005's and exp-010's archives hold probe summaries, not samples, so they are not in
+the table; CI checks exp-010's H2 with [`notebooks/check-exp010.sh`](notebooks/check-exp010.sh).
 
 ## Checks and releases
 
