@@ -23,6 +23,15 @@ packages:
   folder: experiments/exp-002-ws
   registry: ghcr.io/vxedge/experiments/exp-002:0.2.0
   frozen_campaign: null
+- alias: exp-002b
+  id: vxedge/exp-002b
+  version: 0.2.0
+  digest: sha256:1ebea28313412326821953c0c6928751d25dcdbb2c147c901b433cdccc1c97fd
+  title: Virtual-ECU packaging decomposed (machine, transport, vhost-net, management) and its cost (H3)
+  hypothesis: null
+  folder: experiments/exp-002b-ws
+  registry: ghcr.io/vxedge/experiments/exp-002b:0.2.0
+  frozen_campaign: null
 - alias: exp-003
   id: vxedge/exp-003
   version: 0.2.0
