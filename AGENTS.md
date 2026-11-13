@@ -9,7 +9,7 @@ validation source), §12 (methodology/metrics), §13 (reproducibility).
 - `experiments/exp-*.yaml` — experiment manifests (schema §6.1). The `services:` blocks here
   are the **authoritative runtime descriptors** (image + config) for each experiment.
 - `vehicles/vx-vehicle-*.yaml` — vehicle manifests (schema §6.2), referenced by experiments.
-- `notebooks/` — Python analysis (percentile tables, isolation charts, CSV export).
+- `notebooks/` — exp-010's H2 analysis only, until exp-010 runs live (`notebooks/README.md`).
 - `results/` — conventions only; actual archives follow `results_prefix` and are not
   committed (large artifacts go to the registry/S3 per §13).
 

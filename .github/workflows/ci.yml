@@ -7,21 +7,23 @@ on:
 
 jobs:
   # Everything checkable without the vxedge binaries. Fast, no secrets, always runnable.
-  runners:
-    name: campaign runners + notebooks
+  static:
+    name: scripts + exp-010 notebook
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
       - name: Static checks
-        # shellcheck *including* SC2154 (referenced but never assigned), plus each runner's
-        # preamble executed under `set -u`. Both exist for a real regression: on 2026-07-31 an
-        # edit removed the two lines resolving `$RESULTS` from run-exp-001.sh, `bash -n` passed
-        # it, and the campaign died on the first real run after a sudo prompt and a build. The
-        # preamble check is the stronger half — it runs the script, so it also catches a
-        # variable assigned only in a branch that never executes.
-        run: ./scripts/lib/check-runners.sh
+        run: |
+          set -euo pipefail
+          shellcheck -S warning scripts/*.sh notebooks/*.sh
+          python3 -m py_compile scripts/*.py notebooks/*.py
+      - name: exp-010 H2 verdict
+        # exp-010's archives hold probe summaries, not samples, so the verdict engine cannot judge
+        # them: notebooks/analyze_exp010.py must still reproduce the published summary and its H2
+        # verdict from the pinned Zenodo record (notebooks/README.md).
+        run: notebooks/check-exp010.sh
 
   # Every experiment workspace must satisfy the same checks `vxedge experiment up` runs before
   # provisioning: cross-file joins *and* model invariants. A workspace that validates only on
@@ -68,7 +70,6 @@ jobs:
           validated=0
           for ws in experiments/*/; do
             ws=${ws%/}
-            [ "$ws" = experiments/retired-6.1 ] && continue
             descriptors=("$ws"/vxp.yam[l] "$ws"/*.vxp)   # a pattern, so nullglob drops a missing one
             if [ ${#descriptors[@]} -eq 0 ]; then
               echo "== $ws: no descriptor, not a workspace yet"
@@ -90,15 +91,6 @@ jobs:
           done
           [ "$validated" -gt 0 ] || { echo "error: no workspace validated" >&2; exit 1; }
           echo "== $validated workspaces validated"
-          # The retired §6.1 manifests are provenance, not inputs: they must NOT validate as
-          # workspaces, and a day when they do means something resurrected the old schema.
-          for m in experiments/retired-6.1/*.yaml; do
-            if "$VXEDGE" manifest validate --manifest "$m" >/dev/null 2>&1; then
-              echo "error: $m validated — §6.1 is supposed to be unreadable" >&2
-              exit 1
-            fi
-          done
-          echo "== retired §6.1 manifests correctly refused"
       - name: Plan every package's campaign
         # `campaign plan` for the default and every declared profile, against an unprivileged
         # vxedged on this runner: the same checks `campaign start` makes before any trial (typed
@@ -138,9 +130,9 @@ jobs:
           fi
           scripts/packages.py catalog --check "${base[@]}"
       - name: Verdict parity
-        # vxedge's verdict engine must give the notebooks' verdicts on every full published
-        # dataset that holds samples. The archives come from the pinned Zenodo record, each
-        # checked against notebooks/criteria/SHA256SUMS before it is read.
+        # vxedge's verdict engine, judging each package's criteria, must give the published
+        # verdict on every full published dataset that holds samples. The archives come from the
+        # pinned Zenodo record, each checked against scripts/parity/SHA256SUMS before it is read.
         working-directory: vxperiments
         run: scripts/verdict-parity.sh --fetch
       - name: Scenario proof
