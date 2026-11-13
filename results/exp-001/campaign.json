@@ -1,257 +1,281 @@
 {
   "campaign_id": "exp-001",
   "experiment_id": "exp-001",
-  "state": "succeeded",
   "trials": [
     {
       "id": "r1-defaults",
+      "arm": "",
       "repetition": 1,
       "parameters": {
         "load_mbps": 0
       },
       "state": "succeeded",
       "archive": "rep1-load0.zip",
-      "sha256": "2aa4bb7af92dac9553c1931bf7276c8d4b5b6fe1aa6300ab3a3e2d09c340fc4b"
+      "sha256": "sha256:c031da2e486300fa0c8cfd22db4066bfd9d472b7d2f92921285e3879c5ce8cd1"
     },
     {
       "id": "r1-load_mbps=100",
+      "arm": "",
       "repetition": 1,
       "parameters": {
         "load_mbps": 100
       },
       "state": "succeeded",
       "archive": "rep1-load100.zip",
-      "sha256": "01eedf7dce1341815f7e2da9f974e83c3e6d27890bdbe782bfb3be8562170ad8"
+      "sha256": "sha256:22f78f5f756fbb442b95c20762cf0cc5912c47f3fc6d5b01b408a5998e821679"
     },
     {
       "id": "r1-load_mbps=250",
+      "arm": "",
       "repetition": 1,
       "parameters": {
         "load_mbps": 250
       },
       "state": "succeeded",
       "archive": "rep1-load250.zip",
-      "sha256": "bbf6f0baf3a6eda13b61ad2b8564745fc8afc0c4bcc88f34467746289a91552d"
+      "sha256": "sha256:0c557d56b2480234f94ef99d77f1a25463381b9dd4e69f86169c3a6cc04da126"
     },
     {
       "id": "r1-load_mbps=400",
+      "arm": "",
       "repetition": 1,
       "parameters": {
         "load_mbps": 400
       },
       "state": "succeeded",
       "archive": "rep1-load400.zip",
-      "sha256": "d648b507b60727353c43fddf6196cecba35d8b610449d1b720142e93b6404d65"
+      "sha256": "sha256:73d1bb7d66b19c070fb15294a99b228f43deba3ef9c9d1feae6fbc6fee1a68d9"
     },
     {
       "id": "r1-load_mbps=600",
+      "arm": "",
       "repetition": 1,
       "parameters": {
         "load_mbps": 600
       },
       "state": "succeeded",
       "archive": "rep1-load600.zip",
-      "sha256": "b1d41f2325de7512c5ed21ae2d24c303ef16af2a9bca1124a1c211ca5a4bb2e5"
+      "sha256": "sha256:f75d52bd5ed45b57e7596bae364911c176c9f7cc252f2ac3a77bdb9a6cef80cf"
     },
     {
       "id": "r2-defaults",
+      "arm": "",
       "repetition": 2,
       "parameters": {
         "load_mbps": 0
       },
       "state": "succeeded",
       "archive": "rep2-load0.zip",
-      "sha256": "6389ad299479ee7217922818e64e515423668dc99bcf5ea983b58ca473f60e14"
+      "sha256": "sha256:cb5cac95970597d3d2950d6657b0c6ba75f25a1e8956296c61594f5fc97cb931"
     },
     {
       "id": "r2-load_mbps=100",
+      "arm": "",
       "repetition": 2,
       "parameters": {
         "load_mbps": 100
       },
       "state": "succeeded",
       "archive": "rep2-load100.zip",
-      "sha256": "f981c8e1687faadc27ae0e70061d049bc5fd2fabb6ec3e97b5d3b5bbf9089725"
+      "sha256": "sha256:ee42057c9836ada7fcdc3daed10f4bfaaba2a2c983a8bdd75b380fdf62f95b74"
     },
     {
       "id": "r2-load_mbps=250",
+      "arm": "",
       "repetition": 2,
       "parameters": {
         "load_mbps": 250
       },
       "state": "succeeded",
       "archive": "rep2-load250.zip",
-      "sha256": "de77ffe4f27dfef72a6833f39b4c4ea4690332e664dce638c6227f3b36eda999"
+      "sha256": "sha256:a58a339942a97c5f8d0deefc653c6cfe31c52d083df757bf203fe8465daac26d"
     },
     {
       "id": "r2-load_mbps=400",
+      "arm": "",
       "repetition": 2,
       "parameters": {
         "load_mbps": 400
       },
       "state": "succeeded",
       "archive": "rep2-load400.zip",
-      "sha256": "6e5389a040a88c82bb6901f268b667356e13f6947b3d256a3662d1f5f2a50b4c"
+      "sha256": "sha256:4fa68d9b74709af6845e6ebb73f9999d875517a6e3cdbf7292953d40009c3ec1"
     },
     {
       "id": "r2-load_mbps=600",
+      "arm": "",
       "repetition": 2,
       "parameters": {
         "load_mbps": 600
       },
       "state": "succeeded",
       "archive": "rep2-load600.zip",
-      "sha256": "eb2b9e9056d13ae8957803397097b537820c8ef24e280ca86fd9ec827a314912"
+      "sha256": "sha256:2dcc8458eb31865676a8d8d600b22591ad8ac54d6f04df36e7380d7b6168fda0"
     },
     {
       "id": "r3-defaults",
+      "arm": "",
       "repetition": 3,
       "parameters": {
         "load_mbps": 0
       },
       "state": "succeeded",
       "archive": "rep3-load0.zip",
-      "sha256": "4911f6645c69a0f43809c02f60c79498c831934dcd1a2427c225a24b7171ff96"
+      "sha256": "sha256:efc315e9967c4815a422d80355e8b8fb8144476028f971496a764b80d96a7b6d"
     },
     {
       "id": "r3-load_mbps=100",
+      "arm": "",
       "repetition": 3,
       "parameters": {
         "load_mbps": 100
       },
       "state": "succeeded",
       "archive": "rep3-load100.zip",
-      "sha256": "48985da8b0aca894020d76fee31a6971d662c990c57d551ea5ba2e5dde39d9e1"
+      "sha256": "sha256:48f1296e71614eb7531da62959d0fc0768f85dbc099b3b728ad14b5ed132509b"
     },
     {
       "id": "r3-load_mbps=250",
+      "arm": "",
       "repetition": 3,
       "parameters": {
         "load_mbps": 250
       },
       "state": "succeeded",
       "archive": "rep3-load250.zip",
-      "sha256": "e078def4ebbcfd6f96b30209f245b114b5057aa28b4ba0daec9970b93e2b3f80"
+      "sha256": "sha256:265c1c250b21be47c07a18cbe91a580bf1a13bce25c013731c9f89a505ab2295"
     },
     {
       "id": "r3-load_mbps=400",
+      "arm": "",
       "repetition": 3,
       "parameters": {
         "load_mbps": 400
       },
       "state": "succeeded",
       "archive": "rep3-load400.zip",
-      "sha256": "735be9adadafad3760a5618da1e7fcc976de782116eb8381c6562bc5e7a440fe"
+      "sha256": "sha256:28cd290fb99dc7c5b0caaad4264279903032800c2449ad419eba688f75ee73cd"
     },
     {
       "id": "r3-load_mbps=600",
+      "arm": "",
       "repetition": 3,
       "parameters": {
         "load_mbps": 600
       },
       "state": "succeeded",
       "archive": "rep3-load600.zip",
-      "sha256": "08d6a5217355c4a70e713f3640fb7398a0ea65bde2dbee29c01b7cb6a42d8add"
+      "sha256": "sha256:df1b096eb8ee74765141adae0c364c5a378107283162a2304b7e5474dfc760ee"
     },
     {
       "id": "r4-defaults",
+      "arm": "",
       "repetition": 4,
       "parameters": {
         "load_mbps": 0
       },
       "state": "succeeded",
       "archive": "rep4-load0.zip",
-      "sha256": "9fb935aca4342640f56bc7c63e2250854f224790db50b5037a48ef696fd98fa9"
+      "sha256": "sha256:f21e009cff873bda17b3359a8e8ae6186624041e0a62e28fe7b2efb6079d2826"
     },
     {
       "id": "r4-load_mbps=100",
+      "arm": "",
       "repetition": 4,
       "parameters": {
         "load_mbps": 100
       },
       "state": "succeeded",
       "archive": "rep4-load100.zip",
-      "sha256": "27a7e753ec895ee7a42f5523efd1490018a212a89cd8643e215f38fbc7c2eb76"
+      "sha256": "sha256:1b5a38b83761fda83a82c6ad4a28bff36a5b7c395737c727f4687da8fb9456ec"
     },
     {
       "id": "r4-load_mbps=250",
+      "arm": "",
       "repetition": 4,
       "parameters": {
         "load_mbps": 250
       },
       "state": "succeeded",
       "archive": "rep4-load250.zip",
-      "sha256": "16fc23a1bbfd08ab062bad9f394c2424dd1ad68eb6c17bb915d178ddd2896b03"
+      "sha256": "sha256:51e4f0c7940119ac00b4fbb7439dce3b679a3bebfd97b079f527765be3b7243d"
     },
     {
       "id": "r4-load_mbps=400",
+      "arm": "",
       "repetition": 4,
       "parameters": {
         "load_mbps": 400
       },
       "state": "succeeded",
       "archive": "rep4-load400.zip",
-      "sha256": "599d4efb1b4b930abb30fe2882109430c8ae7139a291d65a6b5b184cffc486cb"
+      "sha256": "sha256:28d312df372ec0bfc30f8d805ff2f9d683fa0ebcd38b5694cb8c54efa702bcd8"
     },
     {
       "id": "r4-load_mbps=600",
+      "arm": "",
       "repetition": 4,
       "parameters": {
         "load_mbps": 600
       },
       "state": "succeeded",
       "archive": "rep4-load600.zip",
-      "sha256": "075b53b38e056f935ae64ac3526bb75cf2e38c0a9dbab10a79d420e0ee89270f"
+      "sha256": "sha256:56d64e2b6624a45e9cf00669797cf06c09e8564b2e78ab7bd7783b522961df8e"
     },
     {
       "id": "r5-defaults",
+      "arm": "",
       "repetition": 5,
       "parameters": {
         "load_mbps": 0
       },
       "state": "succeeded",
       "archive": "rep5-load0.zip",
-      "sha256": "539760352ba672c06e05fd95129cd5cd2797f2e447d1122da7eb9ede3a88b259"
+      "sha256": "sha256:88260155ec7e412216bb9656b607aa9168323820e2cb36f8f46e1d50b3f3cb74"
     },
     {
       "id": "r5-load_mbps=100",
+      "arm": "",
       "repetition": 5,
       "parameters": {
         "load_mbps": 100
       },
       "state": "succeeded",
       "archive": "rep5-load100.zip",
-      "sha256": "e66d702ca8b769d2a4fe0be0e3f7516f511edf1d4a3fdf741f475c899a676c70"
+      "sha256": "sha256:ecfbfe3f70f6b3c1da7bd1643da4e5d3843cae61cc92af11ec03cc49434e7748"
     },
     {
       "id": "r5-load_mbps=250",
+      "arm": "",
       "repetition": 5,
       "parameters": {
         "load_mbps": 250
       },
       "state": "succeeded",
       "archive": "rep5-load250.zip",
-      "sha256": "47cda2ddc8d1af7079724624db817324135ff4d80d907e42cb1cf6618e27f1bd"
+      "sha256": "sha256:c1bd1f2af51506742874a25669d16028e6b6b36399c3e9652d02ccff29a5cafa"
     },
     {
       "id": "r5-load_mbps=400",
+      "arm": "",
       "repetition": 5,
       "parameters": {
         "load_mbps": 400
       },
       "state": "succeeded",
       "archive": "rep5-load400.zip",
-      "sha256": "df0cdf970f9ae073671ed634cc4e13efdc88946080e3088b7ef59294d8b86481"
+      "sha256": "sha256:d12b8628beee97b8f9d6425a49640ceb02bfe08ab4cfb001351e4651e65f4423"
     },
     {
       "id": "r5-load_mbps=600",
+      "arm": "",
       "repetition": 5,
       "parameters": {
         "load_mbps": 600
       },
       "state": "succeeded",
       "archive": "rep5-load600.zip",
-      "sha256": "690d3d2d67192cae7f671d5ec63b43949c820c28b787b60e097fa3c5396fa4bb"
+      "sha256": "sha256:865299e321637d9595a8762ccbf43fd137594142f2a71b12c1c0307f7d9a7380"
     }
   ]
 }

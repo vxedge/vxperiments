@@ -2,7 +2,7 @@ kind: experiment
 id: exp-005
 
 # Cold start: three earlier campaigns (exp-001, exp-002, exp-003 — see
-# `../../notebooks/cold_start.py`) each showed their first-measured arm with a p99 three to
+# `notebooks/cold_start.py` at the vxperiments `v0.2.1` tag) each showed their first-measured arm with a p99 three to
 # five times the others' and a normal p50 — a blown tail from a handful of very slow packets
 # right after provisioning (page faults, ARP, veth/netns warm-up, the CPU frequency ramp
 # before the pinned governor settles), diluted to invisibility once enough steady-state

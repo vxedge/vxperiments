@@ -20,8 +20,6 @@ validates against nothing else.
   vxedge/vxarchives release `archives-2026-11-v2`).
 - `scripts/`: the catalogue, verdict parity (`verdict-parity.sh`, `parity/`), `frozen-checks.py`,
   the scenario proof and release notes.
-- `notebooks/`: exp-010's H2 check only (`notebooks/README.md`). It goes when exp-010 has run live
-  as a package; add nothing else here.
 - `vehicles/`, `scenarios/`: shared and reference vehicles, and the reference scenario.
 
 ## Rules

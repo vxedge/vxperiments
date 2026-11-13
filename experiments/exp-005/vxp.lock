@@ -2,11 +2,11 @@ schema: vxp-lock/1
 package:
   id: vxedge/exp-005
   version: 0.2.2
-locked_with: 0.25.0
+locked_with: 0.27.0
 files:
-  README.md: sha256:6a4d5d65261e9695868f8d8fb419e468f1d4fb82a4dbf9d4df3337525eb7c5fd
+  README.md: sha256:24ca0edc7061f0d648c7b7834759b580a448930d99097255d3c18f4556554493
   assets/README.md: sha256:31cc18793196fea418e5cdbcd43a2d90daea141a174d44004dd228c360d19ca1
-  main.yaml: sha256:ff51326011a6b5e00f8816bc8f74d08903ad2cbf658958ae1ae3406e6f4ecc9b
+  main.yaml: sha256:51e00a44037adeb0742b02b2df8df092d8b3438a09412b3435f58407b4c1f9a8
   parts.yaml: sha256:0b02f4f285db669ac249ab8455d4171ec1c4b25248d6315c14406a88d20bdfe0
   parts/README.md: sha256:16508813a77fc2dbf9b8a949ecd87cbc58dc244559d24c31a4f25dbb0af0ce31
   tools/README.md: sha256:a77c9562e7d0d9eff075d6a035d6031e1a1ddc581836140a1e27fef0a59f432c

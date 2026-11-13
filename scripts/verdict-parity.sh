@@ -17,8 +17,9 @@
 #
 # A `--name` pattern of `-` means a campaign wrote the archives and they name their own trials.
 #
-# Not covered: exp-005 and exp-010 (their archives hold probe summaries, not samples; exp-010's H2
-# verdict is checked by notebooks/analyze_exp010.py instead) and the quick-profile sets (a
+# Not covered: exp-005's and exp-010's frozen sets (their archives hold probe summaries, not
+# samples; exp-010's H2 is judged from its live repro, results/exp-010-repro-2026-11-13) and the
+# quick-profile sets (a
 # different top load and a pipeline check only, never reported).
 set -euo pipefail
 cd "$(dirname "$0")/.."

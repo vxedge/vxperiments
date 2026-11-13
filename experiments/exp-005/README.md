@@ -3,7 +3,7 @@
 Three earlier campaigns (exp-001, exp-002, exp-003) each showed their first-measured arm with
 a p99 three to five times the others' and a normal p50 — a blown tail with a normal median,
 what cold start looks like and not what a regression looks like
-(`../../notebooks/cold_start.py` has the full account). None of those experiments were built to
+([`notebooks/cold_start.py`](https://github.com/vxedge/vxperiments/blob/v0.2.1/notebooks/cold_start.py) has the full account). None of those experiments were built to
 measure the phenomenon, only to notice it as an incidental artifact their own warmup mostly
 absorbed. This one measures it deliberately. Its campaign runs through vxAPI
 ([The package](#the-package)).

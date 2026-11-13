@@ -22,9 +22,9 @@ vxedge/vxarchives. A campaign run from a package writes its archives, `campaign.
 
 Verdicts come from vxedge judging a package's criteria over archives:
 [`scripts/verdict-parity.sh --fetch`](../scripts/verdict-parity.sh) re-judges every published
-dataset that holds samples and requires its published verdict. exp-010's H2 is the one exception,
-checked by `notebooks/analyze_exp010.py` because its archives hold summaries only
-([`notebooks/README.md`](../notebooks/README.md)).
+dataset that holds samples and requires its published verdict. exp-010's frozen sets hold probe
+summaries only; its H2 is judged from the live repro of 2026-11-13
+([`exp-010-repro-2026-11-13`](exp-010-repro-2026-11-13/exp-010-summary.md)), which records samples.
 
 Some READMEs here describe how a past result was produced with the bash runners and analysis
 notebooks the packages replaced. Their links point at the
