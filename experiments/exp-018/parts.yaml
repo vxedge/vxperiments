@@ -1,0 +1,16 @@
+kind: baseline
+id: bl-idle
+
+# The unloaded arm: the load devices run no payload (a `local/…` part no measurement names is a
+# bare network namespace), so the infotainment slice is quiet.
+parts:
+  # The probe's two ends, run by vxedged as host processes inside each device's namespace.
+  - ref: local/vxprobe:host-process
+    target_ids: [probe-src, probe-dst]
+  # The broker device needs a container payload for the databroker to join; the vxprobe image
+  # idles as a reflector nobody probes.
+  - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.2.0
+    digest: sha256:860dc44caff3553f19e932ec7af181ca0f265340abb0c0f1e722794a3468bfd1
+    target_ids: broker-host
+  - ref: local/vxprobe:host-process
+    target_ids: [load-a-fn, load-b-fn]

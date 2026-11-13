@@ -1,0 +1,59 @@
+kind: vehicle
+id: vx-protocol-loads-vehicle
+class: road
+subtype: car
+
+# Two slices on one in-vehicle bridge. The ADAS slice carries the probe, device to device; the
+# infotainment slice carries the arm's protocol traffic, also device to device. Neither crosses
+# the shaped uplink, so what the two share is the bridge and the host's CPU: the arm measures
+# whether that much protocol traffic on one slice shows in the other's latency.
+zones:
+  front-left: {}
+  rear-left: {}
+  cabin: {}
+  central: {}
+
+devices:
+  adas-src: { role: zone-controller, zone: front-left, backend: container }
+  adas-dst: { role: hpc,             zone: central,    backend: container }
+  load-a:   { role: ecu,             zone: cabin,      backend: container }
+  load-b:   { role: zone-controller, zone: rear-left,  backend: container }
+  broker:   { role: hpc,             zone: central,    backend: container }
+
+# One function per device. What each runs is the baseline's: `parts.yaml` holds one baseline per
+# arm, and the experiment's `load` parameter picks one.
+functions:
+  probe-src:   { deployed_on: adas-src }
+  probe-dst:   { deployed_on: adas-dst }
+  load-a-fn:   { deployed_on: load-a }
+  load-b-fn:   { deployed_on: load-b }
+  broker-host: { deployed_on: broker }
+
+# Each endpoint pins its address, so a measurement or a load can name its peer, and each device
+# measures inside its own network namespace (exp-014's convention).
+links:
+  - id: l-adas-src
+    endpoints: [{ node: adas-src, port: eth0, ip: 10.118.1.11/24 }]
+    slice: adas
+  - id: l-adas-dst
+    endpoints: [{ node: adas-dst, port: eth0, ip: 10.118.1.12/24 }]
+    slice: adas
+  - id: l-load-a
+    endpoints: [{ node: load-a, port: eth0, ip: 10.118.3.11/24 }]
+    slice: infotainment
+  - id: l-load-b
+    endpoints: [{ node: load-b, port: eth0, ip: 10.118.3.12/24 }]
+    slice: infotainment
+  - id: l-broker
+    endpoints: [{ node: broker, port: eth0, ip: 10.118.3.20/24 }]
+    slice: infotainment
+
+# The Kuksa databroker, in the broker device's container group. It runs in every arm and idles in
+# all but `can`, where load-a's CAN provider publishes to it across the infotainment slice.
+signal_plane:
+  kuksa:
+    image:
+      url: ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+      kind: container
+    on: broker
+    config: { listen: "0.0.0.0:55555" }

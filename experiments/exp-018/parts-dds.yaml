@@ -1,0 +1,27 @@
+kind: baseline
+id: bl-dds
+
+# Cyclone DDS 11.1.0's ddsperf: load-a publishes 1 KiB samples at 1 kHz, reliable, and load-b
+# subscribes. Discovery is unicast to a fixed peer list, so the arm does not depend on multicast
+# crossing the bridge.
+parts:
+  # The probe's two ends, run by vxedged as host processes inside each device's namespace.
+  - ref: local/vxprobe:host-process
+    target_ids: [probe-src, probe-dst]
+  # The broker device needs a container payload for the databroker to join; the vxprobe image
+  # idles as a reflector nobody probes.
+  - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.2.0
+    digest: sha256:860dc44caff3553f19e932ec7af181ca0f265340abb0c0f1e722794a3468bfd1
+    target_ids: broker-host
+  - ref: ghcr.io/vxedge/parts/agent/load/app/dds-perf:0.1.0
+    digest: sha256:fb4dd05b876ae028fdae662443b269b92a4bedb2ff9ed70520f1a5351a4cc363
+    target_ids: load-a-fn
+    run:
+      args: [pub, 1000Hz, size, 1k]
+      env: { CYCLONEDDS_URI: "<CycloneDDS><Domain><General><Interfaces><NetworkInterface name=\"eth0\"/></Interfaces><AllowMulticast>false</AllowMulticast></General><Discovery><ParticipantIndex>auto</ParticipantIndex><Peers><Peer address=\"10.118.3.11\"/><Peer address=\"10.118.3.12\"/></Peers></Discovery></Domain></CycloneDDS>" }
+  - ref: ghcr.io/vxedge/parts/agent/load/app/dds-perf:0.1.0
+    digest: sha256:fb4dd05b876ae028fdae662443b269b92a4bedb2ff9ed70520f1a5351a4cc363
+    target_ids: load-b-fn
+    run:
+      args: [sub]
+      env: { CYCLONEDDS_URI: "<CycloneDDS><Domain><General><Interfaces><NetworkInterface name=\"eth0\"/></Interfaces><AllowMulticast>false</AllowMulticast></General><Discovery><ParticipantIndex>auto</ParticipantIndex><Peers><Peer address=\"10.118.3.11\"/><Peer address=\"10.118.3.12\"/></Peers></Discovery></Domain></CycloneDDS>" }

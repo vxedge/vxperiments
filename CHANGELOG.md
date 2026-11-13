@@ -13,6 +13,17 @@ than a repo tag.
 
 ### Added
 
+- exp-018 0.1.0 (X9.24): real in-vehicle protocol traffic against the ADAS slice. Four arms are
+  four baselines over one vehicle, picked by a parameter that binds `baseline` (vxedge 0.29.0):
+  `idle`; `dds`, Cyclone DDS `ddsperf` publishing 1 KiB at 1 kHz to a subscriber; `someip`, a
+  vsomeip client requesting every 10 ms from a service; and `can`, Eclipse Kuksa's CAN provider
+  feeding the databroker. Each load runs between two infotainment devices, started with its
+  baseline's `run`; the probe measures the ADAS slice device to device, so both share the bridge
+  and the host's CPU. Each loaded arm is judged against `idle` with exp-001's bound: median p99
+  within 2x and loss within 0.5 points.
+- `results/exp-018-repro-2026-11-13`: exp-018's first live run, 20 trials on vxedge 0.29.0. All
+  three arms pass: ADAS p99 is 53.4 to 55.7 µs under load against 53.7 µs idle, with no probe
+  lost. Each load was checked running across the slice before the campaign.
 - exp-014 0.3.0: a ring harness beside the star and the daisy chain. Three `ring-*` devices take
   the shorter way round the chain's path closed back to the backbone (front-left and rear-left
   one hop, front-right two), with three arms and a `ring` criterion: the ring's farthest
@@ -41,7 +52,7 @@ than a repo tag.
   (`exp-001.tgz`), whose archive digests match the published archives. The `vxarchive/1` digests it
   held cannot be read by vxedge 0.26.0 or later, so exp-010's `--reference-workspace` needs this
   record with the published archives unpacked beside it.
-- CI validates the workspaces with vxedge 0.28.0, which reads only `vxp.yaml` packages and
+- CI validates the workspaces with vxedge 0.29.0, which reads only `vxp.yaml` packages and
   `vxarchive/2` archives and pins the 5G images by digest.
 - exp-005 0.2.2 and exp-010 0.2.1 are locked with vxedge 0.27.0; exp-010 requires it. Its lock now pins the 5G core
   (`ghcr.io/vxedge/parts/gw/5gc/os/open5gs:0.1.0`), RAN (`gw/ran/os/ueransim:0.1.0`, carrying

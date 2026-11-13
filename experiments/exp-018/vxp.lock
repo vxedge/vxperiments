@@ -1,0 +1,30 @@
+schema: vxp-lock/1
+package:
+  id: vxedge/exp-018
+  version: 0.1.0
+locked_with: 0.29.0
+files:
+  README.md: sha256:303ab0acd1b24f0a2fc9daab661e685db9c9031e5ceffb7f196ecbc019f041b0
+  assets/README.md: sha256:31cc18793196fea418e5cdbcd43a2d90daea141a174d44004dd228c360d19ca1
+  main.yaml: sha256:eb8bfd96f7667b8bf53fb04a3f6e212aecd0a710464b3d1c7beadaa2d4317133
+  parts-can.yaml: sha256:f3c65a0a1dc93ad2b17b2ff281e4e24c222dd2f2bf0972995c7121ed2af00649
+  parts-dds.yaml: sha256:142497d30254d299f647bae68bd2156a73549f84bae05afe1e612c8366388ddc
+  parts-someip.yaml: sha256:4809b1d380242afef86c10de0a810a5403ffefe37a883d5f2fa11842319d99b6
+  parts.yaml: sha256:258d63ada25a50c7a9fbde02c37f31257dd1e46bf27d7bc265562be53ee0007b
+  parts/README.md: sha256:16508813a77fc2dbf9b8a949ecd87cbc58dc244559d24c31a4f25dbb0af0ce31
+  tools/README.md: sha256:902754458547a8ed6cc19b11b257da52f54496c453e1f273c5bce9095ecda37e
+  vehicle.yaml: sha256:5eb2b601165b58dc5db116a2ecc6e03781bbef96fcf32902ac16f59730ee0db6
+  vxp.yaml: sha256:5d853cb99455b1334046ea41e59996071d018f7551d42a7378bdbc61cfcbda16
+parts: []
+images:
+- ref: ghcr.io/eclipse-kuksa/kuksa-databroker
+  digest: sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+- ref: ghcr.io/vxedge/parts/agent/load/app/dds-perf:0.1.0
+  digest: sha256:fb4dd05b876ae028fdae662443b269b92a4bedb2ff9ed70520f1a5351a4cc363
+- ref: ghcr.io/vxedge/parts/agent/load/app/someip-samples:0.1.0
+  digest: sha256:9bfc942ecc88d5eee852b6209abc25989b10ed0ae0879973bfe9cf8f06f47d50
+- ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.2.0
+  digest: sha256:860dc44caff3553f19e932ec7af181ca0f265340abb0c0f1e722794a3468bfd1
+- ref: ghcr.io/vxedge/parts/svc/signal/app/kuksa-can-provider:0.1.0
+  digest: sha256:23b4aee64c14e49f52d50a0430fe5c8a9ac9709b44abbdadcfba7b7ab9e7698d
+vendored: []

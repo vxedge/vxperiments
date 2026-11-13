@@ -48,10 +48,11 @@ vxedge/vxarchives mirrors it file for file. The summaries stay in git.
 | `exp-003` | [`experiments/exp-003-ws`](experiments/exp-003-ws) | H4: the ADAS slice under a co-located OTA burst |
 | `exp-005` | [`experiments/exp-005`](experiments/exp-005) | Cold-start first-packet latency after zone boot |
 | `exp-010` | [`experiments/exp-010-ws`](experiments/exp-010-ws) | H2: S-NSSAI slicing against exp-001's static VLAN mapping |
-| `exp-014` | [`experiments/exp-014`](experiments/exp-014) | Wiring-harness topology: star against daisy chain |
+| `exp-014` | [`experiments/exp-014`](experiments/exp-014) | Wiring-harness topology: star, daisy chain and ring |
 | `exp-015` | [`experiments/exp-015`](experiments/exp-015) | Kuksa use cases on a vehicle's signal plane, a functional suite |
 | `exp-016` | [`experiments/exp-016`](experiments/exp-016) | The Kuksa databroker measured across a slice |
 | `exp-017` | [`experiments/exp-017`](experiments/exp-017) | VSS scenarios on the signal plane, a functional suite |
+| `exp-018` | [`experiments/exp-018`](experiments/exp-018) | DDS, SOME/IP and CAN-signal traffic against the ADAS slice |
 
 [`catalog.yaml`](catalog.yaml) lists each package's id, version, package digest, hypothesis,
 registry reference and frozen campaign. Each package's README says what it measures, what its
