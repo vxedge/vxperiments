@@ -1,0 +1,13 @@
+# Package descriptor for exp-018 (in-vehicle protocol loads): packaging only, so a version bump
+# never touches experiment content. The catalogue alias is `exp-018`.
+schema: vxp/1
+id: vxedge/exp-018
+version: 0.1.0
+entry: main.yaml
+title: In-vehicle protocol loads against the ADAS slice, DDS vs SOME/IP vs CAN signals
+license: Apache-2.0
+authors: [{ org: vxedge }]
+requires:
+  vxedge: ">=0.29.0"
+  gpu: none
+  backends: [container]

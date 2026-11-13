@@ -1,0 +1,91 @@
+kind: experiment
+id: exp-018
+
+# Does in-vehicle protocol traffic on the infotainment slice show in the ADAS slice's latency?
+# Each arm runs one real protocol stack between two infotainment devices, DDS (ddsperf), SOME/IP
+# (vsomeip) or CAN signals into Kuksa, as its part ships, and a probe measures the ADAS slice
+# device to device. Both cross the same in-vehicle bridge and share the host's CPU; neither crosses
+# the shaped uplink, so this is not exp-001's uplink question. The arms are baselines over one
+# unchanged vehicle: only the software on the load devices differs.
+vehicles: [vx-protocol-loads-vehicle]
+baseline: bl-idle
+
+network:
+  slices:
+    - id: adas
+      mode: vlan
+      vlan: 101
+    - id: infotainment
+      mode: vlan
+      vlan: 103
+
+results:
+  artifact_dir: results/exp-018
+  upload: false
+
+hypothesis:
+  id: protocol-loads
+  statement: "Under DDS, SOME/IP or CAN-signal traffic on the infotainment slice, the ADAS slice keeps p99 within 2x of the unloaded arm's, and its loss within 0.5 points."
+
+# Which baseline runs: the arm's protocol stack. `probe_pps` is the probe's rate.
+parameters:
+  load: { type: string, default: bl-idle, binds: baseline,
+          values: [bl-idle, bl-dds, bl-someip, bl-can] }
+  probe_pps: { type: integer, unit: 1/s, default: 1000, min: 10, max: 5000,
+               binds: "measurements[ctl-rtt].rate_pps" }
+
+# Device to device on the ADAS slice, so the probe crosses the bridge the loads cross.
+measurements:
+  ctl-rtt: { kind: rtt-probe, from: adas-src, to: adas-dst, slice: adas, rate_pps: 1000 }
+
+services:
+  telemetry:
+    id: telemetry-01
+    type: telemetry
+    image: { url: local/vxtelemetry:host-process, kind: container }
+    config: { interval_s: 2, duration_s: 60 }
+
+metrics:
+  - { id: p99, kind: gauge, unit: s, entity: measurements/ctl-rtt, series: vxprobe_rtt_seconds,
+      labels: { quantile: "0.99" } }
+  - { id: lost, kind: counter, unit: "1", entity: measurements/ctl-rtt, series: vxprobe_lost_total }
+  - { id: sent, kind: counter, unit: "1", entity: measurements/ctl-rtt, series: vxprobe_sent_total }
+  - { id: loss_pct, kind: gauge, unit: "%", entity: measurements/ctl-rtt, ratio: [lost, sent],
+      factor: 100 }
+
+# exp-001's H1 bound, per arm against the unloaded one: median p99 within 2x, median loss within
+# 0.5 points. Each arm is judged on its own, so one protocol's cost does not hide another's.
+criteria:
+  - id: dds
+    all:
+      - { id: dds-p99, op: le, lhs: { metric: p99, aggregate: median, select: { arm: dds } },
+          rhs: { metric: p99, aggregate: median, select: { arm: idle }, factor: 2.0 } }
+      - { id: dds-loss, op: le, lhs: { metric: loss_pct, aggregate: median, select: { arm: dds } },
+          rhs: { metric: loss_pct, aggregate: median, select: { arm: idle }, offset: 0.5 } }
+  - id: someip
+    all:
+      - { id: someip-p99, op: le, lhs: { metric: p99, aggregate: median, select: { arm: someip } },
+          rhs: { metric: p99, aggregate: median, select: { arm: idle }, factor: 2.0 } }
+      - { id: someip-loss, op: le, lhs: { metric: loss_pct, aggregate: median, select: { arm: someip } },
+          rhs: { metric: loss_pct, aggregate: median, select: { arm: idle }, offset: 0.5 } }
+  - id: can
+    all:
+      - { id: can-p99, op: le, lhs: { metric: p99, aggregate: median, select: { arm: can } },
+          rhs: { metric: p99, aggregate: median, select: { arm: idle }, factor: 2.0 } }
+      - { id: can-loss, op: le, lhs: { metric: loss_pct, aggregate: median, select: { arm: can } },
+          rhs: { metric: loss_pct, aggregate: median, select: { arm: idle }, offset: 0.5 } }
+
+# 5 repetitions of the four arms, 10 s for the load to start before a 60 s probe window, exp-001's
+# frame. `quick` checks the pipeline only and is never reported.
+campaign:
+  arms:
+    idle: { load: bl-idle }
+    dds: { load: bl-dds }
+    someip: { load: bl-someip }
+    can: { load: bl-can }
+  repetitions: 5
+  warmup_s: 10
+  duration_s: 60
+  profiles:
+    quick: { repetitions: 1, warmup_s: 5, duration_s: 15 }
+    repro: { repetitions: 5 }

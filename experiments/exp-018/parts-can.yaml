@@ -1,0 +1,22 @@
+kind: baseline
+id: bl-can
+
+# Eclipse Kuksa's CAN provider on load-a replays its recorded trace in a loop and publishes the
+# decoded VSS signals to the databroker on the broker device; load-b stays quiet.
+parts:
+  # The probe's two ends, run by vxedged as host processes inside each device's namespace.
+  - ref: local/vxprobe:host-process
+    target_ids: [probe-src, probe-dst]
+  # The broker device needs a container payload for the databroker to join; the vxprobe image
+  # idles as a reflector nobody probes.
+  - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.2.0
+    digest: sha256:860dc44caff3553f19e932ec7af181ca0f265340abb0c0f1e722794a3468bfd1
+    target_ids: broker-host
+  - ref: ghcr.io/vxedge/parts/svc/signal/app/kuksa-can-provider:0.1.0
+    digest: sha256:23b4aee64c14e49f52d50a0430fe5c8a9ac9709b44abbdadcfba7b7ab9e7698d
+    target_ids: load-a-fn
+    run:
+      args: [--infinite]
+      env: { KUKSA_ADDRESS: "10.118.3.20:55555" }
+  - ref: local/vxprobe:host-process
+    target_ids: load-b-fn

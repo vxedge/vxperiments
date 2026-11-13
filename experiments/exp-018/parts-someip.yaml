@@ -1,0 +1,28 @@
+kind: baseline
+id: bl-someip
+
+# vsomeip 3.8.0's examples: load-a answers requests, load-b sends them every 10 ms. Service
+# discovery is multicast, so each side adds a 224.0.0.0/4 route, which needs NET_ADMIN.
+parts:
+  # The probe's two ends, run by vxedged as host processes inside each device's namespace.
+  - ref: local/vxprobe:host-process
+    target_ids: [probe-src, probe-dst]
+  # The broker device needs a container payload for the databroker to join; the vxprobe image
+  # idles as a reflector nobody probes.
+  - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.2.0
+    digest: sha256:860dc44caff3553f19e932ec7af181ca0f265340abb0c0f1e722794a3468bfd1
+    target_ids: broker-host
+  - ref: ghcr.io/vxedge/parts/agent/load/app/someip-samples:0.1.0
+    digest: sha256:9bfc942ecc88d5eee852b6209abc25989b10ed0ae0879973bfe9cf8f06f47d50
+    target_ids: load-a-fn
+    run:
+      args: [response]
+      env: { SOMEIP_UNICAST: "10.118.3.11" }
+      cap_add: [NET_ADMIN]
+  - ref: ghcr.io/vxedge/parts/agent/load/app/someip-samples:0.1.0
+    digest: sha256:9bfc942ecc88d5eee852b6209abc25989b10ed0ae0879973bfe9cf8f06f47d50
+    target_ids: load-b-fn
+    run:
+      args: [request, --cycle, "10"]
+      env: { SOMEIP_UNICAST: "10.118.3.12" }
+      cap_add: [NET_ADMIN]

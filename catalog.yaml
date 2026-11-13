@@ -118,3 +118,15 @@ packages:
   folder: experiments/exp-017
   registry: ghcr.io/vxedge/experiments/exp-017:0.2.0
   frozen_campaign: null
+- alias: exp-018
+  id: vxedge/exp-018
+  version: 0.1.0
+  digest: sha256:ee41902755a2bbc3984b59179fa22a6b6a519cdbd0545d8fd07b0601a46ed6fa
+  title: In-vehicle protocol loads against the ADAS slice, DDS vs SOME/IP vs CAN signals
+  hypothesis:
+    id: protocol-loads
+    statement: Under DDS, SOME/IP or CAN-signal traffic on the infotainment slice, the ADAS slice keeps
+      p99 within 2x of the unloaded arm's, and its loss within 0.5 points.
+  folder: experiments/exp-018
+  registry: ghcr.io/vxedge/experiments/exp-018:0.1.0
+  frozen_campaign: null
