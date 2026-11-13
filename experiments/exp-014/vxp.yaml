@@ -2,9 +2,9 @@
 # never touches experiment content. The catalogue alias is `exp-014`.
 schema: vxp/1
 id: vxedge/exp-014
-version: 0.2.1
+version: 0.3.0
 entry: main.yaml
-title: Wiring-harness topology as a variable, star vs daisy chain
+title: Wiring-harness topology as a variable, star vs daisy chain vs ring
 license: Apache-2.0
 authors: [{ org: vxedge }]
 requires:

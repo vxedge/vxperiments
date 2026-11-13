@@ -3,7 +3,7 @@ id: vx-h-harness-vehicle
 class: road
 subtype: car
 
-# Three physical positions, each wired two ways, so the comparison holds position (and
+# Three physical positions, each wired three ways, so the comparison holds position (and
 # therefore real radial distance to the backbone) constant and varies only how it is harnessed.
 # Reusing the fixed zonal vocabulary (ARCHITECTURE.md §3) rather than inventing per-experiment
 # zone names.
@@ -12,8 +12,9 @@ zones:
   front-right: {}
   rear-left: {}
 
-# Six devices, one function each: at every position, a `star-*` device (its own direct home-run
-# to the backbone) sits beside a `chain-*` device (reached through a daisy chain instead). Same
+# Nine devices, one function each: at every position, a `star-*` device (its own direct home-run
+# to the backbone) sits beside a `chain-*` device (reached through a daisy chain instead) and a
+# `ring-*` device (reached the shorter way round a ring). Same
 # role everywhere — a zone-controller aggregates its zone's traffic onto the backbone regardless
 # of how its own harness segment is wired; only the harness differs, expressed below purely
 # through `impairments`/`harness` on each device's link, never through `role` or `backend`.
@@ -24,6 +25,9 @@ devices:
   chain-fl: { role: zone-controller, zone: front-left,  backend: container }
   chain-fr: { role: zone-controller, zone: front-right, backend: container }
   chain-rl: { role: zone-controller, zone: rear-left,   backend: container }
+  ring-fl:  { role: zone-controller, zone: front-left,  backend: container }
+  ring-fr:  { role: zone-controller, zone: front-right, backend: container }
+  ring-rl:  { role: zone-controller, zone: rear-left,   backend: container }
 
 functions:
   probe-star-fl:  { deployed_on: star-fl }
@@ -32,6 +36,9 @@ functions:
   probe-chain-fl: { deployed_on: chain-fl }
   probe-chain-fr: { deployed_on: chain-fr }
   probe-chain-rl: { deployed_on: chain-rl }
+  probe-ring-fl:  { deployed_on: ring-fl }
+  probe-ring-fr:  { deployed_on: ring-fr }
+  probe-ring-rl:  { deployed_on: ring-rl }
 
 # The comparison this experiment exists to make. Every link binds the same slice — topology is
 # the only declared variable — and each carries `impairments` (netem, the measured half) plus
@@ -66,7 +73,7 @@ functions:
 # convention) would put prober and reflector in the same namespace, and a disposable-netns check
 # during this experiment's own authoring found that Linux's local routing table then delivers
 # between them via loopback, never touching this link's netem at all (`docs/ROADMAP.md`, "Do not
-# lose these"). All six share one /24 with the reflector; namespace isolation is what makes
+# lose these"). All nine share one /24 with the reflector; namespace isolation is what makes
 # that safe here, unlike addressing host-side veth peers directly in one shared namespace.
 links:
   # Star: every position gets its own direct run, so hop count is always one regardless of
@@ -106,3 +113,27 @@ links:
     slice: adas
     impairments: { rate_mbps: 100, delay_us: 90, jitter_us: 15, loss_pct: 0.001 }
     harness: { medium: 100BASE-T1, length_m: 1.5, weight_g: 37.5 }
+
+  # Ring: the daisy chain's path closed back to the backbone (backbone, front-left, front-right,
+  # rear-left, backbone), so each position takes the shorter way round. Front-left and rear-left
+  # are each one hop from the backbone; front-right, opposite it, is two either way. The farthest
+  # position drops from the chain's three hops to two. Same flat-bridge fidelity as the chain: a
+  # device's access port carries the impairment of its shortest path. Harness: every segment is
+  # the chain's 1.5 m. The closing rear-left-to-backbone segment has no device link of its own, so
+  # `seg-ring-rl` records both segments it touches (front-right to rear-left, and rear-left to the
+  # backbone), 3.0 m; summing the three ring links still gives the ring's total length, 6.0 m.
+  - id: seg-ring-fl
+    endpoints: [{ node: ring-fl, port: eth0, ip: 10.114.0.31/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 30, jitter_us: 5, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 1.5, weight_g: 37.5 }
+  - id: seg-ring-fr
+    endpoints: [{ node: ring-fr, port: eth0, ip: 10.114.0.32/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 60, jitter_us: 10, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 1.5, weight_g: 37.5 }
+  - id: seg-ring-rl
+    endpoints: [{ node: ring-rl, port: eth0, ip: 10.114.0.33/24 }]
+    slice: adas
+    impairments: { rate_mbps: 100, delay_us: 30, jitter_us: 5, loss_pct: 0.001 }
+    harness: { medium: 100BASE-T1, length_m: 3.0, weight_g: 75 }
