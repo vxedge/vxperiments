@@ -13,6 +13,8 @@ than a repo tag.
 
 ### Changed
 
+- CI validates the workspaces with vxedge 0.26.0, which reads only `vxp.yaml` packages and
+  `vxarchive/2` archives.
 - `README.md` and `AGENTS.md` describe the package-only repository: the packages and
   `catalog.yaml`, how to validate, plan, run and judge a package with vxedge, how `results/`
   relates to the Zenodo record (2026-11-v2, mirrored as the vxarchives release
