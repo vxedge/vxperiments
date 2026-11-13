@@ -52,11 +52,11 @@ unchanged at 0.2.0. No published number changes.
     35.33 µs during the burst, +0.03 µs against a 1.41 µs threshold, with no loss. Debug builds and
     a release probe beside a debug OTA client also pass. An earlier release-probe campaign that
     failed H4 was not reproduced. Its run folder was under an indexed home directory, and its
-    burst-arm p99 had the same inflated tail (388 µs against 63.5 µs on the clean rerun). Each
+    burst-arm p99 was inflated (388 µs, against 63.5 µs on the rerun). Each
     archive's `metadata.json` now records every tool's build profile.
   - `results/exp-003-repro-2026-11-13` summarises the release rerun. Its ten archives pass
     `vxtelemetry verify` (index, workspace identity and package digest) and give H4 pass offline
-    through `vxedge results verdict`. They are published in the archive record.
+    through `vxedge results verdict`. They go in the archive record's next version.
 - `experiments/exp-015` is the `vxp/1` package `vxedge/exp-015` 0.2.0, locked (X9.2): the Kuksa
   use cases, a functional suite on vxedge 0.22.0's `checks`. Its `main.yaml` holds what
   `cases-v2.sh`, `lib.sh` and `flags.sh` held:
