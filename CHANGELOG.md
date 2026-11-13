@@ -11,7 +11,7 @@ than a repo tag.
 
 ## [Unreleased]
 
-## [0.2.1] - 2026-11-12
+## [0.2.1] - 2026-11-13
 
 Seven experiments join the catalogue as packages: exp-002 (H3, virtual-ECU packaging), exp-002b (H3
 decomposed into its mechanisms, with each arm's cost), exp-003 (H4, OTA co-location), exp-010 (H2,
@@ -46,9 +46,17 @@ unchanged at 0.2.0. No published number changes.
     the two arms, at least 1 µs, with loss at most 1 % in either arm. Verdict parity reads the
     package: h4=pass on `exp-003`, `exp-003-repro-2026-08-03` and `exp-003-repro-2026-10-30`.
   - Live, the `quick` and `repro` profiles ran every trial, the burst client delivering throughout
-    the burst arm with no failed delivery and no probe loss in either arm. The `repro` campaign
-    did not reproduce the frozen H4 verdict, so its outcome is under review before any published
-    number changes.
+    the burst arm with no failed delivery and no probe loss in either arm.
+  - The frozen campaign was measured with a debug-built vxprobe. Rerun on vxedge 0.25.0 with
+    release builds of vxprobe 0.2.3 and vxota 0.1.2, H4 holds: 35.30 µs baseline against
+    35.33 µs during the burst, +0.03 µs against a 1.41 µs threshold, with no loss. Debug builds and
+    a release probe beside a debug OTA client also pass. An earlier release-probe campaign that
+    failed H4 was not reproduced. Its run folder was under an indexed home directory, and its
+    burst-arm p99 had the same inflated tail (388 µs against 63.5 µs on the clean rerun). Each
+    archive's `metadata.json` now records every tool's build profile.
+  - `results/exp-003-repro-2026-11-13` summarises the release rerun. Its ten archives pass
+    `vxtelemetry verify` (index, workspace identity and package digest) and give H4 pass offline
+    through `vxedge results verdict`. They are published in the archive record.
 - `experiments/exp-015` is the `vxp/1` package `vxedge/exp-015` 0.2.0, locked (X9.2): the Kuksa
   use cases, a functional suite on vxedge 0.22.0's `checks`. Its `main.yaml` holds what
   `cases-v2.sh`, `lib.sh` and `flags.sh` held:
@@ -145,6 +153,8 @@ unchanged at 0.2.0. No published number changes.
     0.91 x 1.10) and passes.
   - The published exp-010 archives hold each point's probe summary only, never samples, so verdict
     parity cannot check H2 from them.
+  - The package has not run live: its 5G core and RAN images are not yet published as parts or
+    pinned in `vxp.lock`.
   - `vxp.yaml` replaces `exp-010.vxp`, and `.vxpignore` keeps `scripts/` out of the package.
 
 ### Changed
