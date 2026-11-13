@@ -113,6 +113,9 @@ unchanged at 0.2.0. No published number changes.
   - Against the frozen runs, the `microvm-mmio` arm now uses virtio-mmio version 2, the
     `libvirt-q35` domain has the host CPU and ACPI, and the governor is not pinned. Vcpus, memory
     and the raw-QEMU arms' flags are as `run.sh` set them.
+  - Live, the `quick` profile brought each of the six arms up alone and probed it with no loss, the
+    reflector answering in every arm, and each trial's isolated arm had its CPU and memory series
+    (`source="netns"` for the container arm, `source="process"` for the VM arms).
 
 - `experiments/exp-002-ws` is the `vxp/1` package `vxedge/exp-002` 0.2.0, locked (X9.2). Its
   `main.yaml` holds what `scripts/run.sh` and `notebooks/analyze_exp002.py` held:
