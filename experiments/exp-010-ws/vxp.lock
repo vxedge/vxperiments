@@ -2,7 +2,7 @@ schema: vxp-lock/1
 package:
   id: vxedge/exp-010
   version: 0.2.1
-locked_with: 0.25.0
+locked_with: 0.27.0
 files:
   README.md: sha256:c4972637ef710ae72ea75db9900ae4268a9965eec02f89a6e621a07501ed6287
   assets/README.md: sha256:d8055764bc6fa3075c9e5bfa9569f218a854f758c4b3e7d3d95cf618be4e5e2e
@@ -11,7 +11,13 @@ files:
   parts/README.md: sha256:9a9d1a5e197901e7467d345bcd525b5f2c5a2fa1677bfe5fc9e04851e2142c79
   tools/README.md: sha256:0f12dd67f2bc189c925c8f1841ee02ebec08fd686939028422bdc68fde720b71
   vehicle.yaml: sha256:4e8cf38dc56ba99f725cce89e7e475e89a42acaf6a41ce39c7056a58bf10c145
-  vxp.yaml: sha256:cdfbf235d57aa50be8b6051dd7b2a2585d00f588d340a222f7875d34c394bc10
+  vxp.yaml: sha256:a42484f911a7ba9fe3e05e493a64af95e32552e27b1b955ef3fcd14385402cc1
 parts: []
-images: []
+images:
+- ref: docker.io/library/mongo:7
+  digest: sha256:8bb4442761a63a8dda452744082cdac9644b429807eb977b42324a63cef59ca4
+- ref: ghcr.io/vxedge/parts/gw/5gc/os/open5gs:0.1.0
+  digest: sha256:dfad2271a85c7147669ed5a98cc4c61b113a915d95050ddbcfe25bdea55ac97d
+- ref: ghcr.io/vxedge/parts/gw/ran/os/ueransim:0.1.0
+  digest: sha256:39393bb1982f57f4c3b14ff743baea810868b089d7ceda633b85026817fe066a
 vendored: []

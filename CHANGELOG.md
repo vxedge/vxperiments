@@ -13,8 +13,13 @@ than a repo tag.
 
 ### Changed
 
-- CI validates the workspaces with vxedge 0.26.0, which reads only `vxp.yaml` packages and
-  `vxarchive/2` archives.
+- CI validates the workspaces with vxedge 0.27.0, which reads only `vxp.yaml` packages and
+  `vxarchive/2` archives and pins the 5G images by digest.
+- exp-010 0.2.1 is locked with vxedge 0.27.0 and requires it. Its lock now pins the 5G core
+  (`ghcr.io/vxedge/parts/gw/5gc/os/open5gs:0.1.0`), RAN (`gw/ran/os/ueransim:0.1.0`, carrying
+  the vxprobe 0.2.3 release) and database (`mongo:7`) images by digest, which the 5G path runs
+  and an archive records in `image_digests`. Before this, its lock listed no image, because
+  vxedged started locally built images by bare name.
 - `README.md` and `AGENTS.md` describe the package-only repository: the packages and
   `catalog.yaml`, how to validate, plan, run and judge a package with vxedge, how `results/`
   relates to the Zenodo record (2026-11-v2, mirrored as the vxarchives release

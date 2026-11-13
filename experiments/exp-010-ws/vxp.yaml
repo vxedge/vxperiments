@@ -8,6 +8,6 @@ title: Real S-NSSAI slicing against static VLAN mapping (H2)
 license: Apache-2.0
 authors: [{ org: vxedge }]
 requires:
-  vxedge: ">=0.20.0"
+  vxedge: ">=0.27.0"
   gpu: none
   backends: [container]
