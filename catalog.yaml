@@ -58,7 +58,7 @@ packages:
 - alias: exp-010
   id: vxedge/exp-010
   version: 0.2.1
-  digest: sha256:d11665f6f5d65771f5e3ebc40d4e11fdeaebb871d272e7a7fb75501540961590
+  digest: sha256:a377ff65c14ef732ec37ae70d33e27cf02aa535d47e35fdb0a42144753102ff1
   title: Real S-NSSAI slicing against static VLAN mapping (H2)
   hypothesis:
     id: H2
