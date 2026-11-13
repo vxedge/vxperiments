@@ -41,7 +41,7 @@ than a repo tag.
   (`exp-001.tgz`), whose archive digests match the published archives. The `vxarchive/1` digests it
   held cannot be read by vxedge 0.26.0 or later, so exp-010's `--reference-workspace` needs this
   record with the published archives unpacked beside it.
-- CI validates the workspaces with vxedge 0.27.0, which reads only `vxp.yaml` packages and
+- CI validates the workspaces with vxedge 0.28.0, which reads only `vxp.yaml` packages and
   `vxarchive/2` archives and pins the 5G images by digest.
 - exp-005 0.2.2 and exp-010 0.2.1 are locked with vxedge 0.27.0; exp-010 requires it. Its lock now pins the 5G core
   (`ghcr.io/vxedge/parts/gw/5gc/os/open5gs:0.1.0`), RAN (`gw/ran/os/ueransim:0.1.0`, carrying
