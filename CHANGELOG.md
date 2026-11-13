@@ -13,6 +13,15 @@ than a repo tag.
 
 ### Added
 
+- exp-014 0.3.0: a ring harness beside the star and the daisy chain. Three `ring-*` devices take
+  the shorter way round the chain's path closed back to the backbone (front-left and rear-left
+  one hop, front-right two), with three arms and a `ring` criterion: the ring's farthest
+  position sits below the chain's farthest by more than the star arms' spread (at least 1 µs),
+  and still costs a hop over its front-left. The frozen 2026-08-05 campaign has no ring arms, so
+  verdict parity now expects `hops=pass ring=inconclusive` for it.
+- `results/exp-014-repro-2026-11-13`: exp-014 0.3.0's live run on vxedge 0.27.0, `repro` profile,
+  45 trials. Both criteria pass: each chain hop adds about 60 µs at p50, and the ring's
+  front-right sits 60.0 µs below the chain's rear-left.
 - `results/exp-010-repro-2026-11-13`: exp-010's first live run as a package, `repro` profile,
   vxedge 0.27.0 with the digest-pinned 5G images. H2 passes: p99 growth from 0 to 600 Mbit/s is
   0.972x against a bound of 1.006x (1.10 times exp-001's 0.914x). All 25 trials are complete, the

@@ -1,15 +1,16 @@
-# exp-014 — harness topology as a variable: star vs daisy-chained zones
+# exp-014 — harness topology as a variable: star vs daisy chain vs ring
 
 Does a **star** wiring harness (every zone gets its own direct run to the backbone) hold flat
 latency regardless of physical position, while a **daisy chain** (zones wired in series)
-accumulates delay/jitter with hop count? Six devices, three positions, two wirings each — the
-only declared variable across the six arms is which harness each position is wired with
+accumulates delay/jitter with hop count? And does closing the chain into a **ring** cut its
+farthest position from three hops to two? Nine devices, three positions, three wirings each — the
+only declared variable across the nine arms is which harness each position is wired with
 (`vehicle.yaml`'s per-link `impairments`/`harness`), so the campaign probes each
 sequentially on an otherwise idle topology.
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-014`, version 0.2.1 (`vxp.yaml`). Its catalogue
+This folder is the `vxp/1` package `vxedge/exp-014`, version 0.3.0 (`vxp.yaml`). Its catalogue
 alias is `exp-014`. `vxp.lock` records the digest of every file it holds.
 
 `main.yaml` holds the experiment and what used to live in
@@ -18,26 +19,28 @@ alias is `exp-014`. `vxp.lock` records the digest of every file it holds.
 
 | What | Where it was | Where it is |
 |---|---|---|
-| The six arms, one per device | `ARMS` in `run.sh` | `campaign.arms`, each setting the `device` parameter, which binds `measurements[probe].from` |
+| The arms, one per device (six in `run.sh`, nine now) | `ARMS` in `run.sh` | `campaign.arms`, each setting the `device` parameter, which binds `measurements[probe].from` |
 | 5 repetitions, 10 s, then a 60 s probe window | `REPS`, `WARM_S`, `PROBE_S` in `run.sh` | `campaign.repetitions`, `warmup_s`, `duration_s`, and the `repro` profile |
 | The probe at 1000 pps, inside the arm's device | `vxprobe send` under `ip netns exec` | `measurements.probe`, through the `probe_pps` parameter |
 | The hop rule: each chain hop raises the median p50 by more than the star arms' spread, at least 1 µs | the notebook's verdict | `metrics` and `criteria` |
+| The ring arms and the `ring` rule (0.3.0) | none: new with the package | `ring-*` devices and links, `campaign.arms`, the `ring` criterion |
 
 Its criteria give the notebook's verdict, `hops=pass` with the same values, on the published
-campaign (`../../scripts/verdict-parity.sh`, run by CI).
+campaign (`../../scripts/verdict-parity.sh`, run by CI). That campaign has no ring arms, so `ring` is
+inconclusive on it.
 
 Run it through vxAPI, from inside this folder:
 
 ```bash
-vxedge campaign plan --profile repro          # the 30 trials, checked; touches nothing
+vxedge campaign plan --profile repro          # the 45 trials, checked; touches nothing
 vxedge campaign start --profile repro         # one archive per trial, then the verdict
 ```
 
-The `quick` profile checks the pipeline only and is never reported: one repetition of the six
+The `quick` profile checks the pipeline only and is never reported: one repetition of the nine
 arms with `run.sh --quick`'s 2 s and 10 s windows. Unlike `run.sh --quick`, it keeps 1000 pps,
 because a profile changes only repetitions and windows.
 
-**One difference from `run.sh`:** a campaign trial brings up the whole vehicle, so all six
+**One difference from `run.sh`:** a campaign trial brings up the whole vehicle, so all nine
 devices are up during every arm, idle except the one probed. `run.sh` brought up one arm's device
 at a time. The probe still runs inside the probed device's own network namespace and crosses its
 link, so the hop it measures is the same.
@@ -48,7 +51,7 @@ Everything the experiment needs is in this folder: its documents, its identical 
 ## Design
 
 Three physical positions (`front-left`, `front-right`, `rear-left` — the fixed zonal
-vocabulary, not invented names), each wired two ways:
+vocabulary, not invented names), each wired three ways:
 
 - **Star**: every position gets its own direct run to the backbone — hop count is always one,
   regardless of physical position. This is the property under test, held identical across the
@@ -58,6 +61,10 @@ vocabulary, not invented names), each wired two ways:
 - **Chain**: front-left is nearest the backbone (1 hop), front-right is next (2 hops), rear-left
   is farthest (3 hops) — a plausible single wiring path around the vehicle. Delay/jitter
   accumulate with hop count.
+- **Ring** (0.3.0): the chain's path closed back to the backbone, so each position takes the
+  shorter way round. Front-left and rear-left are one hop each; front-right, opposite the
+  backbone, is two. The `ring` criterion checks that the ring's farthest position sits below the
+  chain's farthest by more than the star arms' spread, and still costs a hop over front-left.
 
 Base unit is one 100BASE-T1 hop: 30µs delay / 5µs jitter, a round, **stated assumption**
 covering PHY encode/decode plus modest store-and-forward for a short automotive frame —
@@ -71,7 +78,10 @@ device — so a `chain-*` device's own access port carries the *cumulative* impa
 from that position would accrue crossing every upstream segment, rather than three separate
 links each forwarding through the last. `harness.length_m` on the same link records only its
 own *local* segment, so summing it across the three chain links reconstructs the topology's real
-total harness length — the number the notebook's harness-reduction accounting reported.
+total harness length — the number the notebook's harness-reduction accounting reported. The
+ring's closing segment, rear-left back to the backbone, has no device link of its own, so
+`seg-ring-rl` records both segments it touches (3.0 m) and the three ring links still sum to the
+ring's total length.
 
 ## Measurement locality — why this experiment is built differently from exp-001/exp-002
 
@@ -104,7 +114,7 @@ deliberately left open rather than asserted here.
 |---|---|---|
 | `vxp.yaml`, `vxp.lock` | — | the package: identity, version, requirements, and the digest of every file |
 | `main.yaml` | `experiment` | the one shared slice, telemetry, the probe, parameters, metrics, criteria and campaign |
-| `vehicle.yaml` | `vehicle` | the six devices, their addresses, and the star/chain harness comparison |
+| `vehicle.yaml` | `vehicle` | the nine devices, their addresses, and the star, chain and ring harness comparison |
 | `parts.yaml` | `baseline` | the identical probe payload every arm carries |
 | `results/` | — | a campaign's archives, one per trial |
 

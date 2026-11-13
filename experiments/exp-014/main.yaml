@@ -3,8 +3,9 @@ id: exp-014
 
 # Harness topology as an experimental variable: does a star wiring harness (every zone gets its
 # own direct run to the backbone) hold flat latency regardless of physical position, while a
-# daisy-chained harness (zones wired in series) accumulates delay/jitter with hop count? Six
-# devices, one vehicle, one slice — the campaign runner probes each of the six sequentially
+# daisy-chained harness (zones wired in series) accumulates delay/jitter with hop count, and does
+# closing the chain into a ring cut its farthest position from three hops to two? Nine
+# devices, one vehicle, one slice — the campaign runner probes each of the nine sequentially
 # under an otherwise idle topology, so the only declared variable across arms is which harness
 # each position is wired with (`vehicle.yaml`'s per-link `impairments`/`harness`), not offered
 # load, not packaging, not QoS. "Identical load" means every arm sees the same (absent)
@@ -12,8 +13,8 @@ id: exp-014
 vehicles: [vx-h-harness-vehicle]
 baseline: bl-exp-014
 
-# One slice for all six devices: topology is the variable under test, not slice QoS. The rate
-# ceiling here is deliberately generous relative to six lightweight probe streams — the per-link
+# One slice for all nine devices: topology is the variable under test, not slice QoS. The rate
+# ceiling here is deliberately generous relative to nine lightweight probe streams — the per-link
 # `impairments.rate_mbps: 100` on each device's own access port is the PHY cap that matters
 # (100BASE-T1), not this slice's aggregate ceiling.
 network:
@@ -36,12 +37,12 @@ results:
 # notebooks/analyze_exp014.py held: the six arms, repetitions and windows, the probe rate, and the
 # hop rule (each chain hop raises the median p50 by more than the star arms' spread, at least 1 µs).
 
-hypothesis: { id: topology, statement: "Each hop of a daisy-chained harness raises latency by more than a star harness varies across positions." }
+hypothesis: { id: topology, statement: "Each hop of a daisy-chained harness raises latency by more than a star harness varies across positions, and a ring harness bounds its farthest position at two hops." }
 
-# Which position the probe sends from: each arm is one of the six devices. `probe_pps` is the
+# Which position the probe sends from: each arm is one of the nine devices. `probe_pps` is the
 # probe's rate.
 parameters:
-  device: { type: string, default: star-fl, values: [star-fl, star-fr, star-rl, chain-fl, chain-fr, chain-rl],
+  device: { type: string, default: star-fl, values: [star-fl, star-fr, star-rl, chain-fl, chain-fr, chain-rl, ring-fl, ring-fr, ring-rl],
             binds: "measurements[probe].from" }
   probe_pps: { type: integer, unit: 1/s, default: 1000, min: 10, max: 5000,
                binds: "measurements[probe].rate_pps" }
@@ -81,8 +82,23 @@ criteria:
         lhs: { diff: [{ metric: p50, aggregate: median, select: { arm: chain-rl } }, { metric: p50, aggregate: median, select: { arm: chain-fr } }] }
         rhs: { max: [{ diff: [{ max: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }, { min: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }] }, { value: 0.000001, unit: s }] }
 
-# run.sh --repro: 5 repetitions of the six arms, 10 s before a 60 s probe window. `quick` checks
-# the pipeline only and is never reported: one repetition with run.sh --quick's 2 s and 10 s
+# Closing the chain into a ring (added in 0.3.0): its farthest position, front-right at two hops,
+# sits below the chain's farthest, rear-left at three, by more than the star arms' spread; and it
+# still costs a hop over the ring's one-hop front-left. The frozen 2026-08-05 campaign has no ring
+# arms, so `ring` is inconclusive on it, and `hops` keeps its published verdict.
+  - id: ring
+    all:
+      - id: chain-rl-over-ring-fr
+        op: gt
+        lhs: { diff: [{ metric: p50, aggregate: median, select: { arm: chain-rl } }, { metric: p50, aggregate: median, select: { arm: ring-fr } }] }
+        rhs: { max: [{ diff: [{ max: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }, { min: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }] }, { value: 0.000001, unit: s }] }
+      - id: ring-fr-over-ring-fl
+        op: gt
+        lhs: { diff: [{ metric: p50, aggregate: median, select: { arm: ring-fr } }, { metric: p50, aggregate: median, select: { arm: ring-fl } }] }
+        rhs: { max: [{ diff: [{ max: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }, { min: [{ metric: p50, aggregate: median, select: { arm: star-fl } }, { metric: p50, aggregate: median, select: { arm: star-fr } }, { metric: p50, aggregate: median, select: { arm: star-rl } }] }] }, { value: 0.000001, unit: s }] }
+
+# 5 repetitions of the nine arms (run.sh --repro ran the first six), 10 s before a 60 s probe window. `quick` checks
+# the pipeline only and is never reported: one repetition of the nine arms with run.sh --quick's 2 s and 10 s
 # windows (a profile changes repetitions and windows only, so it keeps 1000 pps).
 campaign:
   arms:
@@ -92,6 +108,9 @@ campaign:
     chain-fl: { device: chain-fl }
     chain-fr: { device: chain-fr }
     chain-rl: { device: chain-rl }
+    ring-fl: { device: ring-fl }
+    ring-fr: { device: ring-fr }
+    ring-rl: { device: ring-rl }
   repetitions: 5
   warmup_s: 10
   duration_s: 60
