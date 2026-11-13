@@ -2,7 +2,7 @@
 # version bump never touches experiment content. The catalogue alias is `exp-016`.
 schema: vxp/1
 id: vxedge/exp-016
-version: 0.2.0
+version: 0.2.1
 entry: main.yaml
 title: The Kuksa databroker measured across a slice
 license: Apache-2.0

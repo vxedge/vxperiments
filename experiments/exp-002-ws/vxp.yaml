@@ -2,7 +2,7 @@
 # content. The catalogue alias is `exp-002`.
 schema: vxp/1
 id: vxedge/exp-002
-version: 0.2.0
+version: 0.2.1
 entry: main.yaml
 title: Virtual-ECU packaging (container, microVM, full VM) and round-trip latency (H3)
 license: Apache-2.0

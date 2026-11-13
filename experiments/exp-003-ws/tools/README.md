@@ -1,4 +1,7 @@
 # tools/ — analysis and helpers for this experiment
 
-The campaign is `main.yaml`'s; this is for everything after it. Shared analysis lives in
-the repo's `notebooks/`; what belongs here is what only this experiment needs.
+The campaign, its probe, its metrics and the H4 criteria are in `../main.yaml`. vxedge judges them:
+`vxedge campaign verdict <campaign id>` for a campaign, and
+`vxedge results verdict --experiment <this package> <archives>` offline over archives.
+
+What belongs here is what only this experiment needs beyond that. None yet.

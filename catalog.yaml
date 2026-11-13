@@ -3,81 +3,81 @@
 packages:
 - alias: exp-001
   id: vxedge/exp-001
-  version: 0.2.0
-  digest: sha256:65e87ce88f8d3af7d780e0e8d99494eaf04e34c8d76665ffc6c6c150aca87ed9
+  version: 0.2.1
+  digest: sha256:fab4ab23d059a63813043d062eaba4b93957a402b6f1342b095aa624be9f8b17
   title: ADAS slice isolation under infotainment load (H1)
   hypothesis:
     id: H1
     statement: The ADAS slice keeps p99 within 2x of idle under infotainment load.
   folder: experiments/exp-001-ws
-  registry: ghcr.io/vxedge/experiments/exp-001:0.2.0
+  registry: ghcr.io/vxedge/experiments/exp-001:0.2.1
   frozen_campaign: results/exp-001/campaign.json
 - alias: exp-002
   id: vxedge/exp-002
-  version: 0.2.0
-  digest: sha256:fbfd7bc20c61b18222db7e8ddb113c47e39418647af581d9b0f4d3aec3f8911b
+  version: 0.2.1
+  digest: sha256:6a5453a17706e1cd9ca5a3af236345a0c4b497a34552dfe927e815ba29d82749
   title: Virtual-ECU packaging (container, microVM, full VM) and round-trip latency (H3)
   hypothesis:
     id: H3
     statement: Packaging measurably affects RTT.
   folder: experiments/exp-002-ws
-  registry: ghcr.io/vxedge/experiments/exp-002:0.2.0
+  registry: ghcr.io/vxedge/experiments/exp-002:0.2.1
   frozen_campaign: null
 - alias: exp-002b
   id: vxedge/exp-002b
-  version: 0.2.0
-  digest: sha256:1ebea28313412326821953c0c6928751d25dcdbb2c147c901b433cdccc1c97fd
+  version: 0.2.1
+  digest: sha256:a379839b730b8db2ab9496e9e79d5df861e9b512048cfb94fffc3e118189dd2d
   title: Virtual-ECU packaging decomposed (machine, transport, vhost-net, management) and its cost (H3)
   hypothesis: null
   folder: experiments/exp-002b-ws
-  registry: ghcr.io/vxedge/experiments/exp-002b:0.2.0
+  registry: ghcr.io/vxedge/experiments/exp-002b:0.2.1
   frozen_campaign: null
 - alias: exp-003
   id: vxedge/exp-003
-  version: 0.2.0
-  digest: sha256:11820fd244ffbb2ed8e84c3db48c15ac670cf8f3483bed5402145e1e8b517343
+  version: 0.2.1
+  digest: sha256:841a01da171a50a2c02a73f33876f1877853762a00b90043840a70e124a385fa
   title: ADAS slice SLA under OTA co-location (H4)
   hypothesis:
     id: H4
     statement: An OTA burst does not compromise the ADAS slice.
   folder: experiments/exp-003-ws
-  registry: ghcr.io/vxedge/experiments/exp-003:0.2.0
+  registry: ghcr.io/vxedge/experiments/exp-003:0.2.1
   frozen_campaign: null
 - alias: exp-005
   id: vxedge/exp-005
-  version: 0.2.1
-  digest: sha256:750c1c6cbbde0e76260e57000e512a8b1e17981447c4760efabd17dacf362c20
+  version: 0.2.2
+  digest: sha256:798dee378c2c79038f03997378bf7875ceb87c865c80d3743c78f77acb31572d
   title: Cold-start first-packet latency after zone boot
   hypothesis:
     id: cold-start
     statement: A fresh zone boot costs its first packets at least 2x the steady-state median latency,
       on every boot.
   folder: experiments/exp-005
-  registry: ghcr.io/vxedge/experiments/exp-005:0.2.1
+  registry: ghcr.io/vxedge/experiments/exp-005:0.2.2
   frozen_campaign: null
 - alias: exp-010
   id: vxedge/exp-010
-  version: 0.2.0
-  digest: sha256:407e8a4ef83eaaca5d68a79e9348d3ef62f2f93d31a89e2dd3bade708274e134
+  version: 0.2.1
+  digest: sha256:d11665f6f5d65771f5e3ebc40d4e11fdeaebb871d272e7a7fb75501540961590
   title: Real S-NSSAI slicing against static VLAN mapping (H2)
   hypothesis:
     id: H2
     statement: Real S-NSSAI slicing isolates the ADAS slice at least as well as exp-001's static VLAN
       mapping.
   folder: experiments/exp-010-ws
-  registry: ghcr.io/vxedge/experiments/exp-010:0.2.0
+  registry: ghcr.io/vxedge/experiments/exp-010:0.2.1
   frozen_campaign: null
 - alias: exp-014
   id: vxedge/exp-014
-  version: 0.2.0
-  digest: sha256:341aa9c436fb15e845d420ce367d45365c399f693a787eccc5f6357a0c071af4
+  version: 0.2.1
+  digest: sha256:9af423c231fcdb7ab23df09564ec77c3c874b886b11de0dfc14eae13bb40d280
   title: Wiring-harness topology as a variable, star vs daisy chain
   hypothesis:
     id: topology
     statement: Each hop of a daisy-chained harness raises latency by more than a star harness varies across
       positions.
   folder: experiments/exp-014
-  registry: ghcr.io/vxedge/experiments/exp-014:0.2.0
+  registry: ghcr.io/vxedge/experiments/exp-014:0.2.1
   frozen_campaign: null
 - alias: exp-015
   id: vxedge/exp-015
@@ -94,8 +94,8 @@ packages:
   frozen_campaign: null
 - alias: exp-016
   id: vxedge/exp-016
-  version: 0.2.0
-  digest: sha256:b86cc2ce6a2341ed718bbc86ccf92195e5893e5d0184521fcb200c56181ca4c4
+  version: 0.2.1
+  digest: sha256:4bbb38ed12a48b275178cd47d48205c101ca770eea97d7df5f3d697c80e31d9f
   title: The Kuksa databroker measured across a slice
   hypothesis:
     id: broker-slice
@@ -103,7 +103,7 @@ packages:
       actuate p50 than their spread between repetitions, and 600 Mbit/s on the infotainment slice adds
       no more than that spread.
   folder: experiments/exp-016
-  registry: ghcr.io/vxedge/experiments/exp-016:0.2.0
+  registry: ghcr.io/vxedge/experiments/exp-016:0.2.1
   frozen_campaign: null
 - alias: exp-017
   id: vxedge/exp-017

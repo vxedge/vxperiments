@@ -2,11 +2,12 @@
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-003`, version 0.2.0 (`vxp.yaml`). Its catalogue
+This folder is the `vxp/1` package `vxedge/exp-003`, version 0.2.1 (`vxp.yaml`). Its catalogue
 alias is `exp-003`. `vxp.lock` records the digest of every file it holds.
 
-`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
-`../../notebooks/criteria/exp-003.yaml`:
+`main.yaml` holds the experiment and what used to live in
+[`scripts/run.sh`](https://github.com/vxedge/vxperiments/blob/v0.2.0/experiments/exp-003-ws/scripts/run.sh) and
+[`notebooks/criteria/exp-003.yaml`](https://github.com/vxedge/vxperiments/blob/v0.2.0/notebooks/criteria/exp-003.yaml):
 
 | What | Where it was | Where it is |
 |---|---|---|

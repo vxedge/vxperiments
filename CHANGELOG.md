@@ -13,6 +13,34 @@ than a repo tag.
 
 ### Changed
 
+- `README.md` and `AGENTS.md` describe the package-only repository: the packages and
+  `catalog.yaml`, how to validate, plan, run and judge a package with vxedge, how `results/`
+  relates to the Zenodo record (2026-11-v2, mirrored as the vxarchives release
+  `archives-2026-11-v2`), verdict parity, the exp-010 notebook exception, and the catalogue
+  release. `results/README.md` describes the frozen record as it is now.
+- `results/exp-001-measurements-2026-11-09` and `results/done-means-gate-2026-11-10` link the
+  runner, notebook and criteria they name at the `v0.2.1` tag. Their accounts are unchanged.
+- Package READMEs no longer give the removed runners' commands. The runners, notebooks and
+  `retired-6.1` manifests they cite as history link to the `v0.2.1` tag (or `v0.2.0`, for files
+  removed before it), and each package's `tools/README.md` points at its criteria and
+  `vxedge campaign verdict` / `vxedge results verdict` in place of `notebooks/`. `.vxpignore`,
+  which only kept the removed `scripts/` out, is deleted from exp-001, exp-002, exp-005, exp-010
+  and exp-014. Each changed package has a new version and lock, with vxedge 0.25.0; criteria and
+  experiment documents are unchanged, and all 16 parity datasets still give their published
+  verdicts:
+  - exp-001 0.2.1 (`sha256:fab4ab23d059…`): the bash-campaign and §6.1-status sections become
+    "Before the package", with the plan-equivalence record kept.
+  - exp-002 0.2.1 (`sha256:6a5453a17706…`).
+  - exp-002b 0.2.1 (`sha256:a379839b730b…`).
+  - exp-003 0.2.1 (`sha256:841a01da171a…`).
+  - exp-005 0.2.2 (`sha256:798dee378c2c…`): its README states vxedge 0.20.0, as `requires` does,
+    and describes the probe as the declared measurement.
+  - exp-010 0.2.1 (`sha256:d11665f6f5d6…`): its README states that the package has not run live
+    and that `notebooks/analyze_exp010.py` checks H2 until it has; "Sharing it" describes
+    `vxedge pkg pack` and the catalogue release.
+  - exp-014 0.2.1 (`sha256:9af423c231fc…`).
+  - exp-016 0.2.1 (`sha256:4bbb38ed12a4…`): its host preparation points at the published run's
+    README.
 - Verdict parity reads version 2026-11-v2 of the Zenodo record that holds the raw archives
   ([10.5281/zenodo.24192950](https://doi.org/10.5281/zenodo.24192950)), in place of 2026-11
   (10.5281/zenodo.23810053). Its `SHA256SUMS` is the published one, 25 archives, and the table
