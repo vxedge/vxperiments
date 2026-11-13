@@ -5,14 +5,8 @@ a p99 three to five times the others' and a normal p50 — a blown tail with a n
 what cold start looks like and not what a regression looks like
 (`../../notebooks/cold_start.py` has the full account). None of those experiments were built to
 measure the phenomenon, only to notice it as an incidental artifact their own warmup mostly
-absorbed. This one measures it deliberately.
-
-```bash
-cd experiments/exp-005
-sudo -E env "PATH=$PATH" ./scripts/run.sh --quick   # pipeline validation
-sudo -E env "PATH=$PATH" ./scripts/run.sh --repro   # the bash campaign; the package runs it through vxAPI (below)
-python3 ../../notebooks/analyze_exp005.py results/exp-005-repro-<date>
-```
+absorbed. This one measures it deliberately. Its campaign runs through vxAPI
+([The package](#the-package)).
 
 ## Design
 
@@ -38,18 +32,19 @@ is what keeps the comparison free of host-state drift — the same self-referent
 where users will see them): the cold phase's own `p99` must never be reported — ~60 samples is
 two orders of magnitude below the ≥10 000 tail-percentile support the methodology skill
 requires. Its `max` and `p50` are the reportable per-repetition figures, always stated next to
-`n`. The repetition axis (20 repetitions by default) is what carries statistical weight:
-`analyze_exp005.py` reports the *distribution* of `(cold.max / steady.p50)` across repetitions,
+`n`. The repetition axis (20 repetitions by default) is what carries statistical weight: the
+criterion reads `(cold.max / steady.p50)` per repetition and judges it across all repetitions,
 not any single repetition's own percentiles.
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-005`, version 0.2.1 (`vxp.yaml`). Its catalogue
-alias is `exp-005`. `vxp.lock` records the digest of every file it holds, and `.vxpignore` keeps
-`scripts/` out of it. It needs vxedge 0.18.0 or later, for measure windows.
+This folder is the `vxp/1` package `vxedge/exp-005`, version 0.2.2 (`vxp.yaml`). Its catalogue
+alias is `exp-005`. `vxp.lock` records the digest of every file it holds. It needs vxedge 0.20.0
+or later, for measure windows and profile window lengths.
 
-`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
-`../../notebooks/analyze_exp005.py`:
+`main.yaml` holds the experiment and what used to live in
+[`scripts/run.sh`](https://github.com/vxedge/vxperiments/blob/v0.2.1/experiments/exp-005/scripts/run.sh) and
+[`notebooks/analyze_exp005.py`](https://github.com/vxedge/vxperiments/blob/v0.2.1/notebooks/analyze_exp005.py):
 
 | What | Where it was | Where it is |
 |---|---|---|
@@ -86,11 +81,13 @@ The `quick` profile checks the pipeline only and is never reported: two repetiti
 
 ## Measurement locality
 
-Like exp-014 (and exp-001/exp-003 after `docs/ROADMAP.md` #28's fix), the device is genuinely
-zoned up (`zone up --vxid node-cold-probe-01`) and probed via
-`ip netns exec vx-node-cold-probe-01 vxprobe send ...` — prober in the device's own netns,
-reflector in the host's default netns. Different FIB domains, so there is no same-netns
-loopback shortcut for the kernel to take.
+Like exp-014, the device is genuinely zoned up and probed from inside its own network namespace:
+the probe is a declared measurement that vxedged runs in `node-cold-probe-01`, towards a reflector
+the daemon places across the slice. The bash runner that produced the published campaign did the
+same by hand (`zone up --vxid node-cold-probe-01`, then
+`ip netns exec vx-node-cold-probe-01 vxprobe send ...`, with the reflector in the host's default
+netns). Prober and reflector sit in different FIB domains, so there is no same-netns loopback
+shortcut for the kernel to take.
 
 ## Layout
 
@@ -100,8 +97,6 @@ loopback shortcut for the kernel to take.
 | `main.yaml` | `experiment` | the one slice, the measurement, the telemetry service, metrics, criteria and the campaign's windows |
 | `vehicle.yaml` | `vehicle` | the single device and its address |
 | `parts.yaml` | `baseline` | the vxprobe payload the device carries |
-| `scripts/run.sh` | — | the bash campaign that came before the package's: zone up, cold burst, steady window, zone down |
-| `scripts/lib/` | — | vendored: `freshness.sh`, `host_pinning.sh`, `results_dir.sh` |
-| `results/` | — | archives, one per repetition |
+| `results/` | — | a campaign's archives, one per trial |
 
 Every YAML file declares its `kind` and `id`, and nothing references anything by path.

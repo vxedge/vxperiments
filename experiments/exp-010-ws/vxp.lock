@@ -1,18 +1,17 @@
 schema: vxp-lock/1
 package:
   id: vxedge/exp-010
-  version: 0.2.0
-locked_with: 0.20.0
+  version: 0.2.1
+locked_with: 0.25.0
 files:
-  .vxpignore: sha256:07978949e28ffa95b5c3f2e5d7b2edcebefdabe98ff0215573bbe599ad34dd5d
-  README.md: sha256:0ad05fbf9ac809a436604dcadda0b64652c3afc3e2148ce3ca3dca9aa67f609a
+  README.md: sha256:c4972637ef710ae72ea75db9900ae4268a9965eec02f89a6e621a07501ed6287
   assets/README.md: sha256:d8055764bc6fa3075c9e5bfa9569f218a854f758c4b3e7d3d95cf618be4e5e2e
   main.yaml: sha256:84d39baaed7138b0501095e7aceb2a79f52e0f6d11467424c274a1e9ae3f009e
   parts.yaml: sha256:182f6ce96ade091e2f55001dbbe147a60791e0ed3609bbb4c801dc4e41b10858
   parts/README.md: sha256:9a9d1a5e197901e7467d345bcd525b5f2c5a2fa1677bfe5fc9e04851e2142c79
-  tools/README.md: sha256:44aef51b3bc2f327ded10268fff43887ac1ca88a0a4bdaefcb8a7e9f512f3faf
+  tools/README.md: sha256:0f12dd67f2bc189c925c8f1841ee02ebec08fd686939028422bdc68fde720b71
   vehicle.yaml: sha256:4e8cf38dc56ba99f725cce89e7e475e89a42acaf6a41ce39c7056a58bf10c145
-  vxp.yaml: sha256:43f3cf345036073d4cbc92d6886b698b8ba96c487da5f7224ab27a6042207443
+  vxp.yaml: sha256:cdfbf235d57aa50be8b6051dd7b2a2585d00f588d340a222f7875d34c394bc10
 parts: []
 images: []
 vendored: []

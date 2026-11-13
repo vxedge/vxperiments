@@ -2,7 +2,7 @@
 # touches experiment content. The catalogue alias is `exp-002b`.
 schema: vxp/1
 id: vxedge/exp-002b
-version: 0.2.0
+version: 0.2.1
 entry: main.yaml
 title: Virtual-ECU packaging decomposed (machine, transport, vhost-net, management) and its cost (H3)
 license: Apache-2.0

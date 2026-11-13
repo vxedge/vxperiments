@@ -2,7 +2,7 @@
 # content. The catalogue alias is `exp-003`.
 schema: vxp/1
 id: vxedge/exp-003
-version: 0.2.0
+version: 0.2.1
 entry: main.yaml
 title: ADAS slice SLA under OTA co-location (H4)
 license: Apache-2.0

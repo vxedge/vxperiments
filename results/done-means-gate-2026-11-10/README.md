@@ -87,8 +87,10 @@ still to run.
 - **Step 6 against the published reference.** `ResultService.Compare` compares two campaigns this
   daemon recorded. The frozen exp-001 campaign is a set of `vxarchive/1` archives on Zenodo with
   no campaign record, so it cannot be named through vxAPI. `vxedge results compare` does compare
-  against it offline; see [`../../notebooks/criteria`](../../notebooks/criteria) and
-  `scripts/verdict-parity.sh`. How vxAPI should name a frozen reference was open at this run.
+  against it offline; see
+  [`notebooks/criteria`](https://github.com/vxedge/vxperiments/tree/v0.2.1/notebooks/criteria) and
+  `scripts/verdict-parity.sh` at the v0.2.1 tag. How vxAPI should name a frozen reference was open
+  at this run.
   Since vxedge 0.17.0, `ResultService.Compare` takes `reference_workspace`, and
   `results/exp-001/campaign.json` records the frozen campaign for it (see
   [`../../experiments/exp-001-ws`](../../experiments/exp-001-ws)).

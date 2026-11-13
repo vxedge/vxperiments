@@ -6,7 +6,7 @@ competing load on another slice adds to that. Measured with Kuksa's own tool,
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-016`, version 0.2.0 (`vxp.yaml`). Its catalogue
+This folder is the `vxp/1` package `vxedge/exp-016`, version 0.2.1 (`vxp.yaml`). Its catalogue
 alias is `exp-016`. `main.yaml`'s `checks` (vxedge 0.25.0) run each kuksa-perf run as a step in a
 node's namespace, and its `samples` read the run's percentiles as series that the metrics and
 criteria aggregate, so no script drives it.
@@ -31,9 +31,10 @@ vxedge results verdict --experiment . results/<campaign>
 ```
 
 The host needs KVM for the two VM zones. Before a run whose numbers matter, prepare the host as
-the published run did: pin the CPU governor to `performance` and hold `/dev/cpu_dma_latency` at
-2 us for the whole campaign (`scripts/lib/host_pinning.sh`), and keep other workloads off it. The
-package sets no host state; without that preparation the numbers measure CPU wake-up, not the
+the published run did
+([`results/broker-slice-main-2026-11-04`](../../results/broker-slice-main-2026-11-04/README.md)):
+pin the CPU governor to `performance`, hold `/dev/cpu_dma_latency` at 2 us for the whole campaign,
+and keep other workloads off it. The package sets no host state; without that preparation the numbers measure CPU wake-up, not the
 slice (see below).
 
 ## Criteria

@@ -6,11 +6,11 @@ with no hand-built networking. The probe is a declared `measurements` entry that
 `traffic_profiles.infotainment-load`, which `TrafficService` runs inside `node-infot-load-01`. The
 daemon places the far side of the uplink for both. Nothing here uses `ip netns exec` or creates a
 VLAN subinterface by hand. The question is whether this path measures what
-[`run.sh`](../../experiments/exp-001-ws/scripts/run.sh) measures.
+[`run.sh`](https://github.com/vxedge/vxperiments/blob/v0.2.1/experiments/exp-001-ws/scripts/run.sh) measures.
 
 ## Protocol
 
-[`run-measurements.sh`](../../experiments/exp-001-ws/scripts/run-measurements.sh) follows run.sh's
+[`run-measurements.sh`](https://github.com/vxedge/vxperiments/blob/v0.2.1/experiments/exp-001-ws/scripts/run-measurements.sh) follows run.sh's
 `--repro` protocol:
 - 5 repetitions of loads 0, 100, 250, 400 and 600 mbit/s, with the gateway and zones brought up and
   down per point.
@@ -31,7 +31,9 @@ about 3.59 GB, because the slice's 400 mbit/s ceiling caps them.
 | Parts | `local/vxprobe:host-process`, `local/vxtraffic:host-process`: the zones are host processes in their own network namespaces |
 | Host | Linux 7.0.0-43-generic, not PREEMPT_RT, governor `performance`, userspace timestamps |
 
-The per-point vxprobe summaries are in [`points/`](points/). Regenerate everything below with:
+The per-point vxprobe summaries are in [`points/`](points/). Everything below was generated with
+[`notebooks/compare_exp001_paths.py`](https://github.com/vxedge/vxperiments/blob/v0.2.1/notebooks/compare_exp001_paths.py), from a checkout of the
+v0.2.1 tag:
 
 ```bash
 python3 notebooks/compare_exp001_paths.py results/exp-001-measurements-2026-11-09/points \

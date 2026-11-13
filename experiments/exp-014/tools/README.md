@@ -1,7 +1,7 @@
 # tools/ — analysis and helpers for this experiment
 
-The notebook or script that turns this experiment's archives into its table, plus anything
-else specific to it. Shared analysis belongs in the repo's own notebooks; what lives here
-is what only this experiment needs.
+The campaign's arms, its probe, its metrics and the hop rule are in `../main.yaml`. vxedge judges them:
+`vxedge campaign verdict <campaign id>` for a campaign, and
+`vxedge results verdict --experiment <this package> <archives>` offline over archives.
 
-`scripts/run.sh` runs the campaign; `tools/` is for everything after it.
+What belongs here is what only this experiment needs beyond that. None yet.

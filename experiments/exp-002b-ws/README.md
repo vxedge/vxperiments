@@ -2,7 +2,7 @@
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-002b`, version 0.2.0 (`vxp.yaml`). Its catalogue
+This folder is the `vxp/1` package `vxedge/exp-002b`, version 0.2.1 (`vxp.yaml`). Its catalogue
 alias is `exp-002b`. `vxp.lock` records the digest of every file it holds and the guest bundle it
 pins.
 
@@ -16,8 +16,9 @@ one per pair of arms, and records what each arm costs the host:
 | vhost-net | `q35-vhost` vs `q35-pci` | vhost-net on vs off, on q35 with virtio-pci |
 | management | `libvirt-q35` vs `q35-pci` | libvirt vs raw QEMU, on q35 with virtio-pci |
 
-`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
-`../../notebooks/criteria/exp-002b.yaml`:
+`main.yaml` holds the experiment and what used to live in
+[`scripts/run.sh`](https://github.com/vxedge/vxperiments/blob/v0.2.0/experiments/exp-002b-ws/scripts/run.sh) and
+[`notebooks/criteria/exp-002b.yaml`](https://github.com/vxedge/vxperiments/blob/v0.2.0/notebooks/criteria/exp-002b.yaml):
 
 | What | Where it was | Where it is |
 |---|---|---|

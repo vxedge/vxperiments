@@ -2,12 +2,13 @@
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-002`, version 0.2.0 (`vxp.yaml`). Its catalogue
+This folder is the `vxp/1` package `vxedge/exp-002`, version 0.2.1 (`vxp.yaml`). Its catalogue
 alias is `exp-002`. `vxp.lock` records the digest of every file it holds and the guest bundle it
-pins, and `.vxpignore` keeps `scripts/` out of it.
+pins.
 
-`main.yaml` holds the experiment and what used to live in `scripts/run.sh` and
-`../../notebooks/analyze_exp002.py`:
+`main.yaml` holds the experiment and what used to live in
+[`scripts/run.sh`](https://github.com/vxedge/vxperiments/blob/v0.2.1/experiments/exp-002-ws/scripts/run.sh) and
+[`notebooks/analyze_exp002.py`](https://github.com/vxedge/vxperiments/blob/v0.2.1/notebooks/analyze_exp002.py):
 
 | What | Where it was | Where it is |
 |---|---|---|
@@ -38,7 +39,8 @@ give the notebook's H3 verdict through this package (`../../scripts/verdict-pari
 
 ## Before the package
 
-`scripts/run.sh` is the bash runner the campaign replaced, kept until X9.3 removes it. It brought
+[`scripts/run.sh`](https://github.com/vxedge/vxperiments/blob/v0.2.1/experiments/exp-002-ws/scripts/run.sh)
+was the bash runner the campaign replaced; vxperiments 0.2.1 is the last release that has it. It brought
 the gateway up, put `10.101.0.1/24` on the uplink's VLAN by hand, then brought each arm's device up
 alone and probed it from the host. The package does the same through vxAPI.
 

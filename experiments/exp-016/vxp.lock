@@ -1,10 +1,10 @@
 schema: vxp-lock/1
 package:
   id: vxedge/exp-016
-  version: 0.2.0
+  version: 0.2.1
 locked_with: 0.25.0
 files:
-  README.md: sha256:27667a6c1ecdf576769f8e455579a651b7367e6fecd7472e43a14128d0686b7f
+  README.md: sha256:d97c89b85bac3c06c9194e2a2f88f3343515f534fcfcaaf43644a859b8649400
   data/actuate-g1-k1.json: sha256:3989f85facaf556f005bd62b08b58867e2ff7a781dfbbe74987467a48cc3e86b
   data/actuate-g1-k240.json: sha256:8a7cebe5d158cab8c8c98061b3ef6ff4ccf8fc12f252b2fb9e15d0a01efe052d
   data/actuate-g16-k1.json: sha256:c5c54c3282399d4192202f0712c9d8dfdb0adea704d4f25158287ad265573d39
@@ -16,7 +16,7 @@ files:
   tools/perf.awk: sha256:edf277cf3090afafe20ac06cc77c02fb27b3322446bc6643284363ea429cbf48
   tools/perf/Containerfile: sha256:563a933b19fa70328a824c0a0e3b24c9d7c3cbbe9a1f692198c3193db1791cb9
   vehicle.yaml: sha256:97c160edb4b940cede055e0b783e03db6a127e9f8cdf7c4415d157620d6715c1
-  vxp.yaml: sha256:5341d8e3bcc4a93b44700c28ac5d624236bf40f3edcb466f5f8f501cf5699b5f
+  vxp.yaml: sha256:4bfa1eda8ee7af1fdc297d38d1c70531f1d538859f48a1127a095d977b4a6d23
 parts:
 - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle
   digest: sha256:dce921197fa93f7a6bd306b1748b93785e329e443504bd2113a98ccfad52c5e6
