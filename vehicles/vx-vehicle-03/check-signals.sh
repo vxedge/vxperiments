@@ -8,6 +8,10 @@
 # and the denied check, so a broken client cannot pass as either.
 set -uo pipefail
 
+# The run's instance slot (vxedge ARCHITECTURE.md §6.0.5): every host name carries it. Set VX_SLOT
+# for a vehicle run in a slot other than 0.
+S="${VX_SLOT:-0}"
+
 CLIENT=ghcr.io/eclipse-kuksa/kuksa-databroker-cli@sha256:871649f14576871ca048ed5f4ff2c109656d748877d8ddb8609c67091c9f9c33
 BROKER=10.100.0.50:55555
 VALUE=42.5
@@ -21,7 +25,7 @@ fail() { echo "FAIL  $1"; failures=$((failures + 1)); }
 client() {
     local node=$1
     shift
-    timeout 40 script -qec "podman run --rm -t -e TERM=xterm --network container:vx-$node-infra \
+    timeout 40 script -qec "podman run --rm -t -e TERM=xterm --network container:vx$S-$node-infra \
         $CLIENT --server http://$BROKER $*" /dev/null </dev/null 2>&1 |
         sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g; s/\r//g'
 }
@@ -35,7 +39,7 @@ classify() {
 }
 
 rx_packets() {
-    ip -s -j link show "vz-$1" | python3 -c \
+    ip -s -j link show "vz$S-$1" | python3 -c \
         'import json,sys; print(json.load(sys.stdin)[0]["stats64"]["rx"]["packets"])'
 }
 
@@ -61,8 +65,8 @@ denied() {
 }
 
 echo "client: $CLIENT"
-echo "databroker args: $(podman inspect -f '{{.Args}}' vx-hpc1-kuksa-databroker)"
-echo "databroker image: $(podman inspect -f '{{.ImageName}}' vx-hpc1-kuksa-databroker)"
+echo "databroker args: $(podman inspect -f '{{.Args}}' "vx$S-hpc1-kuksa-databroker")"
+echo "databroker image: $(podman inspect -f '{{.ImageName}}' "vx$S-hpc1-kuksa-databroker")"
 
 allowed cabin1 "publish Vehicle.Speed $VALUE"
 allowed cabin1 "get Vehicle.Speed"
@@ -74,9 +78,9 @@ allowed cabin1 "get Vehicle.Speed"
 
 echo "bridge VLAN membership:"
 bridge -j vlan show | python3 -c '
-import json, sys
+import json, os, sys
 for port in json.load(sys.stdin):
-    if port["ifname"] in ("vz-hpc1", "vz-cabin1", "vz-zone-rl"):
+    if port["ifname"] in ["vz" + os.environ.get("VX_SLOT", "0") + "-" + d for d in ("hpc1", "cabin1", "zone-rl")]:
         print("  " + port["ifname"], [v["vlan"] for v in port["vlans"]])'
 
 exit "$failures"
