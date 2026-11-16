@@ -48,6 +48,10 @@ than a repo tag.
 
 ### Changed
 
+- CI validates with vxedge 0.31.0. exp-016 0.2.2 requires it: vxedge 0.31.0 locks published check
+  tool images, so its lock now pins the `vxtraffic` image its checks run, and an earlier vxedge reads
+  the lock as stale.
+
 - `results/exp-001/campaign.json` is the `vxarchive/2` record from Zenodo 2026-11-v2
   (`exp-001.tgz`), whose archive digests match the published archives. The `vxarchive/1` digests it
   held cannot be read by vxedge 0.26.0 or later, so exp-010's `--reference-workspace` needs this
