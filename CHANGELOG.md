@@ -51,6 +51,11 @@ than a repo tag.
 - CI validates with vxedge 0.31.0. exp-016 0.2.2 requires it: vxedge 0.31.0 locks published check
   tool images, so its lock now pins the `vxtraffic` image its checks run, and an earlier vxedge reads
   the lock as stale.
+- exp-015 0.2.1 and exp-017 0.2.1 run the published vxparts part `svc/signal/app/kuksa-v2-client`
+  0.1.0, pinned by digest, as their kuksa.val.v2 test client, in place of `localhost/vxperiments/kv2:1`
+  built from each package's `tools/kv2`, which is removed. Both require vxedge 0.31.0, which locks
+  published check tool images: their locks now pin the client and the can-provider image, so a copy of
+  either package runs its checks on any host.
 
 - `results/exp-001/campaign.json` is the `vxarchive/2` record from Zenodo 2026-11-v2
   (`exp-001.tgz`), whose archive digests match the published archives. The `vxarchive/1` digests it

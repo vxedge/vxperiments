@@ -2,13 +2,13 @@
 # experiment content. The catalogue alias is `exp-015`.
 schema: vxp/1
 id: vxedge/exp-015
-version: 0.2.0
+version: 0.2.1
 entry: main.yaml
 title: Kuksa use cases on vx-vehicle-03's signal plane
 license: Apache-2.0
 authors: [{ org: vxedge }]
 requires:
-  vxedge: ">=0.22.0"
+  vxedge: ">=0.31.0"
   gpu: none
   kvm: true
   backends: [container, qemu-microvm, cloud-hypervisor, wasm-capsule]

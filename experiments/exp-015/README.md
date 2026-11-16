@@ -23,17 +23,16 @@ alias is `exp-015`. It is a functional suite, not a measurement: `main.yaml`'s `
 | What `--insecure` changes | `flags.sh`, with the v1 CLI | two throwaway brokers (`on: alone`) and the v2 client `with` each |
 | 47 checks, one verdict | the transcript's lines | the criterion `kuksa-v2` over 50 cases |
 
-Run it through vxAPI, from inside this folder, after building the client once:
+Run it through vxAPI, from inside this folder:
 
 ```bash
-podman build -t localhost/vxperiments/kv2:1 tools/kv2
 vxedge campaign plan
 vxedge campaign start      # one trial; its archive holds every step's output, then the verdict
 vxedge results verdict --experiment . results/<campaign>   # each case, and what was observed
 ```
 
-The host needs KVM for the two VM zones. The client is local to the host that builds it: kv2 is
-not a published part yet, so `localhost/vxperiments/kv2:1` is what the package names.
+The host needs KVM for the two VM zones. The client is the published vxparts part
+`svc/signal/app/kuksa-v2-client` 0.1.0, pinned by digest and pulled on first use.
 
 The signal-plane checks `run.sh` repeated before the cases, from
 [`results/signal-plane-2026-11-03`](../../results/signal-plane-2026-11-03) (the vehicle's own
@@ -48,7 +47,7 @@ their published run stays in `results/`.
 |---|---|
 | databroker 0.7.1, under test | `ghcr.io/eclipse-kuksa/kuksa-databroker@sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd` |
 | can-provider 0.5.1, the CAN feed | `ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider@sha256:41f5abffe30be4dd0bf6d82f28ca149d327e2d6de8619b562a12035a30da0c8e` |
-| kv2, the v2 test client | built from [`tools/kv2`](tools/kv2): `python:3.12-slim` by digest, `kuksa-client==0.6.0` and its dependencies by hash |
+| kv2, the v2 test client | `ghcr.io/vxedge/parts/svc/signal/app/kuksa-v2-client:0.1.0@sha256:aed1c8d13ff7a421d3bd0907956cf1934b954bc0698fef8a84daa1e0dc890aaa`: the vxparts part `svc/signal/app/kuksa-v2-client`, `python:3.12-slim` by digest, `kuksa-client==0.6.0` and its dependencies by hash |
 
 kv2 calls the generated `kuksa.val.v2` stubs that kuksa-client 0.6.0
 ships, not the SDK's `VSSClient`: that client's `get` is v1, and its publish and subscribe fall back
@@ -84,4 +83,3 @@ answers, unrestarted, afterwards. A case whose step did not run is `inconclusive
   timeout from an answer, not measurements.
 - The CAN feed is a recorded dump replayed by can-provider. No SocketCAN, plant model or vehicle
   application is involved.
-- kv2 is local to the host that builds it.
