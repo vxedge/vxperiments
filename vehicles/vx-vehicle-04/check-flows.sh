@@ -6,22 +6,26 @@
 # nothing was sent.
 set -uo pipefail
 
+# The run's instance slot (vxedge ARCHITECTURE.md §6.0.5): every host name carries it. Set VX_SLOT
+# for a vehicle run in a slot other than 0.
+S="${VX_SLOT:-0}"
+
 failures=0
 pass() { echo "PASS  $1"; }
 fail() { echo "FAIL  $1"; failures=$((failures + 1)); }
 
 replies() {
-    podman exec "vx-$1-payload" /vxprobe send --target "$2:9800" --pps 20 --duration-s 1 \
+    podman exec "vx$S-$1-payload" /vxprobe send --target "$2:9800" --pps 20 --duration-s 1 \
         --timeout-ms 500 2>&1 | sed -n 's/.*"received":[[:space:]]*\([0-9]*\).*/\1/p' | head -1
 }
 
 fetch() {
-    podman exec "vx-$1-payload" /bin/busybox wget -q -T 2 -O - "http://$2:9900/root.json" \
+    podman exec "vx$S-$1-payload" /bin/busybox wget -q -T 2 -O - "http://$2:9900/root.json" \
         2>/dev/null | head -c 64
 }
 
 rx_packets() {
-    ip -s -j link show "vz-$1" | python3 -c \
+    ip -s -j link show "vz$S-$1" | python3 -c \
         'import json,sys; print(json.load(sys.stdin)[0]["stats64"]["rx"]["packets"])'
 }
 

@@ -5,23 +5,27 @@
 # identity is its text.
 set -uo pipefail
 
+# The run's instance slot (vxedge ARCHITECTURE.md §6.0.5): every host name carries it. Set VX_SLOT
+# for a vehicle run in a slot other than 0.
+S="${VX_SLOT:-0}"
+
 echo "# guests"
 pgrep -af '^[^ ]*qemu-system[^ ]* .*vx\.node=' | awk '{print $1}'
 pgrep -f '^[^ ]*cloud-hypervisor '
 pgrep -x vxcapsule
 echo "# containers"
-podman ps --filter name=^vx- --format '{{.Names}} {{.ID}} {{.Pid}}' | sort
+podman ps --filter name=^vx$S- --format '{{.Names}} {{.ID}} {{.Pid}}' | sort
 echo "# namespaces"
 ip netns | grep -E '^vx'
-for c in $(podman ps --filter name=-infra --format '{{.Names}}' | grep '^vx-' | sort); do
+for c in $(podman ps --filter name=-infra --format '{{.Names}}' | grep "^vx$S-" | sort); do
     pid=$(podman inspect -f '{{.State.Pid}}' "$c")
     echo "$c $(readlink "/proc/$pid/ns/net")"
 done
 echo "# links"
 ip -o link | grep -E ': (vx|vz)' | awk '{print $1, $2}'
-echo "# vlans"; bridge vlan show | grep -E '^(vx|vz)|^ +[0-9]'
+echo "# vlans"; bridge vlan show | grep -E '^(vx|v[zpi][0-9a-z]-)|^ +[0-9]'
 echo "# tc"
-for dev in $(ip -o link | grep -oE 'vz-[^:@]+|vxbr0' | sort -u); do
+for dev in $(ip -o link | grep -oE "v[zpi]$S-[^:@]+|vxbr$S" | sort -u); do
     echo "$dev"; tc class show dev "$dev"; tc qdisc show dev "$dev"
 done
 echo "# nft"

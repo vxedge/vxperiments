@@ -10,7 +10,7 @@ show() {
 }
 
 show "netns" "$(ip netns | grep -E '^vx' || true)"
-show "links" "$(ip -br link | grep -E '^(vx|vz)' || true)"
+show "links" "$(ip -br link | grep -E '^(vx|v[zpi][0-9a-z]-)' || true)"
 show "containers" "$(podman ps -a --format '{{.Names}}' | grep -E '^vx' || true)"
 show "qemu" "$(pgrep -af '^[^ ]*qemu-system[^ ]* .*vx\.node=' | cut -c1-60 || true)"
 show "nft" "$(sudo -n nft list tables | grep -E 'vx' || true)"
