@@ -48,6 +48,10 @@ than a repo tag.
 
 ### Changed
 
+- vxedge is described as a virtual vehicle with environmental parity, for packaged, measured SDV experiments;
+  5G slicing is one family of its measured cases. `README.md` and the `CITATION.cff` title, abstract and keywords use the
+  wording registered in `docs/FACTS.md` (`project.summary`, `project.description`). No identifier, API or
+  result changes.
 - `results/exp-001/campaign.json` is the `vxarchive/2` record from Zenodo 2026-11-v2
   (`exp-001.tgz`), whose archive digests match the published archives. The `vxarchive/1` digests it
   held cannot be read by vxedge 0.26.0 or later, so exp-010's `--reference-workspace` needs this
