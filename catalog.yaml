@@ -14,23 +14,23 @@ packages:
   frozen_campaign: results/exp-001/campaign.json
 - alias: exp-002
   id: vxedge/exp-002
-  version: 0.2.1
-  digest: sha256:6a5453a17706e1cd9ca5a3af236345a0c4b497a34552dfe927e815ba29d82749
+  version: 0.2.2
+  digest: sha256:e343e511c5e1ccbef320734f253c9e14764e7e8cc4fe60a7a85b56563b73e373
   title: Virtual-ECU packaging (container, microVM, full VM) and round-trip latency (H3)
   hypothesis:
     id: H3
     statement: Packaging measurably affects RTT.
   folder: experiments/exp-002-ws
-  registry: ghcr.io/vxedge/experiments/exp-002:0.2.1
+  registry: ghcr.io/vxedge/experiments/exp-002:0.2.2
   frozen_campaign: null
 - alias: exp-002b
   id: vxedge/exp-002b
-  version: 0.2.1
-  digest: sha256:a379839b730b8db2ab9496e9e79d5df861e9b512048cfb94fffc3e118189dd2d
+  version: 0.2.2
+  digest: sha256:9d0a58be7889f2141042f84f4292d8ea809c5edead67a8fa0a74b7662706e6f2
   title: Virtual-ECU packaging decomposed (machine, transport, vhost-net, management) and its cost (H3)
   hypothesis: null
   folder: experiments/exp-002b-ws
-  registry: ghcr.io/vxedge/experiments/exp-002b:0.2.1
+  registry: ghcr.io/vxedge/experiments/exp-002b:0.2.2
   frozen_campaign: null
 - alias: exp-003
   id: vxedge/exp-003

@@ -2,7 +2,7 @@
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-002`, version 0.2.1 (`vxp.yaml`). Its catalogue
+This folder is the `vxp/1` package `vxedge/exp-002`, version 0.2.2 (`vxp.yaml`). Its catalogue
 alias is `exp-002`. `vxp.lock` records the digest of every file it holds and the guest bundle it
 pins.
 
@@ -30,6 +30,11 @@ vxedge campaign start --profile repro    # one archive per trial, then H3's verd
 
 The `quick` profile checks the pipeline only and is never reported: one repetition with
 `run.sh --quick`'s 2 s and 10 s windows, at 1000 pps (`run.sh --quick` probed at 500).
+
+From vxedge 0.32.0, the `from: host` sender runs in the run's own uplink namespace, `vxh<s>`, rather
+than in the host's. On a same-day comparison on its container arm (4 trials per build at 1000 pps for 60 s),
+its p50 read 36.6 µs (IQR 0.9) against 38.3 µs (IQR 0.4) on 0.31.0, so compare a rerun with numbers
+taken on 0.31.0 or earlier with that offset in mind.
 
 The host needs KVM for the VM arms, and the libvirt arm needs vxedged's user in the `libvirt`
 group, with the part cache readable by libvirt's qemu user (see `ARCHITECTURE.md` §9).
