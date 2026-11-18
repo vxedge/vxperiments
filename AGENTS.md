@@ -24,6 +24,14 @@ validates against nothing else.
 
 ## Rules
 
+- **Branch names use the `vx/` prefix**, for example `vx/fix-probe-drift`. Never name a branch after a
+  tool or vendor. Delete a branch once its PR is merged.
+- **Merge only after formal checks.** Before a PR is merged: its CI is green on the PR head; the commands under
+  "Checks before a PR"
+  ran clean locally; and the diff was re-read for claims beyond `docs/FACTS.md`, host details and
+  personal or private material. A failing check blocks the merge; never skip, weaken or disable one.
+- **Describe vxedge with `project.summary` from `docs/FACTS.md`** (the README's first lines quote it).
+  Do not write another description of vxedge; 5G slicing is one family of its measured cases.
 - **A changed package needs a new version.** Every file in a package folder counts toward its
   digest, README included, and published results and archives cite package digests. After any
   change in a folder: bump `version` in its `vxp.yaml` (PATCH when only docs or packaging

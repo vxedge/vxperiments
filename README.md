@@ -8,7 +8,7 @@ published campaign, and the checks that tie each published verdict to its packag
 [![CI](https://github.com/vxedge/vxperiments/actions/workflows/ci.yml/badge.svg)](https://github.com/vxedge/vxperiments/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/tag/vxedge/vxperiments?label=release)](https://github.com/vxedge/vxperiments/tags)
 
-vxedge is an open, all-software testbed for mapping 5G network slices onto zonal and central software-defined-vehicle (SDV) E/E architectures on a single machine. Every published number ships with the manifest and image digests that produced it.
+`vxperiments` is the experiment catalogue of vxedge, a virtual vehicle with environmental parity, for packaged, measured SDV experiments. Every result ships with the manifest and image digests that produced it.
 
 Each experiment is a self-contained package folder: its documents, its campaign and profiles, its
 metrics and its acceptance criteria. vxedge runs the campaign and judges the criteria. Each

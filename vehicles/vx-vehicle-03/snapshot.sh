@@ -22,7 +22,7 @@ for c in $(podman ps --filter name=-infra --format '{{.Names}}' | grep "^vx$S-" 
     echo "$c $(readlink "/proc/$pid/ns/net")"
 done
 echo "# links"
-ip -o link | grep -E ': (vx|vz)' | awk '{print $1, $2}'
+ip -o link | grep -E ': (vx|v[zpi][0-9a-z]-)' | awk '{print $1, $2}'
 echo "# vlans"; bridge vlan show | grep -E '^(vx|v[zpi][0-9a-z]-)|^ +[0-9]'
 echo "# tc"
 for dev in $(ip -o link | grep -oE "v[zpi]$S-[^:@]+|vxbr$S" | sort -u); do
