@@ -53,6 +53,8 @@ than a repo tag.
   sends from `vxh<s>` and reads about 1.7 µs lower at p50 than on 0.31.0 (36.6 against 38.3 µs on
   exp-002's container arm), so reruns are compared with that offset in mind. Relocked; the
   experiments are unchanged.
+- CI validates every package with vxedge 0.33.0, which adds the fleet view (`vxedge runs status`,
+  `vxedge runs down`). No package changes: all eleven validate and keep their locks.
 - CI validates with vxedge 0.31.0. exp-016 0.2.2 requires it: vxedge 0.31.0 locks published check
   tool images, so its lock now pins the `vxtraffic` image its checks run, and an earlier vxedge reads
   the lock as stale.
