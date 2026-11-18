@@ -6,7 +6,7 @@ competing load on another slice adds to that. Measured with Kuksa's own tool,
 
 ## The package
 
-This folder is the `vxp/1` package `vxedge/exp-016`, version 0.2.1 (`vxp.yaml`). Its catalogue
+This folder is the `vxp/1` package `vxedge/exp-016`, version 0.2.2 (`vxp.yaml`). Its catalogue
 alias is `exp-016`. `main.yaml`'s `checks` (vxedge 0.25.0) run each kuksa-perf run as a step in a
 node's namespace, and its `samples` read the run's percentiles as series that the metrics and
 criteria aggregate, so no script drives it.

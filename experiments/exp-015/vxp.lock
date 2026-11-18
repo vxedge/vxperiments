@@ -1,26 +1,26 @@
 schema: vxp-lock/1
 package:
   id: vxedge/exp-015
-  version: 0.2.0
-locked_with: 0.22.0
+  version: 0.2.1
+locked_with: 0.31.0
 files:
-  README.md: sha256:0550de74217d00031ee8e27f1a0dbd2ee54388dede683039d5b7626940a6f31c
-  main.yaml: sha256:0a4a905d02dfec65d6247b9dd13e681bf3fb817e45122689e279923c3b17c82d
+  README.md: sha256:8563e16c011f76194a4e444f5be4752c9cb78ceaf23710ed37a31e70218b7646
+  main.yaml: sha256:347e1840ef0f5a3d5b9334a3561e462d86e0dbb64fd474dd211ccd6ce61afbac
   parts.yaml: sha256:3b3f4cadc1f43cf1a96524255160fc6face34052a4a49425c5cf6a7f55c270d7
-  tools/kv2/Containerfile: sha256:91adf9e5226b90d073f1b4634a7345dc73229e3a50a01bb54fce29c923271eb2
-  tools/kv2/kv2.py: sha256:aa076381517b3f9a336bad48f42cfeb97204810bda1d28b6248fc29ca55123ab
-  tools/kv2/requirements.in: sha256:ba7c305b8e175a60b4b3867b8dfff830cf085f5d2d11b000dd1928b8e2a97a68
-  tools/kv2/requirements.txt: sha256:3ea3459402af1e5c91358a74762413731ec98a19f5df04bd12cf26d6b5c713dc
   vehicle.yaml: sha256:b652d321018b58f39efd1988dcbf3d6571abf353d263d4cd4036d9ebe301f4fa
-  vxp.yaml: sha256:168cb9de3a7a5e21ea28bc6159c5362a311c164f8e5fbc0d9916ba42f9903fe8
+  vxp.yaml: sha256:aa69ae4507d2c15cd190e0c7da228c500c0f79a584cddcd37676e11dc1076d97
 parts:
 - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle
   digest: sha256:dce921197fa93f7a6bd306b1748b93785e329e443504bd2113a98ccfad52c5e6
 - ref: ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule
   digest: sha256:4392871714b302e17dc9f81518d4768093bbfbddac6dbc9c10a517a9f286654d
 images:
+- ref: ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider
+  digest: sha256:41f5abffe30be4dd0bf6d82f28ca149d327e2d6de8619b562a12035a30da0c8e
 - ref: ghcr.io/eclipse-kuksa/kuksa-databroker
   digest: sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
 - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
   digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
+- ref: ghcr.io/vxedge/parts/svc/signal/app/kuksa-v2-client:0.1.0
+  digest: sha256:aed1c8d13ff7a421d3bd0907956cf1934b954bc0698fef8a84daa1e0dc890aaa
 vendored: []

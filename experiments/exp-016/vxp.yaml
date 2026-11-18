@@ -2,13 +2,13 @@
 # version bump never touches experiment content. The catalogue alias is `exp-016`.
 schema: vxp/1
 id: vxedge/exp-016
-version: 0.2.1
+version: 0.2.2
 entry: main.yaml
 title: The Kuksa databroker measured across a slice
 license: Apache-2.0
 authors: [{ org: vxedge }]
 requires:
-  vxedge: ">=0.25.0"
+  vxedge: ">=0.31.0"
   gpu: none
   kvm: true
   backends: [container, qemu-microvm, cloud-hypervisor, wasm-capsule]

@@ -1,10 +1,10 @@
 schema: vxp-lock/1
 package:
   id: vxedge/exp-016
-  version: 0.2.1
-locked_with: 0.25.0
+  version: 0.2.2
+locked_with: 0.31.0
 files:
-  README.md: sha256:d97c89b85bac3c06c9194e2a2f88f3343515f534fcfcaaf43644a859b8649400
+  README.md: sha256:63e51dfba43fc8aacf1fddd40277ef85e02dcb4db6794dea6e0c5ecd49b205cf
   data/actuate-g1-k1.json: sha256:3989f85facaf556f005bd62b08b58867e2ff7a781dfbbe74987467a48cc3e86b
   data/actuate-g1-k240.json: sha256:8a7cebe5d158cab8c8c98061b3ef6ff4ccf8fc12f252b2fb9e15d0a01efe052d
   data/actuate-g16-k1.json: sha256:c5c54c3282399d4192202f0712c9d8dfdb0adea704d4f25158287ad265573d39
@@ -16,7 +16,7 @@ files:
   tools/perf.awk: sha256:edf277cf3090afafe20ac06cc77c02fb27b3322446bc6643284363ea429cbf48
   tools/perf/Containerfile: sha256:563a933b19fa70328a824c0a0e3b24c9d7c3cbbe9a1f692198c3193db1791cb9
   vehicle.yaml: sha256:97c160edb4b940cede055e0b783e03db6a127e9f8cdf7c4415d157620d6715c1
-  vxp.yaml: sha256:4bfa1eda8ee7af1fdc297d38d1c70531f1d538859f48a1127a095d977b4a6d23
+  vxp.yaml: sha256:9037bdcc25a5c3a2c0b8572dff7a912055ad21d092c396721938acf66148cb8c
 parts:
 - ref: ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle
   digest: sha256:dce921197fa93f7a6bd306b1748b93785e329e443504bd2113a98ccfad52c5e6
@@ -25,6 +25,12 @@ parts:
 images:
 - ref: ghcr.io/eclipse-kuksa/kuksa-databroker
   digest: sha256:529d8c6d3cc223362667672978bcb8f92c4d356b25aedd336e7a2e004d7279bd
+- ref: ghcr.io/eclipse-kuksa/kuksa-databroker-perf
+  digest: sha256:74ad5bb003e2f541cf9862ba63cecf66cd93badb514f1c6c8b68bcaac29ffd93
+- ref: ghcr.io/vxedge/parts/agent/load/app/kuksa-perf
+  digest: sha256:1e894b9d7de05d41059d711871b17ae3023497933ad88f05f29f903000c7ba73
+- ref: ghcr.io/vxedge/parts/agent/load/app/vxtraffic
+  digest: sha256:be310378c1f330969072669fb24a991b26c2a991dc02f23c81056c8fc98f2c3c
 - ref: ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1
   digest: sha256:b3f22650146dcae004589d311fcd8f231bd2e058f8cb50a7d2a766519210fd6d
 vendored: []

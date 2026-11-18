@@ -19,13 +19,13 @@ run each case as a step and judge what the client prints.
 | `PASS`, `FAIL` and `OBS` lines | the scripts | `checks.cases`; `OBS` lines are `observe` cases |
 
 ```bash
-podman build -t localhost/vxperiments/kv2:1 tools/kv2
 vxedge campaign start
 vxedge results verdict --experiment . results/<campaign>
 ```
 
 [`assets/`](assets) holds the three VSS files the scripts fetched, each with the sha256 they were
-checked by. `tools/kv2` is exp-015's client, copied so the package stands alone.
+checked by. The client, kv2, is the vxparts part `svc/signal/app/kuksa-v2-client` 0.1.0, pinned by
+digest, the one exp-015 runs.
 
 ## Scenarios, on the vehicle
 

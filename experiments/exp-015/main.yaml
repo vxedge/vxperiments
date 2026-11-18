@@ -43,9 +43,8 @@ campaign:
 # cabin1 and hpc1, the denied one on zone-rl (infotainment).
 checks:
   tools:
-    # The kuksa.val.v2 test client, built from tools/kv2 on the host that runs the package:
-    #   podman build -t localhost/vxperiments/kv2:1 tools/kv2
-    kv2: { image: localhost/vxperiments/kv2:1, args: [--server, "10.100.0.50:55555"] }
+    # The kuksa.val.v2 test client: the vxparts part svc/signal/app/kuksa-v2-client 0.1.0, by digest.
+    kv2: { image: ghcr.io/vxedge/parts/svc/signal/app/kuksa-v2-client:0.1.0@sha256:aed1c8d13ff7a421d3bd0907956cf1934b954bc0698fef8a84daa1e0dc890aaa, args: [--server, "10.100.0.50:55555"] }
     # can-provider 0.5.1 replays the CAN dump its image carries into the broker on hpc1.
     can:
       image: ghcr.io/eclipse-kuksa/kuksa-can-provider/can-provider@sha256:41f5abffe30be4dd0bf6d82f28ca149d327e2d6de8619b562a12035a30da0c8e
