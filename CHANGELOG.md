@@ -48,6 +48,11 @@ than a repo tag.
 
 ### Changed
 
+- CI validates every package with vxedge 0.32.0, which runs each run's uplink side in its own
+  namespace, `vxh<s>`. exp-002 and exp-002b 0.2.2: their READMEs note that a `from: host` probe now
+  sends from `vxh<s>` and reads about 1.7 µs lower at p50 than on 0.31.0 (36.6 against 38.3 µs on
+  exp-002's container arm), so reruns are compared with that offset in mind. Relocked; the
+  experiments are unchanged.
 - CI validates with vxedge 0.31.0. exp-016 0.2.2 requires it: vxedge 0.31.0 locks published check
   tool images, so its lock now pins the `vxtraffic` image its checks run, and an earlier vxedge reads
   the lock as stale.
