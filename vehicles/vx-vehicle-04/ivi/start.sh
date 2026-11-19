@@ -13,7 +13,7 @@ rm -f "$run/qemu.pid"
 exec qemu-system-x86_64 -M microvm,acpi=off -enable-kvm -cpu host -m 128m -smp 1 -nodefaults \
     -global virtio-mmio.force-legacy=false -no-user-config -nographic -monitor none \
     -serial "file:$run/serial.log" -kernel bundle/vmlinuz -initrd bundle/initrd.img \
-    -append "console=ttyS0 reboot=t panic=-1 quiet vx.ip=$VX_IP vx.node=$VX_NODE" \
+    -append "console=ttyS0 reboot=t panic=-1 quiet vx.ip=$VX_IP vx.node=$VX_NODE vx.slot=${VX_SLOT:?needs vxedge 0.34.2 or later}" \
     -netdev "tap,id=n0,ifname=$VX_INTERFACE,script=no,downscript=no,vnet_hdr=off" \
     -device virtio-net-device,netdev=n0,mac=52:54:00:a7:00:13 \
     -daemonize -pidfile "$run/qemu.pid"

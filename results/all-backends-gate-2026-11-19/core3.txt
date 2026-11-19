@@ -1,0 +1,237 @@
+21:20:09 #### core x3
+21:20:09   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | vxh netns: none | nft: by the owner's script
+21:20:09   PASS host clean before start
+21:20:10 == core 1: vx-vehicle-04 through vxmcp
+21:20:11   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True, 'NODE_BACKEND_ATTACH': True, 'NODE_BACKEND_QEMU_MCU': True}
+21:20:11   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
+21:20:12    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (every stage, in this workspace's slot,
+21:20:12   PASS vehicle_up returns a job
+21:20:12    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (every stage, in this workspace's slot,
+21:20:12   PASS duplicate vehicle_up returns the running job (job-9e3b85-000000)
+21:20:12    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (stages gateway, in this workspace's sl
+21:20:12   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
+21:20:12    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage, in this workspace's sl
+21:20:12   PASS another workspace's up refused BUSY while this up runs (ERROR_REASON_BUSY)
+21:20:21   PASS vehicle_up job JOB_STATE_SUCCEEDED 
+21:20:21   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
+21:20:21   PASS job carries run_id run-5c04a4bb6c15
+21:20:22   PASS run_list holds the one run ['run-5c04a4bb6c15']
+21:20:22   PASS run_list reads the run UP once up succeeded ['RESOURCE_STATE_UP']
+21:20:22   PASS vehicle_status: every node UP (not: []) backends ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:20:22   PASS vehicle_status: every node has a typed payload (missing: [])
+21:20:22   payloads: ecu-mcu-frt=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/freertos/firmware/probe-mps2:0.1.0; ecu-mcu-zep=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/zephyr/firmware/probe-mps2:0.1.0; ecu-rtos=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/freertos/stack/probe-bundle:0.1.0; hpc1=PAYLOAD_KIND_CONTAINER:ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1; ivi1=PAYLOAD_KIND_ATTACH_ADAPTER:<vxperiments>/vehicles/vx-vehicle-04/./ivi; sensor-rr=PAYLOAD_KIND_WASM:ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule:0.1.0; zone-fl=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0; zone-fr=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0; zone-rl=PAYLOAD_KIND_CONTAINER:ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1; zone-rr=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0
+21:20:22   PASS [up] every backend is up: ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:20:22   PASS [up] ecu-mcu-frt: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:20:22   PASS [up] ecu-mcu-zep: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:20:22   PASS [up] zone-fl: all 4 threads may run only on CPU 4 ({'4': 4})
+21:20:22   PASS [up] zone-fr: all 8 threads may run only on CPU 5 ({'5': 8})
+21:20:22   PASS [up] zone-rr: all 6 threads may run only on CPU 6 ({'6': 6})
+21:20:22   PASS [up] sensor-rr: all 2 threads may run only on CPU 7 ({'7': 2})
+21:20:22   PASS [up] ecu-mcu-frt: all 3 threads may run only on CPU 8 ({'8': 3})
+21:20:22   PASS [up] attach interface at-ivi1 adopted (master vxbr0)
+21:21:04   [up] flows: PASS  allowed hpc1 -> qemu-microvm 10.100.0.11:9800 (20/20 replies) | PASS  allowed hpc1 -> cloud-hypervisor 10.100.0.12:9800 (20/20 replies) | PASS  allowed hpc1 -> libvirt 10.100.0.21:9800 (20/20 replies) | PASS  allowed hpc1 -> wasm-capsule 10.100.0.14:9800 (20/20 replies) | PASS  allowed hpc1 -> attach 10.100.0.13:9800 (20/20 replies) | PASS  allowed hpc1 -> freertos 10.100.0.15:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-freertos 10.100.0.16:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-zephyr 10.100.0.17:9800 (20/20 replies) | PASS  OTA root.json served on hpc1:9900 | PASS  denied zone-rl -> qemu-microvm 10.100.0.11:9800 (0 replies, 2 frames reached the bridge) | PASS  denied zone-rl -> cloud-hypervisor 10.100.0.12:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> libvirt 10.100.0.21:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> wasm-capsule 10.100.0.14:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> attach 10.100.0.13:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> freertos 10.100.0.15:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-freertos 10.100.0.16:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-zephyr 10.100.0.17:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> container 10.100.0.50:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> ota root.json
+21:21:04   PASS [up] check-flows.sh: 19 checks, rc=0
+21:21:04   PASS another vehicle's status: no run (ERROR_REASON_NO_ACTIVE_RUN)
+21:21:04    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage, in this workspace's slot,
+21:21:07   PASS [first] second vehicle up JOB_STATE_SUCCEEDED 
+21:21:08   PASS [first] second vehicle in a slot of its own {'run-5c04a4bb6c15': '0', 'run-fa3d16c825af': '1'}
+21:21:08   PASS run_status reads both runs ['run-5c04a4bb6c15', 'run-fa3d16c825af']
+21:21:08   PASS run_status: run-5c04a4bb6c15 rollup RESOURCE_STATE_UP, error ERROR_REASON_UNSPECIFIED
+21:21:08   PASS run_status: run-fa3d16c825af rollup RESOURCE_STATE_UP, error ERROR_REASON_UNSPECIFIED
+21:21:08   PASS run_status: run-5c04a4bb6c15 carries its 10 typed nodes (10)
+21:21:08   PASS run_status by name: run-fa3d16c825af UP, run-stale an entry with RUN_MISMATCH (ERROR_REASON_RUN_MISMATCH)
+21:21:08    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down run `run-fa3d16c825af` of the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage
+21:21:26   PASS vehicle_down of run-fa3d16c825af by run_id JOB_STATE_SUCCEEDED 
+21:21:26   PASS run_list holds this run alone again
+21:21:29   PASS event tail resumed with no EVENTS_LOST ([])
+21:21:29   PASS events include run.up
+21:21:29   PASS event ids contiguous across 113 events
+21:21:29   PASS run.up carries run_id
+21:21:32   PASS after restart: run still listed
+21:21:32   PASS after restart: run still UP
+21:21:33   PASS after restart: every node still UP (not: [])
+21:21:33   PASS [restart] every backend is up: ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:21:33   PASS [restart] ecu-mcu-frt: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:21:33   PASS [restart] ecu-mcu-zep: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:21:33   PASS [restart] zone-fl: all 4 threads may run only on CPU 4 ({'4': 4})
+21:21:33   PASS [restart] zone-fr: all 8 threads may run only on CPU 5 ({'5': 8})
+21:21:33   PASS [restart] zone-rr: all 6 threads may run only on CPU 6 ({'6': 6})
+21:21:33   PASS [restart] sensor-rr: all 2 threads may run only on CPU 7 ({'7': 2})
+21:21:33   PASS [restart] ecu-mcu-frt: all 3 threads may run only on CPU 8 ({'8': 3})
+21:21:33   PASS [restart] attach interface at-ivi1 adopted (master vxbr0)
+21:22:14   [restart] flows: PASS  allowed hpc1 -> qemu-microvm 10.100.0.11:9800 (20/20 replies) | PASS  allowed hpc1 -> cloud-hypervisor 10.100.0.12:9800 (20/20 replies) | PASS  allowed hpc1 -> libvirt 10.100.0.21:9800 (20/20 replies) | PASS  allowed hpc1 -> wasm-capsule 10.100.0.14:9800 (20/20 replies) | PASS  allowed hpc1 -> attach 10.100.0.13:9800 (20/20 replies) | PASS  allowed hpc1 -> freertos 10.100.0.15:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-freertos 10.100.0.16:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-zephyr 10.100.0.17:9800 (20/20 replies) | PASS  OTA root.json served on hpc1:9900 | PASS  denied zone-rl -> qemu-microvm 10.100.0.11:9800 (0 replies, 2 frames reached the bridge) | PASS  denied zone-rl -> cloud-hypervisor 10.100.0.12:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> libvirt 10.100.0.21:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> wasm-capsule 10.100.0.14:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> attach 10.100.0.13:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> freertos 10.100.0.15:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-freertos 10.100.0.16:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-zephyr 10.100.0.17:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> container 10.100.0.50:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> ota root.json
+21:22:14   PASS [restart] check-flows.sh: 19 checks, rc=0
+21:22:14   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
+21:22:14   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
+21:22:14   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
+21:22:14    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage, in this workspace's slot,
+21:22:17   PASS [again] second vehicle up JOB_STATE_SUCCEEDED 
+21:22:18   PASS [again] second vehicle in a slot of its own {'run-5c04a4bb6c15': '0', 'run-b54295092656': '1'}
+21:22:19    ? run_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down every run on this host as it stands when the job runs (up now: `run-5c04a4bb6c15` (slot 0, vx-vehicle-04), `run-b542950926
+21:22:19   PASS run_down all returns a run.down job (run.down)
+21:22:19   PASS run_down asked the human, naming both runs up
+21:22:19    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-35f374-000007`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
+21:22:19   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
+21:22:55   PASS run_down job JOB_STATE_SUCCEEDED 
+21:22:55   PASS run_down: one vehicle.down child per run, each succeeded {'run-b54295092656': ('vehicle.down', 'JOB_STATE_SUCCEEDED'), 'run-5c04a4bb6c15': ('vehicle.down', 'JOB_STATE_SUCCEEDED')}
+21:22:55   PASS run_list empty after down
+21:22:55   PASS attach interface at-ivi1 returned with no master after down
+21:22:55   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | vxh netns: none | nft: by the owner's script
+21:22:55   PASS host clean after down
+21:22:55 == core 2: vx-vehicle-04 through vxmcp
+21:22:55   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True, 'NODE_BACKEND_ATTACH': True, 'NODE_BACKEND_QEMU_MCU': True}
+21:22:55   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
+21:22:56    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (every stage, in this workspace's slot,
+21:22:56   PASS vehicle_up returns a job
+21:22:56    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (every stage, in this workspace's slot,
+21:22:56   PASS duplicate vehicle_up returns the running job (job-35f374-00001c)
+21:22:56    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (stages gateway, in this workspace's sl
+21:22:56   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
+21:22:56    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage, in this workspace's sl
+21:22:56   PASS another workspace's up refused BUSY while this up runs (ERROR_REASON_BUSY)
+21:23:05   PASS vehicle_up job JOB_STATE_SUCCEEDED 
+21:23:05   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
+21:23:05   PASS job carries run_id run-8276fa95eceb
+21:23:06   PASS run_list holds the one run ['run-8276fa95eceb']
+21:23:06   PASS run_list reads the run UP once up succeeded ['RESOURCE_STATE_UP']
+21:23:06   PASS vehicle_status: every node UP (not: []) backends ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:23:06   PASS vehicle_status: every node has a typed payload (missing: [])
+21:23:06   payloads: ecu-mcu-frt=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/freertos/firmware/probe-mps2:0.1.0; ecu-mcu-zep=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/zephyr/firmware/probe-mps2:0.1.0; ecu-rtos=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/freertos/stack/probe-bundle:0.1.0; hpc1=PAYLOAD_KIND_CONTAINER:ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1; ivi1=PAYLOAD_KIND_ATTACH_ADAPTER:<vxperiments>/vehicles/vx-vehicle-04/./ivi; sensor-rr=PAYLOAD_KIND_WASM:ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule:0.1.0; zone-fl=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0; zone-fr=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0; zone-rl=PAYLOAD_KIND_CONTAINER:ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1; zone-rr=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0
+21:23:06   PASS [up] every backend is up: ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:23:06   PASS [up] ecu-mcu-frt: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:23:06   PASS [up] ecu-mcu-zep: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:23:06   PASS [up] zone-fl: all 4 threads may run only on CPU 4 ({'4': 4})
+21:23:06   PASS [up] zone-fr: all 8 threads may run only on CPU 5 ({'5': 8})
+21:23:06   PASS [up] zone-rr: all 6 threads may run only on CPU 6 ({'6': 6})
+21:23:06   PASS [up] sensor-rr: all 2 threads may run only on CPU 7 ({'7': 2})
+21:23:06   PASS [up] ecu-mcu-frt: all 3 threads may run only on CPU 8 ({'8': 3})
+21:23:06   PASS [up] attach interface at-ivi1 adopted (master vxbr0)
+21:23:48   [up] flows: PASS  allowed hpc1 -> qemu-microvm 10.100.0.11:9800 (20/20 replies) | PASS  allowed hpc1 -> cloud-hypervisor 10.100.0.12:9800 (20/20 replies) | PASS  allowed hpc1 -> libvirt 10.100.0.21:9800 (20/20 replies) | PASS  allowed hpc1 -> wasm-capsule 10.100.0.14:9800 (20/20 replies) | PASS  allowed hpc1 -> attach 10.100.0.13:9800 (20/20 replies) | PASS  allowed hpc1 -> freertos 10.100.0.15:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-freertos 10.100.0.16:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-zephyr 10.100.0.17:9800 (20/20 replies) | PASS  OTA root.json served on hpc1:9900 | PASS  denied zone-rl -> qemu-microvm 10.100.0.11:9800 (0 replies, 2 frames reached the bridge) | PASS  denied zone-rl -> cloud-hypervisor 10.100.0.12:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> libvirt 10.100.0.21:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> wasm-capsule 10.100.0.14:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> attach 10.100.0.13:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> freertos 10.100.0.15:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-freertos 10.100.0.16:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-zephyr 10.100.0.17:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> container 10.100.0.50:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> ota root.json
+21:23:48   PASS [up] check-flows.sh: 19 checks, rc=0
+21:23:48   PASS another vehicle's status: no run (ERROR_REASON_NO_ACTIVE_RUN)
+21:23:48    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage, in this workspace's slot,
+21:23:51   PASS [first] second vehicle up JOB_STATE_SUCCEEDED 
+21:23:52   PASS [first] second vehicle in a slot of its own {'run-8276fa95eceb': '0', 'run-2fa54b7766b2': '1'}
+21:23:52   PASS run_status reads both runs ['run-2fa54b7766b2', 'run-8276fa95eceb']
+21:23:52   PASS run_status: run-8276fa95eceb rollup RESOURCE_STATE_UP, error ERROR_REASON_UNSPECIFIED
+21:23:52   PASS run_status: run-2fa54b7766b2 rollup RESOURCE_STATE_UP, error ERROR_REASON_UNSPECIFIED
+21:23:52   PASS run_status: run-8276fa95eceb carries its 10 typed nodes (10)
+21:23:52   PASS run_status by name: run-2fa54b7766b2 UP, run-stale an entry with RUN_MISMATCH (ERROR_REASON_RUN_MISMATCH)
+21:23:52    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down run `run-2fa54b7766b2` of the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage
+21:24:10   PASS vehicle_down of run-2fa54b7766b2 by run_id JOB_STATE_SUCCEEDED 
+21:24:10   PASS run_list holds this run alone again
+21:24:13   PASS event tail resumed with no EVENTS_LOST ([])
+21:24:13   PASS events include run.up
+21:24:13   PASS event ids contiguous across 113 events
+21:24:13   PASS run.up carries run_id
+21:24:16   PASS after restart: run still listed
+21:24:16   PASS after restart: run still UP
+21:24:17   PASS after restart: every node still UP (not: [])
+21:24:17   PASS [restart] every backend is up: ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:24:17   PASS [restart] ecu-mcu-frt: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:24:17   PASS [restart] ecu-mcu-zep: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:24:17   PASS [restart] zone-fl: all 4 threads may run only on CPU 4 ({'4': 4})
+21:24:17   PASS [restart] zone-fr: all 8 threads may run only on CPU 5 ({'5': 8})
+21:24:17   PASS [restart] zone-rr: all 6 threads may run only on CPU 6 ({'6': 6})
+21:24:17   PASS [restart] sensor-rr: all 2 threads may run only on CPU 7 ({'7': 2})
+21:24:17   PASS [restart] ecu-mcu-frt: all 3 threads may run only on CPU 8 ({'8': 3})
+21:24:17   PASS [restart] attach interface at-ivi1 adopted (master vxbr0)
+21:24:58   [restart] flows: PASS  allowed hpc1 -> qemu-microvm 10.100.0.11:9800 (20/20 replies) | PASS  allowed hpc1 -> cloud-hypervisor 10.100.0.12:9800 (20/20 replies) | PASS  allowed hpc1 -> libvirt 10.100.0.21:9800 (20/20 replies) | PASS  allowed hpc1 -> wasm-capsule 10.100.0.14:9800 (20/20 replies) | PASS  allowed hpc1 -> attach 10.100.0.13:9800 (20/20 replies) | PASS  allowed hpc1 -> freertos 10.100.0.15:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-freertos 10.100.0.16:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-zephyr 10.100.0.17:9800 (20/20 replies) | PASS  OTA root.json served on hpc1:9900 | PASS  denied zone-rl -> qemu-microvm 10.100.0.11:9800 (0 replies, 2 frames reached the bridge) | PASS  denied zone-rl -> cloud-hypervisor 10.100.0.12:9800 (0 replies, 4 frames reached the bridge) | PASS  denied zone-rl -> libvirt 10.100.0.21:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> wasm-capsule 10.100.0.14:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> attach 10.100.0.13:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> freertos 10.100.0.15:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-freertos 10.100.0.16:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-zephyr 10.100.0.17:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> container 10.100.0.50:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> ota root.json
+21:24:58   PASS [restart] check-flows.sh: 19 checks, rc=0
+21:24:58   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
+21:24:58   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
+21:24:58   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
+21:24:58    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage, in this workspace's slot,
+21:25:01   PASS [again] second vehicle up JOB_STATE_SUCCEEDED 
+21:25:02   PASS [again] second vehicle in a slot of its own {'run-8276fa95eceb': '0', 'run-1817f2563215': '1'}
+21:25:03    ? run_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down every run on this host as it stands when the job runs (up now: `run-8276fa95eceb` (slot 0, vx-vehicle-04), `run-1817f25632
+21:25:03   PASS run_down all returns a run.down job (run.down)
+21:25:03   PASS run_down asked the human, naming both runs up
+21:25:03    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-629377-000007`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
+21:25:03   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
+21:25:39   PASS run_down job JOB_STATE_SUCCEEDED 
+21:25:39   PASS run_down: one vehicle.down child per run, each succeeded {'run-1817f2563215': ('vehicle.down', 'JOB_STATE_SUCCEEDED'), 'run-8276fa95eceb': ('vehicle.down', 'JOB_STATE_SUCCEEDED')}
+21:25:39   PASS run_list empty after down
+21:25:39   PASS attach interface at-ivi1 returned with no master after down
+21:25:39   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | vxh netns: none | nft: by the owner's script
+21:25:39   PASS host clean after down
+21:25:39 == core 3: vx-vehicle-04 through vxmcp
+21:25:39   PASS host_capabilities: every backend available {'NODE_BACKEND_CONTAINER': True, 'NODE_BACKEND_QEMU_MICROVM': True, 'NODE_BACKEND_LIBVIRT': True, 'NODE_BACKEND_CLOUD_HYPERVISOR': True, 'NODE_BACKEND_WASM_CAPSULE': True, 'NODE_BACKEND_ATTACH': True, 'NODE_BACKEND_QEMU_MCU': True}
+21:25:39   PASS workspace_plan: valid, every check passed (failed: [], problems: [])
+21:25:40    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (every stage, in this workspace's slot,
+21:25:40   PASS vehicle_up returns a job
+21:25:40    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (every stage, in this workspace's slot,
+21:25:40   PASS duplicate vehicle_up returns the running job (job-629377-00001c)
+21:25:40    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-04` (stages gateway, in this workspace's sl
+21:25:40   PASS competing vehicle_up (other stages) refused BUSY (ERROR_REASON_BUSY)
+21:25:40    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<vxperiments>/experiments/exp-002-ws` (every stage, in this workspace's sl
+21:25:40   PASS another workspace's up refused BUSY while this up runs (ERROR_REASON_BUSY)
+21:25:49   PASS vehicle_up job JOB_STATE_SUCCEEDED 
+21:25:49   PASS child jobs all succeeded {'svc.up': 'JOB_STATE_SUCCEEDED', 'compute.up': 'JOB_STATE_SUCCEEDED', 'zone.up': 'JOB_STATE_SUCCEEDED', 'gateway.up': 'JOB_STATE_SUCCEEDED'}
+21:25:49   PASS job carries run_id run-8a037a783c32
+21:25:49   PASS run_list holds the one run ['run-8a037a783c32']
+21:25:49   PASS run_list reads the run UP once up succeeded ['RESOURCE_STATE_UP']
+21:25:50   PASS vehicle_status: every node UP (not: []) backends ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:25:50   PASS vehicle_status: every node has a typed payload (missing: [])
+21:25:50   payloads: ecu-mcu-frt=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/freertos/firmware/probe-mps2:0.1.0; ecu-mcu-zep=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/zephyr/firmware/probe-mps2:0.1.0; ecu-rtos=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/freertos/stack/probe-bundle:0.1.0; hpc1=PAYLOAD_KIND_CONTAINER:ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1; ivi1=PAYLOAD_KIND_ATTACH_ADAPTER:<vxperiments>/vehicles/vx-vehicle-04/./ivi; sensor-rr=PAYLOAD_KIND_WASM:ghcr.io/vxedge/parts/zone/wasm/app/reflector-capsule:0.1.0; zone-fl=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0; zone-fr=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0; zone-rl=PAYLOAD_KIND_CONTAINER:ghcr.io/vxedge/parts/agent/probe/app/vxprobe:0.1.1; zone-rr=PAYLOAD_KIND_GUEST_BUNDLE:ghcr.io/vxedge/parts/zone/linux/stack/probe-bundle:0.1.0
+21:25:50   PASS [up] every backend is up: ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:25:50   PASS [up] ecu-mcu-frt: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:25:50   PASS [up] ecu-mcu-zep: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:25:50   PASS [up] zone-fl: all 4 threads may run only on CPU 4 ({'4': 4})
+21:25:50   PASS [up] zone-fr: all 8 threads may run only on CPU 5 ({'5': 8})
+21:25:50   PASS [up] zone-rr: all 6 threads may run only on CPU 6 ({'6': 6})
+21:25:50   PASS [up] sensor-rr: all 2 threads may run only on CPU 7 ({'7': 2})
+21:25:50   PASS [up] ecu-mcu-frt: all 3 threads may run only on CPU 8 ({'8': 3})
+21:25:50   PASS [up] attach interface at-ivi1 adopted (master vxbr0)
+21:26:32   [up] flows: PASS  allowed hpc1 -> qemu-microvm 10.100.0.11:9800 (20/20 replies) | PASS  allowed hpc1 -> cloud-hypervisor 10.100.0.12:9800 (20/20 replies) | PASS  allowed hpc1 -> libvirt 10.100.0.21:9800 (20/20 replies) | PASS  allowed hpc1 -> wasm-capsule 10.100.0.14:9800 (20/20 replies) | PASS  allowed hpc1 -> attach 10.100.0.13:9800 (20/20 replies) | PASS  allowed hpc1 -> freertos 10.100.0.15:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-freertos 10.100.0.16:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-zephyr 10.100.0.17:9800 (20/20 replies) | PASS  OTA root.json served on hpc1:9900 | PASS  denied zone-rl -> qemu-microvm 10.100.0.11:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> cloud-hypervisor 10.100.0.12:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> libvirt 10.100.0.21:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> wasm-capsule 10.100.0.14:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> attach 10.100.0.13:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> freertos 10.100.0.15:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-freertos 10.100.0.16:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-zephyr 10.100.0.17:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> container 10.100.0.50:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> ota root.json
+21:26:32   PASS [up] check-flows.sh: 19 checks, rc=0
+21:26:32   PASS another vehicle's status: no run (ERROR_REASON_NO_ACTIVE_RUN)
+21:26:32    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage, in this workspace's slot,
+21:26:35   PASS [first] second vehicle up JOB_STATE_SUCCEEDED 
+21:26:36   PASS [first] second vehicle in a slot of its own {'run-8a037a783c32': '0', 'run-c802af436295': '1'}
+21:26:36   PASS run_status reads both runs ['run-8a037a783c32', 'run-c802af436295']
+21:26:36   PASS run_status: run-8a037a783c32 rollup RESOURCE_STATE_UP, error ERROR_REASON_UNSPECIFIED
+21:26:36   PASS run_status: run-c802af436295 rollup RESOURCE_STATE_UP, error ERROR_REASON_UNSPECIFIED
+21:26:36   PASS run_status: run-8a037a783c32 carries its 10 typed nodes (10)
+21:26:36   PASS run_status by name: run-c802af436295 UP, run-stale an entry with RUN_MISMATCH (ERROR_REASON_RUN_MISMATCH)
+21:26:36    ? vehicle_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down run `run-c802af436295` of the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage
+21:26:54   PASS vehicle_down of run-c802af436295 by run_id JOB_STATE_SUCCEEDED 
+21:26:54   PASS run_list holds this run alone again
+21:26:57   PASS event tail resumed with no EVENTS_LOST ([])
+21:26:57   PASS events include run.up
+21:26:57   PASS event ids contiguous across 113 events
+21:26:57   PASS run.up carries run_id
+21:27:00   PASS after restart: run still listed
+21:27:00   PASS after restart: run still UP
+21:27:01   PASS after restart: every node still UP (not: [])
+21:27:01   PASS [restart] every backend is up: ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:27:01   PASS [restart] ecu-mcu-frt: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:27:01   PASS [restart] ecu-mcu-zep: qemu-mcu reports arch 'armv7m', acceleration 'tcg'
+21:27:01   PASS [restart] zone-fl: all 4 threads may run only on CPU 4 ({'4': 4})
+21:27:01   PASS [restart] zone-fr: all 8 threads may run only on CPU 5 ({'5': 8})
+21:27:01   PASS [restart] zone-rr: all 6 threads may run only on CPU 6 ({'6': 6})
+21:27:01   PASS [restart] sensor-rr: all 2 threads may run only on CPU 7 ({'7': 2})
+21:27:01   PASS [restart] ecu-mcu-frt: all 3 threads may run only on CPU 8 ({'8': 3})
+21:27:01   PASS [restart] attach interface at-ivi1 adopted (master vxbr0)
+21:27:42   [restart] flows: PASS  allowed hpc1 -> qemu-microvm 10.100.0.11:9800 (20/20 replies) | PASS  allowed hpc1 -> cloud-hypervisor 10.100.0.12:9800 (20/20 replies) | PASS  allowed hpc1 -> libvirt 10.100.0.21:9800 (20/20 replies) | PASS  allowed hpc1 -> wasm-capsule 10.100.0.14:9800 (20/20 replies) | PASS  allowed hpc1 -> attach 10.100.0.13:9800 (20/20 replies) | PASS  allowed hpc1 -> freertos 10.100.0.15:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-freertos 10.100.0.16:9800 (20/20 replies) | PASS  allowed hpc1 -> qemu-mcu-zephyr 10.100.0.17:9800 (20/20 replies) | PASS  OTA root.json served on hpc1:9900 | PASS  denied zone-rl -> qemu-microvm 10.100.0.11:9800 (0 replies, 2 frames reached the bridge) | PASS  denied zone-rl -> cloud-hypervisor 10.100.0.12:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> libvirt 10.100.0.21:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> wasm-capsule 10.100.0.14:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> attach 10.100.0.13:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> freertos 10.100.0.15:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-freertos 10.100.0.16:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> qemu-mcu-zephyr 10.100.0.17:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> container 10.100.0.50:9800 (0 replies, 3 frames reached the bridge) | PASS  denied zone-rl -> ota root.json
+21:27:42   PASS [restart] check-flows.sh: 19 checks, rc=0
+21:27:42   PASS after restart: old job id JOB_UNKNOWN (ERROR_REASON_JOB_UNKNOWN)
+21:27:42   PASS after restart: old cursor EVENTS_LOST (ERROR_REASON_EVENTS_LOST)
+21:27:42   PASS stale run_id refused (ERROR_REASON_RUN_MISMATCH)
+21:27:42    ? vehicle_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the vehicle at `<vxperiments>/vehicles/vx-vehicle-02` (every stage, in this workspace's slot,
+21:27:45   PASS [again] second vehicle up JOB_STATE_SUCCEEDED 
+21:27:46   PASS [again] second vehicle in a slot of its own {'run-8a037a783c32': '0', 'run-806ca52ebc2c': '1'}
+21:27:47    ? run_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down every run on this host as it stands when the job runs (up now: `run-8a037a783c32` (slot 0, vx-vehicle-04), `run-806ca52ebc
+21:27:47   PASS run_down all returns a run.down job (run.down)
+21:27:47   PASS run_down asked the human, naming both runs up
+21:27:47    ? job_cancel asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Cancel job `job-d8d9fc-000007`: it stops at its next step and its child jobs are cancelled too, which can leave a run partly up unti
+21:27:47   PASS cancelling a down refused (ERROR_REASON_NOT_CANCELLABLE)
+21:28:23   PASS run_down job JOB_STATE_SUCCEEDED 
+21:28:23   PASS run_down: one vehicle.down child per run, each succeeded {'run-806ca52ebc2c': ('vehicle.down', 'JOB_STATE_SUCCEEDED'), 'run-8a037a783c32': ('vehicle.down', 'JOB_STATE_SUCCEEDED')}
+21:28:23   PASS run_list empty after down
+21:28:23   PASS attach interface at-ivi1 returned with no master after down
+21:28:23   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | vxh netns: none | nft: by the owner's script
+21:28:23   PASS host clean after down
+21:28:23 backends covered by core: ['NODE_BACKEND_ATTACH', 'NODE_BACKEND_CLOUD_HYPERVISOR', 'NODE_BACKEND_CONTAINER', 'NODE_BACKEND_LIBVIRT', 'NODE_BACKEND_QEMU_MCU', 'NODE_BACKEND_QEMU_MICROVM', 'NODE_BACKEND_WASM_CAPSULE']
+21:28:23 teardown: runs down --all rc=0 run.down: succeeded
+21:28:23 #### core: 0 failure(s)

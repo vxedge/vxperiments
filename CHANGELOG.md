@@ -13,6 +13,15 @@ than a repo tag.
 
 ### Added
 
+- `results/all-backends-gate-2026-11-19`: the vxAPI gate on vxedge 0.34.2 and vxmcp 0.7.0, every node backend on
+  vx-vehicle-04 beside vx-vehicle-02 in a slot of its own. Core 3 of 3 runs, 190 checks, 0 failed, with the fleet
+  tools (`run_status`, `run_down`); traffic on exp-001-ws with its zones up, 12 checks, 0 failed.
+
+### Changed
+
+- vx-vehicle-04's attach adapter marks its guest with `vx.slot=$VX_SLOT`, so another vehicle can come up beside
+  it; the vehicle now needs vxedge 0.34.2.
+
 - exp-018 0.1.0 (X9.24): real in-vehicle protocol traffic against the ADAS slice. Four arms are
   four baselines over one vehicle, picked by a parameter that binds `baseline` (vxedge 0.29.0):
   `idle`; `dds`, Cyclone DDS `ddsperf` publishing 1 KiB at 1 kHz to a subscriber; `someip`, a
