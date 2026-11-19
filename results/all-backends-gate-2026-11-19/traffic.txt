@@ -1,0 +1,28 @@
+21:31:06 #### traffic x1
+21:31:06   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | vxh netns: none | nft: by the owner's script
+21:31:06   PASS host clean before start
+21:31:07 == traffic and collection on a copy of exp-001-ws, its zones up
+21:31:07    ? experiment_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Bring up the experiment at `<scratch>/exp-001-ws` (every stage, in this workspace's slot, or
+21:31:11   PASS exp-001 up JOB_STATE_SUCCEEDED 
+21:31:11    ? svc_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start the `telemetry` service that `<scratch>/exp-001-ws` declares, in this workspace's run.
+21:31:13   PASS telemetry svc_up JOB_STATE_SUCCEEDED 
+21:31:13    ? traffic_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start every traffic profile that `<scratch>/exp-001-ws` declares, in this workspace's run: l
+21:31:13    ? traffic_up asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Start every traffic profile that `<scratch>/exp-001-ws` declares, in this workspace's run: l
+21:31:13   PASS traffic_up retry with the same request_id returns the same job
+21:31:13   PASS traffic_up job JOB_STATE_SUCCEEDED 
+21:31:28   traffic states seen: ['TRAFFIC_PROFILE_STATE_FINISHED', 'TRAFFIC_PROFILE_STATE_RUNNING']; last {'profiles': [{'detail': '', 'id': 'infotainment-load', 'state': 'TRAFFIC_PROFILE_STATE_FINISHED'}]}
+21:31:28   PASS traffic_status moved from running to finished
+21:31:28    ? telemetry_collect asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Collect the telemetry `<scratch>/exp-001-ws` ingested into an archive at `<home>/
+21:31:28   PASS collect JOB_STATE_SUCCEEDED artifact {'path': '<scratch>/exp-001-ws/results/exp-001-1795120288590.zip', 'sha256': '41fb2026a3680131e935730e1c916f86599ff53303c5854d40bf9cc28db03e50'}
+21:31:28   PASS archive sha256 matches Job.artifact
+21:31:28   archive members ['index.json', 'metadata.json', 'entities.json', 'metrics/samples.jsonl.zst', 'logs/host/services/telemetry.jsonl.zst', 'logs/vx-h1-vehicle/rear-left/node-infot-load-01.jsonl.zst', 'package/README.md', 'package/assets/README.md', 'package/main.yaml', 'package/parts.yaml', 'package/parts/README.md', 'package/tools/README.md', 'package/vehicle.yaml', 'package/vxp.lock', 'package/vxp.yaml']; metadata keys ['archive', 'collected_at_unix_ms', 'experiment_id', 'image_digests', 'ingest', 'instance', 'kernel', 'package', 'shaping', 'tools', 'vxtelemetry_version', 'workspace_identity_algorithm', 'workspace_sha256']
+21:31:28   PASS archive holds the package and its metadata
+21:31:28   PASS vxtelemetry verify: vxtelemetry verify: index OK; identity OK; package digest OK
+21:31:28   archive at <scratch>/exp-001-ws/results/exp-001-1795120288590.zip
+21:31:28    ? svc_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Stop the `telemetry` service on this host: where the only run places it on a node, or else on the host, whichever experiment started
+21:31:28    ? experiment_down asked the human: {"confirm": {"method": "elicitation/create", "params": {"message": "Tear down this workspace's run of the experiment at `<scratch>/exp-001-ws` (every stage): st
+21:31:29   PASS exp-001 down JOB_STATE_SUCCEEDED
+21:31:29   leak check: netns: none | links: none | containers: none | qemu: none | cloud-hypervisor: none | vxcapsule: none | vxh netns: none | nft: by the owner's script
+21:31:29   PASS host clean after exp-001
+21:31:29 teardown: runs down --all rc=0 run.down: succeeded
+21:31:29 #### traffic: 0 failure(s)

@@ -29,7 +29,9 @@ bundle on it:
 sudo ip tuntap add dev at-ivi1 mode tap user $USER && sudo ip link set at-ivi1 up
 ```
 
-`start.sh`, `status.sh` and `stop.sh` act on this node only, by the PID QEMU records. The gateway adopts
+`start.sh`, `status.sh` and `stop.sh` act on this node only, by the PID QEMU records. The guest's kernel line
+carries `vx.slot=$VX_SLOT` beside `vx.node=`, so vxedge reads it as this run's and another vehicle can come up
+beside it in a slot of its own. The gateway adopts
 `at-ivi1` into the slice at `up` and returns it with no master at `down`. The tap stays, because it belongs
 to the host.
 
@@ -52,7 +54,7 @@ Needs KVM, libvirt reachable without sudo, Cloud Hypervisor, `qemu-system-arm`, 
   each node's process should be allowed on that CPU only.
 - **Backends without pins:** the container nodes carry none. On a host whose rootless Podman has no `cpuset`
   controller, `up` refuses a pinned container device, and vxedge also refuses pins on an `attach` device.
-- **Version:** needs vxedge 0.16.0 or later for the `qemu-mcu` ECUs. The libvirt node needs ACPI for its NIC
+- **Version:** needs vxedge 0.34.2 or later, which gives the adapter its slot (`VX_SLOT`), and 0.16.0 or later for the `qemu-mcu` ECUs. The libvirt node needs ACPI for its NIC
   and `emulatorpin` for its threads (0.13.0).
 
 ## Gate
