@@ -4,6 +4,7 @@
 - probe: 1000 pps x 60 s per point, warmup 10 s discarded before probing
 - host: kernel 6.17.0-35-generic, PREEMPT_RT=False, governor=powersave, timestamping: userspace-monotonic (SO_TIMESTAMPING follow-up open)
 - caveats: shared-host gateway; full profile; TrafficService's spawned vxprobe send does not expose --metrics yet; only the final aggregate probe-summary.json is captured (that is all analyze_exp010.py reads)
+- note (2026-11-19): the vlan arm below quotes exp-001 as measured before its 2026-08-03 netns-isolation re-run (loopback path: 77.3 µs at idle, 0.93x growth); the corrected exp-001 reads 89.6 µs and 0.914x (bound 1.006x), and the snssai numbers and the H2 verdict are unchanged. See the later exp-010 repros, which quote the corrected reference.
 
 ## snssai arm
 
