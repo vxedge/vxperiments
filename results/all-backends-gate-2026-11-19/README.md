@@ -87,8 +87,9 @@ before the recorded runs:
 3. **Shakedown on 0.34.2:** all passed but `run_status`'s no-error check, which read `ERROR_REASON_UNSPECIFIED`
    as an error. Fixed in the harness.
 4. **Traffic, first try:** the telemetry service stopped at once, with no target to scrape. exp-001 declares
-   none of its own and relies on the daemon's exporter. The exporter had not started, because another service on
-   the host held its default port. The harness now starts `vxedged` with `--metrics-listen 127.0.0.1:0`.
+   none of its own and relies on the daemon's exporter. The exporter had not started, because its default port
+   was held by a daemon left running from the first shakedown's hand cleanup, since stopped. The harness now
+   starts `vxedged` with `--metrics-listen 127.0.0.1:0`, so a daemon already on the host cannot take its port.
 5. **Traffic, second try:** everything passed except the archive check, which looked for `workspace/main.yaml`;
    the archive has kept the workspace under `package/` since vxtelemetry moved to `vxarchive/2`. The check now
    reads `package/` and runs `vxtelemetry verify`.
