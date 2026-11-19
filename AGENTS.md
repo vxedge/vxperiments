@@ -26,6 +26,9 @@ validates against nothing else.
 
 - **Branch names use the `vx/` prefix**, for example `vx/fix-probe-drift`. Never name a branch after a
   tool or vendor. Delete a branch once its PR is merged.
+- **No AI attribution in commits or PRs.** Commits carry no `Co-Authored-By` or `Claude-Session`
+  trailer, and PR descriptions no generated-by footer or session link. `.claude/settings.json`
+  turns Claude Code's attribution off.
 - **Merge only after formal checks.** Before a PR is merged: its CI is green on the PR head; the commands under
   "Checks before a PR"
   ran clean locally; and the diff was re-read for claims beyond `docs/FACTS.md`, host details and
